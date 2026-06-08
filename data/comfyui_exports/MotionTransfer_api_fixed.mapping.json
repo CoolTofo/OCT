@@ -1,0 +1,427 @@
+{
+  "profile": "motiontransfer",
+  "runtime_switches": {
+    "enable_uni3c": {
+      "enabled_node_id": "1110",
+      "enabled_input": "value",
+      "lazy_node_id": "1111",
+      "target_node_id": "530",
+      "target_input": "uni3c_embeds",
+      "default": false
+    },
+    "enable_face": {
+      "enabled_node_id": "1112",
+      "enabled_input": "value",
+      "lazy_node_id": "1113",
+      "target_node_id": "904",
+      "target_input": "face_images",
+      "default": true
+    },
+    "enable_multi_person": {
+      "enabled_node_id": "1114",
+      "enabled_input": "value",
+      "lazy_node_id": "1115",
+      "target_node_id": "1068",
+      "target_input": "bboxes",
+      "default": true,
+      "extra_gates": [
+        {
+          "enabled_node_id": "1114",
+          "enabled_input": "value",
+          "lazy_node_id": "1116",
+          "target_node_id": "1069",
+          "target_input": "bboxes",
+          "default": true
+        }
+      ]
+    },
+    "enable_pose_align": {
+      "enabled_node_id": "1097",
+      "enabled_input": "value",
+      "default": false,
+      "reused_existing_node": true
+    }
+  },
+  "main_output_node_id": "312",
+  "output_mode": "all",
+  "workflow_output": "D:\\Program Files\\OCT_Box\\OCT\\data\\comfyui_exports\\MotionTransfer_api_fixed.workflow.json",
+  "api_output": "D:\\Program Files\\OCT_Box\\OCT\\workflows\\custom\\MotionTransfer_api_fixed.json",
+  "api_input": "D:\\Program Files\\OCT_Box\\OCT\\data\\comfyui_exports\\_api_input_abc8b6f841dd461b91d70c85a17cac6c.json",
+  "normalize_legacy_widgets": {
+    "changes": [
+      {
+        "node_id": "1082",
+        "type": "BodyRatioMapperProportionTransfer",
+        "repair": "removed stale pre-anchor boolean and appended output_absolute_coordinates=True",
+        "before": [
+          false,
+          true,
+          true,
+          true,
+          false,
+          true,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          "single_frame_multi_person",
+          false,
+          0.3
+        ],
+        "after": [
+          false,
+          true,
+          true,
+          true,
+          false,
+          true,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          "single_frame_multi_person",
+          false,
+          0.3,
+          true
+        ]
+      }
+    ]
+  },
+  "compatible_custom_nodes": {
+    "converted": []
+  },
+  "strip_reroute_nodes": {
+    "removed": 0,
+    "rewired": [],
+    "unresolved": []
+  },
+  "flatten_set_get": {
+    "converted": [
+      {
+        "name": "输出帧数",
+        "set_id": 157,
+        "getter_ids": [
+          894
+        ],
+        "consumers": 1
+      },
+      {
+        "name": "输入音频",
+        "set_id": 148,
+        "getter_ids": [
+          149
+        ],
+        "consumers": 1
+      },
+      {
+        "name": "帧率",
+        "set_id": 245,
+        "getter_ids": [
+          250,
+          1075
+        ],
+        "consumers": 4
+      },
+      {
+        "name": "输入视频",
+        "set_id": 144,
+        "getter_ids": [
+          801,
+          1074
+        ],
+        "consumers": 4
+      },
+      {
+        "name": "总帧数",
+        "set_id": 664,
+        "getter_ids": [
+          899
+        ],
+        "consumers": 1
+      },
+      {
+        "name": "宽度",
+        "set_id": 153,
+        "getter_ids": [
+          896,
+          207,
+          548,
+          1073,
+          209
+        ],
+        "consumers": 5
+      },
+      {
+        "name": "高度",
+        "set_id": 154,
+        "getter_ids": [
+          208,
+          895,
+          210,
+          549,
+          1089
+        ],
+        "consumers": 5
+      },
+      {
+        "name": "VAE",
+        "set_id": 934,
+        "getter_ids": [
+          905,
+          544,
+          439
+        ],
+        "consumers": 3
+      },
+      {
+        "name": "模型",
+        "set_id": 936,
+        "getter_ids": [
+          221
+        ],
+        "consumers": 1
+      },
+      {
+        "name": "视觉clip",
+        "set_id": 937,
+        "getter_ids": [
+          901
+        ],
+        "consumers": 1
+      },
+      {
+        "name": "输入图像",
+        "set_id": 128,
+        "getter_ids": [
+          902,
+          943,
+          1076
+        ],
+        "consumers": 4
+      },
+      {
+        "name": "Uni3C",
+        "set_id": 589,
+        "getter_ids": [
+          590
+        ],
+        "consumers": 1
+      },
+      {
+        "name": "面部图",
+        "set_id": 1072,
+        "getter_ids": [
+          903
+        ],
+        "consumers": 1
+      },
+      {
+        "name": "SDPose姿态图",
+        "set_id": 1083,
+        "getter_ids": [
+          898
+        ],
+        "consumers": 1
+      },
+      {
+        "name": "姿态切换",
+        "set_id": 1096,
+        "getter_ids": [
+          1090
+        ],
+        "consumers": 1
+      },
+      {
+        "name": "视频输出",
+        "set_id": 440,
+        "getter_ids": [
+          448
+        ],
+        "consumers": 1
+      }
+    ],
+    "skipped": []
+  },
+  "frontend_switches": {
+    "converted": [],
+    "skipped": []
+  },
+  "api_value_overlay": {
+    "updated": [
+      {
+        "node_id": "312",
+        "class_type": "VHS_VideoCombine",
+        "inputs": [
+          "filename_prefix"
+        ]
+      },
+      {
+        "node_id": "932",
+        "class_type": "WanVideoVAELoader",
+        "inputs": [
+          "verbose"
+        ]
+      },
+      {
+        "node_id": "942",
+        "class_type": "CLIPVisionLoader",
+        "inputs": [
+          "clip_name"
+        ]
+      },
+      {
+        "node_id": "1062",
+        "class_type": "BBoxYOLO",
+        "inputs": [
+          "confidence_threshold"
+        ]
+      },
+      {
+        "node_id": "1066",
+        "class_type": "VHS_VideoCombine",
+        "inputs": [
+          "pix_fmt",
+          "crf"
+        ]
+      },
+      {
+        "node_id": "1067",
+        "class_type": "VHS_VideoCombine",
+        "inputs": [
+          "pix_fmt",
+          "crf"
+        ]
+      },
+      {
+        "node_id": "1071",
+        "class_type": "VHS_VideoCombine",
+        "inputs": [
+          "pix_fmt",
+          "crf"
+        ]
+      },
+      {
+        "node_id": "1077",
+        "class_type": "BBoxYOLO",
+        "inputs": [
+          "confidence_threshold"
+        ]
+      },
+      {
+        "node_id": "1082",
+        "class_type": "BodyRatioMapperProportionTransfer",
+        "inputs": [
+          "enable_rpca",
+          "hand_scaling",
+          "foot_scaling",
+          "offset_stabilizer_y",
+          "offset_stabilizer_x",
+          "best_hand_search",
+          "use_shoulder_fk_for_hand",
+          "use_torso_fk_for_arm",
+          "use_torso_fk_for_foot",
+          "best_neck_search",
+          "final_offset_alignment",
+          "base_offset_mode",
+          "head_fixed_mode",
+          "anchor_output_mode",
+          "print_detailed_logs",
+          "confidence_threshold",
+          "output_absolute_coordinates"
+        ]
+      },
+      {
+        "node_id": "1085",
+        "class_type": "BodyRatioMapperSDPoseRender",
+        "inputs": [
+          "resolution_x",
+          "score_threshold",
+          "scale_for_xinsir",
+          "stick_width",
+          "face_point_size",
+          "draw_face",
+          "draw_mouth",
+          "draw_hands",
+          "draw_feet",
+          "draw_thigh",
+          "draw_calf"
+        ]
+      },
+      {
+        "node_id": "1086",
+        "class_type": "BodyRatioMapperSDPoseRender",
+        "inputs": [
+          "draw_thigh",
+          "draw_calf"
+        ]
+      },
+      {
+        "node_id": "1087",
+        "class_type": "BodyRatioMapperSDPoseRender",
+        "inputs": [
+          "draw_thigh",
+          "draw_calf"
+        ]
+      },
+      {
+        "node_id": "1088",
+        "class_type": "BodyRatioMapperSDPoseRender",
+        "inputs": [
+          "resolution_x",
+          "score_threshold",
+          "scale_for_xinsir",
+          "stick_width",
+          "face_point_size",
+          "draw_face",
+          "draw_mouth",
+          "draw_hands",
+          "draw_feet",
+          "draw_thigh",
+          "draw_calf"
+        ]
+      },
+      {
+        "node_id": "1092",
+        "class_type": "PoseAndFaceDetection",
+        "inputs": [
+          "face_padding"
+        ]
+      },
+      {
+        "node_id": "1097",
+        "class_type": "PrimitiveBoolean",
+        "inputs": [
+          "value"
+        ]
+      },
+      {
+        "node_id": "1104",
+        "class_type": "easy int",
+        "inputs": [
+          "value"
+        ]
+      },
+      {
+        "node_id": "1109",
+        "class_type": "PrimitiveInt",
+        "inputs": [
+          "value"
+        ]
+      }
+    ],
+    "skipped": []
+  },
+  "validation": {
+    "nodes": 62,
+    "links": 90,
+    "bad_links": 0,
+    "residual_ui_nodes": []
+  }
+}

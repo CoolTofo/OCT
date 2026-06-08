@@ -1,0 +1,30 @@
+{
+  "categories": [
+    {
+      "id": "characters",
+      "name": "角色",
+      "type": "image",
+      "items": [
+        {
+          "id": "asset_17abfeb4c864",
+          "name": "大圣特写",
+          "url": "/assets/library/lib_3bf65fd7511d_大圣特写.jpg",
+          "created_at": 1780644659659
+        }
+      ]
+    },
+    {
+      "id": "scenes",
+      "name": "场景",
+      "type": "image",
+      "items": []
+    },
+    {
+      "id": "workflows",
+      "name": "工作流",
+      "type": "workflow",
+      "items": []
+    }
+  ],
+  "updated_at": 1780644659659
+}

@@ -1,0 +1,187 @@
+[
+  {
+    "id": "modelscope",
+    "name": "ModelScope",
+    "base_url": "https://api-inference.modelscope.cn/v1",
+    "protocol": "openai",
+    "image_generation_endpoint": "",
+    "image_edit_endpoint": "",
+    "enabled": true,
+    "primary": false,
+    "image_models": [
+      "Tongyi-MAI/Z-Image-Turbo",
+      "Qwen/Qwen-Image-2512",
+      "Qwen/Qwen-Image-Edit-2511",
+      "black-forest-labs/FLUX.2-klein-9B"
+    ],
+    "chat_models": [
+      "Qwen/Qwen3-235B-A22B",
+      "Qwen/Qwen3-VL-235B-A22B-Instruct",
+      "MiniMax/MiniMax-M2.7:MiniMax"
+    ],
+    "video_models": [],
+    "ms_loras": [
+      {
+        "id": "Daniel8152/film",
+        "name": "Z-Image Film",
+        "target_model": "Tongyi-MAI/Z-Image-Turbo",
+        "strength": 0.8,
+        "enabled": true,
+        "note": ""
+      },
+      {
+        "id": "Daniel8152/Qwen-Image-2512-Film",
+        "name": "Qwen Image 2512 Film",
+        "target_model": "Qwen/Qwen-Image-2512",
+        "strength": 0.8,
+        "enabled": true,
+        "note": ""
+      },
+      {
+        "id": "Daniel8152/Klein-enhance",
+        "name": "Klein enhance",
+        "target_model": "black-forest-labs/FLUX.2-klein-9B",
+        "strength": 0.8,
+        "enabled": true,
+        "note": ""
+      }
+    ],
+    "ms_defaults_version": 3
+  },
+  {
+    "id": "custom-api",
+    "name": "T8API",
+    "base_url": "https://ai.t8star.org",
+    "protocol": "openai",
+    "image_generation_endpoint": "",
+    "image_edit_endpoint": "",
+    "enabled": true,
+    "primary": false,
+    "image_models": [
+      "gemini-3.1-flash-image-preview",
+      "gemini-3.1-flash-image-preview-2k",
+      "gemini-3.1-flash-image-preview-4k",
+      "gpt-image-2",
+      "gpt-image-2-all"
+    ],
+    "chat_models": [
+      "gpt-5.5"
+    ],
+    "video_models": [],
+    "ms_loras": [],
+    "ms_defaults_version": 0
+  },
+  {
+    "id": "holo",
+    "name": "W Project HOLO",
+    "base_url": "https://api.dealonhorizon.us",
+    "protocol": "holo",
+    "image_generation_endpoint": "",
+    "image_edit_endpoint": "",
+    "enabled": true,
+    "primary": false,
+    "image_models": [
+      "GPT-images2",
+      "GPT-images2 16:9-2K",
+      "GPT-images2 16:9-4K",
+      "GPT-images2 1:1",
+      "GPT-images2 1:1-2K",
+      "GPT-images2 2:3",
+      "GPT-images2 3:2",
+      "GPT-images2 9:16-4K",
+      "gemini-3.1-flash-image-four-three",
+      "gemini-3.1-flash-image-four-three-2k",
+      "gemini-3.1-flash-image-four-three-4k",
+      "gemini-3.1-flash-image-landscape",
+      "gemini-3.1-flash-image-landscape-2k",
+      "gemini-3.1-flash-image-landscape-4k",
+      "gemini-3.1-flash-image-portrait",
+      "gemini-3.1-flash-image-portrait-2k",
+      "gemini-3.1-flash-image-portrait-4k",
+      "gemini-3.1-flash-image-square",
+      "gemini-3.1-flash-image-square-2k",
+      "gemini-3.1-flash-image-square-4k",
+      "gemini-3.1-flash-image-three-four",
+      "gemini-3.1-flash-image-three-four-2k",
+      "gemini-3.1-flash-image-three-four-4k",
+      "gemini-3.0-pro-image-landscape"
+    ],
+    "chat_models": [],
+    "video_models": [
+      "Sora-2-12"
+    ],
+    "ms_loras": [],
+    "ms_defaults_version": 0
+  },
+  {
+    "id": "seedance",
+    "name": "Seedance 2.0",
+    "base_url": "https://ark.cn-beijing.volces.com/api/v3",
+    "protocol": "seedance",
+    "image_generation_endpoint": "",
+    "image_edit_endpoint": "",
+    "enabled": true,
+    "primary": false,
+    "image_models": [],
+    "chat_models": [],
+    "video_models": [
+      "doubao-seedance-2-0-260128",
+      "doubao-seedance-2-0-fast-260128"
+    ],
+    "ms_loras": [],
+    "ms_defaults_version": 0
+  },
+  {
+    "id": "motion-transfer",
+    "name": "动作迁移 2.0",
+    "base_url": "https://visual.volcengineapi.com",
+    "protocol": "volc_visual",
+    "image_generation_endpoint": "",
+    "image_edit_endpoint": "",
+    "enabled": true,
+    "primary": false,
+    "image_models": [],
+    "chat_models": [],
+    "video_models": [
+      "jimeng_dreamactor_m20_gen_video"
+    ],
+    "ms_loras": [],
+    "ms_defaults_version": 0
+  },
+  {
+    "id": "runninghub",
+    "name": "RunningHub",
+    "base_url": "https://www.runninghub.cn",
+    "protocol": "runninghub",
+    "image_generation_endpoint": "",
+    "image_edit_endpoint": "",
+    "enabled": true,
+    "primary": false,
+    "image_models": [],
+    "chat_models": [],
+    "video_models": [],
+    "ms_loras": [],
+    "ms_defaults_version": 0
+  },
+  {
+    "id": "custom-api-2",
+    "name": "APIMart",
+    "base_url": "https://api.apimart.ai/v1",
+    "protocol": "openai",
+    "image_generation_endpoint": "",
+    "image_edit_endpoint": "",
+    "enabled": true,
+    "primary": false,
+    "image_models": [
+      "gemini-3.1-flash-image-preview",
+      "gpt-image-2",
+      "gpt-image-2-official"
+    ],
+    "chat_models": [
+      "gpt-5.5"
+    ],
+    "video_models": [],
+    "ms_loras": [],
+    "ms_defaults_version": 0
+  }
+]

@@ -1,0 +1,1807 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="icon" href="/static/october-cabin-logo.webp" type="image/webp">
+    <title>十月文化 · AI 创作工作室</title>
+    <script>
+        (function(){
+            try {
+                var theme = localStorage.getItem('studio_theme') || localStorage.getItem('canvas_theme') || 'light';
+                if(theme === 'dark') {
+                    document.documentElement.classList.add('studio-theme-dark');
+                    document.documentElement.classList.add('theme-dark');
+                }
+                document.documentElement.classList.add('studio-route-booting');
+            } catch(e) {}
+        })();
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/static/theme.js?v=20260516-theme-sync"></script>
+    <script src="/static/i18n.js?v=20260524-seedance-mentions"></script>
+    <link rel="stylesheet" href="/static/oct-ui.css?v=20260528-brand-align">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;600;700;900&family=Inter:wght@400;500;600;700&display=swap');
+
+        /* --- Tailwind CDN fallback utilities --- */
+        .w-1\.5 { width: 0.375rem; }
+        .h-1\.5 { height: 0.375rem; }
+        .w-4 { width: 1rem; }
+        .h-4 { height: 1rem; }
+        .w-5 { width: 1.25rem; }
+        .h-5 { height: 1.25rem; }
+        .flex-shrink-0 { flex-shrink: 0; }
+        .rounded-full { border-radius: 9999px; }
+        .transition-colors { transition-property: color, background-color, border-color, fill, stroke; transition-duration: 150ms; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }
+        .animate-pulse { animation: studio-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+
+        /* === CSS Custom Properties === */
+        :root {
+            --accent: #000000;
+            --accent-secondary: #d97757;
+            --fluid-ease: cubic-bezier(0.3, 0, 0, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+            --smooth: cubic-bezier(0.16, 1, 0.3, 1);
+            --bg: #f9fafb;
+            --sidebar-bg: #ffffff;
+            --stage-bg: #f3f4f6;
+            --border: rgba(0, 0, 0, 0.08);
+            --stage-border: rgba(0, 0, 0, 0.06);
+            --text: #121212;
+            --text-secondary: #6b7280;
+            --muted: #9ca3af;
+            --nav-hover-bg: rgba(0, 0, 0, 0.04);
+            --nav-active-bg: #121212;
+            --nav-active-text: #ffffff;
+            --monitor-bg: rgba(255, 255, 255, 0.75);
+            --monitor-border: rgba(0, 0, 0, 0.06);
+            --monitor-shadow: rgba(0, 0, 0, 0.05);
+            --divider: rgba(0, 0, 0, 0.08);
+            --scrollbar: #d4d4d4;
+            --scrollbar-hover: #b0b0b0;
+            --glass-bg: rgba(255, 255, 255, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --sidebar-width: 80px;
+            --sidebar-expanded: 240px;
+            --stage-radius: 28px;
+            --nav-item-radius: 12px;
+            --logo-shadow: 0 8px 24px rgba(15, 23, 42, 0.10);
+        }
+
+        html.theme-dark,
+        body.theme-dark {
+            --bg: #0c0f15;
+            --sidebar-bg: #0c0f15;
+            --stage-bg: #10141c;
+            --border: rgba(255, 255, 255, 0.06);
+            --stage-border: rgba(255, 255, 255, 0.04);
+            --text: #e8ecf4;
+            --text-secondary: #949ab0;
+            --muted: #6b7280;
+            --nav-hover-bg: rgba(255, 255, 255, 0.04);
+            --nav-active-bg: #e8ecf4;
+            --nav-active-text: #0c0f15;
+            --monitor-bg: rgba(18, 22, 32, 0.82);
+            --monitor-border: rgba(255, 255, 255, 0.06);
+            --monitor-shadow: rgba(0, 0, 0, 0.3);
+            --divider: rgba(255, 255, 255, 0.08);
+            --scrollbar: #2a3142;
+            --scrollbar-hover: #3b4459;
+            --glass-bg: rgba(18, 22, 32, 0.5);
+            --glass-border: rgba(255, 255, 255, 0.04);
+            --logo-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+        }
+
+        /* === Base Styles === */
+        html { scroll-behavior: smooth; }
+
+        html.studio-route-booting body {
+            visibility: hidden !important;
+        }
+
+        *::-webkit-scrollbar {
+            width: 8px !important;
+            height: 8px !important;
+            background: transparent !important;
+        }
+        *::-webkit-scrollbar-track {
+            background: transparent !important;
+        }
+        *::-webkit-scrollbar-thumb {
+            background-color: var(--scrollbar) !important;
+            border: 2px solid transparent !important;
+            background-clip: padding-box !important;
+            border-radius: 8px !important;
+            min-height: 32px;
+        }
+        *::-webkit-scrollbar-thumb:hover {
+            background-color: var(--scrollbar-hover) !important;
+        }
+        * {
+            scrollbar-width: thin !important;
+            scrollbar-color: var(--scrollbar) transparent !important;
+        }
+
+        body {
+            background: var(--bg);
+            font-family: 'Space Grotesk', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            height: 100dvh;
+            color: var(--text);
+            transition: background 0.35s var(--smooth), color 0.35s var(--smooth);
+            margin: 0;
+            padding: 0;
+        }
+
+        a, button {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* === App Shell === */
+        .app-shell {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+            height: 100dvh;
+            background: var(--bg);
+            position: relative;
+            transition: background 0.35s var(--smooth);
+        }
+
+        /* =========================================================
+           DESKTOP SIDEBAR (≥1024px)
+           ========================================================= */
+        .sidebar {
+            position: relative;
+            z-index: 50;
+            width: var(--sidebar-width);
+            min-width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border-right: 1px solid var(--border);
+            padding: 20px 0 16px;
+            transition: width 0.45s var(--fluid-ease) 0.4s, background 0.35s var(--smooth), border-color 0.35s var(--smooth);
+            overflow: hidden;
+        }
+
+        .sidebar:hover {
+            width: var(--sidebar-expanded);
+            transition-delay: 0s;
+        }
+
+        @keyframes sidebar-enter {
+            from { opacity: 0; transform: translateX(-8px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        html:not(.studio-route-booting) .sidebar {
+            animation: sidebar-enter 0.5s var(--fluid-ease);
+        }
+
+        /* --- Logo --- */
+        .logo-container {
+            position: relative;
+            width: 52px;
+            height: 52px;
+            min-width: 52px;
+            min-height: 52px;
+            flex-shrink: 0;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: var(--logo-shadow);
+            transition: width 0.45s var(--fluid-ease) 0.4s, height 0.45s var(--fluid-ease) 0.4s, border-radius 0.45s var(--fluid-ease) 0.4s, box-shadow 0.45s var(--fluid-ease) 0.4s;
+            cursor: pointer;
+        }
+
+        .sidebar:hover .logo-container {
+            width: 200px;
+            height: 160px;
+            border-radius: 18px;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
+            transition-delay: 0s;
+        }
+
+        .logo-container .logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.6s var(--fluid-ease);
+        }
+
+        .sidebar:hover .logo-container .logo-img {
+            transform: scale(1.05);
+        }
+
+        .logo-container .logo-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 50%);
+            opacity: 0;
+            transition: opacity 0.4s var(--smooth);
+        }
+
+        .sidebar:hover .logo-container .logo-overlay {
+            opacity: 1;
+        }
+
+        .logo-badge {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%) translateY(4px);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            opacity: 0;
+            transition: opacity 0.3s var(--smooth), transform 0.3s var(--smooth);
+            white-space: nowrap;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+        }
+
+        .sidebar:hover .logo-badge {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+            transition-delay: 0.1s;
+        }
+
+        /* --- Brand Name --- */
+        .brand-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 14px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .brand-name {
+            font-family: "Inter", "Microsoft YaHei UI", "PingFang SC", "Noto Sans SC", sans-serif;
+            font-size: 20px;
+            font-weight: 900;
+            line-height: 1.2;
+            width: 64px;
+            max-height: 72px;
+            max-width: 64px;
+            text-align: center;
+            word-break: break-all;
+            padding: 8px 4px;
+            border-radius: 8px;
+            background: linear-gradient(var(--sidebar-bg), var(--sidebar-bg)) padding-box,
+                        linear-gradient(150deg, rgba(18,18,18,0.15), rgba(217,119,87,0.2), rgba(245,158,11,0.18)) border-box;
+            border: 1px solid transparent;
+            transition: max-width 0.4s var(--fluid-ease) 0.4s, max-height 0.4s var(--fluid-ease) 0.4s, font-size 0.4s var(--fluid-ease) 0.4s, padding 0.4s var(--fluid-ease) 0.4s, background 0.3s;
+            color: var(--text);
+            letter-spacing: 0.02em;
+        }
+
+        .sidebar:hover .brand-name {
+            font-size: 26px;
+            width: auto;
+            max-width: 200px;
+            max-height: 52px;
+            padding: 10px 20px;
+            white-space: nowrap;
+            word-break: keep-all;
+            transition-delay: 0s;
+        }
+
+        /* --- Divider --- */
+        .sidebar-divider {
+            width: 28px;
+            height: 1px;
+            background: var(--divider);
+            margin: 10px auto;
+            transition: width 0.4s var(--fluid-ease) 0.4s, background 0.3s;
+        }
+
+        .sidebar:hover .sidebar-divider {
+            width: 180px;
+            transition-delay: 0s;
+        }
+
+        /* --- Nav Items --- */
+        .nav-list {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0;
+            margin: 4px 0;
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .nav-item {
+            position: relative;
+            width: 44px;
+            height: 40px;
+            margin: 3px 0;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            border-radius: var(--nav-item-radius);
+            cursor: pointer;
+            transition: width 0.35s var(--fluid-ease) 0.4s, background-color 0.2s, color 0.2s;
+            color: var(--muted);
+            overflow: hidden;
+            padding-left: 12px;
+            flex-shrink: 0;
+            text-decoration: none;
+            border: none;
+            background: transparent;
+        }
+
+        .sidebar:hover .nav-item {
+            width: 210px;
+            transition-delay: 0s;
+        }
+
+        .nav-item:hover {
+            background: var(--nav-hover-bg);
+            color: var(--text);
+        }
+
+        .nav-item.active {
+            background: var(--nav-active-bg);
+            color: var(--nav-active-text);
+        }
+
+        .nav-item .nav-icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-item .nav-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .nav-item .nav-text {
+            opacity: 0;
+            margin-left: 14px;
+            font-weight: 600;
+            font-size: 13px;
+            white-space: nowrap;
+            transition: opacity 0.3s 0.4s;
+        }
+
+        .sidebar:hover .nav-item .nav-text {
+            opacity: 1;
+            transition-delay: 0.08s;
+        }
+
+        .nav-group {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .nav-sublist {
+            width: 44px;
+            height: 0;
+            opacity: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin: 0;
+            overflow: hidden;
+            pointer-events: none;
+            transition: width 0.35s var(--fluid-ease) 0.4s, opacity 0.18s, height 0.18s, margin 0.18s;
+        }
+
+        .sidebar:hover .nav-sublist {
+            width: 190px;
+            height: auto;
+            opacity: 1;
+            margin: 0 0 5px;
+            pointer-events: auto;
+            transition-delay: 0s;
+        }
+
+        .nav-subitem {
+            width: 44px;
+            height: 28px;
+            border: 0;
+            border-radius: 10px;
+            background: transparent;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 0 0 15px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 650;
+            overflow: hidden;
+            transition: width 0.35s var(--fluid-ease) 0.4s, background-color 0.2s, color 0.2s;
+        }
+
+        .sidebar:hover .nav-subitem {
+            width: 190px;
+            transition-delay: 0s;
+        }
+
+        .nav-subitem:hover,
+        .nav-subitem.active {
+            background: var(--nav-hover-bg);
+            color: var(--text);
+        }
+
+        .nav-subitem-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 999px;
+            background: currentColor;
+            flex: 0 0 auto;
+            opacity: .55;
+        }
+
+        .nav-subitem span:last-child {
+            opacity: 0;
+            white-space: nowrap;
+            transition: opacity 0.3s 0.4s;
+        }
+
+        .sidebar:hover .nav-subitem span:last-child {
+            opacity: 1;
+            transition-delay: 0.08s;
+        }
+
+        .nav-group:has(.nav-subitem.active) > .nav-item {
+            background: var(--nav-active-bg);
+            color: var(--nav-active-text);
+        }
+
+        /* Nav item tooltip for collapsed state */
+        .nav-item::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 56px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--text);
+            color: var(--bg);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            z-index: 100;
+        }
+
+        @media (hover: hover) {
+            .nav-item:hover::after {
+                opacity: 0;
+            }
+            .sidebar:not(:hover) .nav-item:hover::after {
+                opacity: 1;
+            }
+        }
+
+        @media (pointer: coarse) {
+            .nav-item::after {
+                display: none !important;
+            }
+        }
+
+        /* --- Side Actions --- */
+        .side-actions {
+            margin-top: auto;
+            margin-bottom: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            width: 100%;
+        }
+
+        .side-pill {
+            width: 40px;
+            height: 28px;
+            border-radius: 8px;
+            background: transparent;
+            border: none;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: width 0.35s var(--fluid-ease) 0.4s, gap 0.35s var(--fluid-ease) 0.4s, background-color 0.2s, color 0.2s;
+            flex-shrink: 0;
+            overflow: hidden;
+            gap: 0;
+            position: relative;
+        }
+
+        .sidebar:hover .side-pill {
+            width: 210px;
+            gap: 10px;
+            transition-delay: 0s;
+        }
+
+        .side-pill:hover {
+            background: var(--nav-hover-bg);
+            color: var(--text);
+        }
+
+        .side-pill svg {
+            width: 15px;
+            height: 15px;
+            flex-shrink: 0;
+        }
+
+        .side-pill-text {
+            opacity: 0;
+            max-width: 0;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+            overflow: hidden;
+            transition: opacity 0.3s 0.4s, max-width 0.35s var(--fluid-ease) 0.4s;
+        }
+
+        .sidebar:hover .side-pill-text {
+            opacity: 1;
+            max-width: 120px;
+            transition-delay: 0.12s;
+        }
+
+        /* =========================================================
+           MAIN STAGE
+           ========================================================= */
+        .stage {
+            flex: 1;
+            min-width: 0;
+            background: var(--stage-bg);
+            margin: 12px;
+            border-radius: var(--stage-radius);
+            overflow: hidden;
+            border: 1px solid var(--stage-border);
+            position: relative;
+            transition: background 0.35s var(--smooth), border-color 0.35s var(--smooth), border-radius 0.35s var(--smooth), margin 0.35s var(--smooth);
+        }
+
+        iframe {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            opacity: 0;
+            transform: scale(1.03);
+            filter: blur(6px);
+            transition: all 0.5s var(--fluid-ease);
+            pointer-events: none;
+        }
+
+        iframe.active {
+            opacity: 1;
+            transform: scale(1);
+            filter: blur(0);
+            pointer-events: auto;
+        }
+
+        /* === Nano Monitor (Glassmorphism) === */
+        .nano-monitor {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--monitor-bg);
+            backdrop-filter: blur(16px) saturate(1.4);
+            -webkit-backdrop-filter: blur(16px) saturate(1.4);
+            padding: 7px 16px;
+            border-radius: 14px;
+            border: 1px solid var(--monitor-border);
+            box-shadow: 0 4px 24px var(--monitor-shadow), inset 0 1px 0 rgba(255,255,255,0.08);
+            font-family: monospace;
+            transition: all 0.4s var(--fluid-ease);
+        }
+
+        .nano-monitor.is-busy {
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(16px);
+            border-color: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+        }
+
+        .stat-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: 0.02em;
+        }
+
+        .nano-monitor.is-busy .stat-group {
+            color: #fff;
+        }
+
+        .monitor-divider {
+            width: 1px;
+            height: 14px;
+            background: var(--divider);
+        }
+
+        .is-busy .monitor-divider {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .pulse-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 6px rgba(16, 185, 129, 0.4);
+        }
+
+        .pulse-dot.is-warning {
+            background: #f59e0b;
+            box-shadow: 0 0 6px rgba(245, 158, 11, 0.4);
+        }
+
+        .spinner-nano {
+            width: 11px;
+            height: 11px;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            display: none;
+        }
+
+        .is-busy .spinner-nano { display: block; }
+        .is-busy .pulse-dot { display: none; }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .label-nano {
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            opacity: 0.55;
+            font-size: 9px;
+        }
+
+        .monitor-brand {
+            letter-spacing: 0;
+            opacity: 1;
+            font-family: "Inter", "Microsoft YaHei UI", "PingFang SC", sans-serif;
+            font-size: 11px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .monitor-hidden {
+            display: none !important;
+        }
+
+        /* =========================================================
+           MOBILE / TABLET ADAPTIVE
+           ========================================================= */
+        @media (max-width: 1023px) {
+            /* --- Tablet sidebar becomes toggleable --- */
+            .sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                z-index: 200;
+                transform: translateX(-100%);
+                transition: transform 0.35s var(--fluid-ease), width 0.35s var(--fluid-ease), background 0.35s;
+                width: 260px;
+                min-width: 260px;
+                border-right: 1px solid var(--border);
+                box-shadow: 4px 0 30px rgba(0, 0, 0, 0.08);
+            }
+
+            .sidebar.is-open {
+                transform: translateX(0);
+            }
+
+            .sidebar:hover {
+                width: 260px;
+            }
+
+            .sidebar .nav-item {
+                width: 220px;
+            }
+
+            .sidebar .nav-item .nav-text {
+                opacity: 1;
+            }
+
+            .sidebar .nav-sublist,
+            .sidebar .nav-subitem {
+                width: 200px;
+            }
+
+            .sidebar .nav-sublist {
+                height: auto;
+                opacity: 1;
+                margin: 0 0 5px;
+                pointer-events: auto;
+            }
+
+            .sidebar .nav-subitem span:last-child {
+                opacity: 1;
+            }
+
+            .sidebar .side-pill {
+                width: 220px;
+                gap: 10px;
+            }
+
+            .sidebar .side-pill .side-pill-text {
+                opacity: 1;
+                max-width: 120px;
+            }
+
+            .sidebar .logo-container {
+                width: 200px;
+                height: 160px;
+                border-radius: 18px;
+            }
+
+            .sidebar .logo-container .logo-overlay {
+                opacity: 1;
+            }
+
+            .sidebar .logo-badge {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+
+            .sidebar .brand-name {
+                font-size: 26px;
+                width: auto;
+                max-width: 200px;
+                max-height: 52px;
+                padding: 10px 20px;
+                white-space: nowrap;
+                word-break: keep-all;
+            }
+
+            .sidebar .sidebar-divider {
+                width: 180px;
+            }
+
+            .nav-item::after {
+                display: none !important;
+            }
+
+            /* --- Mobile header bar --- */
+            .mobile-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 100;
+                height: 52px;
+                padding: 0 14px;
+                background: var(--sidebar-bg);
+                border-bottom: 1px solid var(--border);
+                backdrop-filter: blur(16px);
+                transition: background 0.3s, border-color 0.3s;
+            }
+
+            .mobile-header-brand {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-family: "Inter", "Microsoft YaHei UI", "PingFang SC", sans-serif;
+                font-size: 16px;
+                font-weight: 800;
+                color: var(--text);
+            }
+
+            .mobile-header-brand img {
+                width: 28px;
+                height: 28px;
+                border-radius: 8px;
+                object-fit: cover;
+            }
+
+            .hamburger-btn {
+                width: 36px;
+                height: 36px;
+                border-radius: 10px;
+                border: none;
+                background: transparent;
+                cursor: pointer;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 5px;
+                color: var(--text);
+                transition: background 0.2s;
+            }
+
+            .hamburger-btn:hover {
+                background: var(--nav-hover-bg);
+            }
+
+            .hamburger-btn span {
+                display: block;
+                width: 20px;
+                height: 2px;
+                background: var(--text);
+                border-radius: 2px;
+                transition: transform 0.3s var(--smooth), opacity 0.3s;
+            }
+
+            .hamburger-btn.is-active span:nth-child(1) {
+                transform: translateY(7px) rotate(45deg);
+            }
+            .hamburger-btn.is-active span:nth-child(2) {
+                opacity: 0;
+            }
+            .hamburger-btn.is-active span:nth-child(3) {
+                transform: translateY(-7px) rotate(-45deg);
+            }
+
+            /* --- Overlay --- */
+            .sidebar-overlay {
+                position: fixed;
+                inset: 0;
+                z-index: 199;
+                background: rgba(0, 0, 0, 0.3);
+                backdrop-filter: blur(2px);
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s;
+            }
+
+            .sidebar-overlay.is-visible {
+                opacity: 1;
+                pointer-events: auto;
+            }
+
+            /* Stage adjustments for tablet */
+            .stage {
+                margin: 0;
+                border-radius: 0;
+                border: none;
+                padding-top: 52px;
+            }
+
+            .nano-monitor {
+                bottom: 68px;
+                left: 12px;
+            }
+        }
+
+        @media (max-width: 767px) {
+            /* --- Mobile bottom navigation --- */
+            .mobile-bottom-nav {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                z-index: 100;
+                display: flex;
+                align-items: center;
+                justify-content: space-around;
+                height: 60px;
+                background: var(--sidebar-bg);
+                border-top: 1px solid var(--border);
+                backdrop-filter: blur(16px);
+                padding: 0 4px;
+                padding-bottom: env(safe-area-inset-bottom, 0);
+                transition: background 0.3s, border-color 0.3s;
+            }
+
+            .mobile-nav-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 2px;
+                min-width: 48px;
+                padding: 4px 6px;
+                border: none;
+                background: transparent;
+                cursor: pointer;
+                color: var(--muted);
+                transition: color 0.2s, transform 0.2s;
+                position: relative;
+                -webkit-tap-highlight-color: transparent;
+            }
+
+            .mobile-nav-item:active {
+                transform: scale(0.92);
+            }
+
+            .mobile-nav-item.active {
+                color: var(--text);
+            }
+
+            .mobile-nav-item.active::after {
+                content: '';
+                position: absolute;
+                top: -1px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 24px;
+                height: 2px;
+                background: var(--text);
+                border-radius: 2px;
+            }
+
+            .mobile-nav-item svg {
+                width: 22px;
+                height: 22px;
+            }
+
+            .mobile-nav-item span {
+                font-size: 9px;
+                font-weight: 600;
+                letter-spacing: 0.02em;
+                line-height: 1;
+                max-width: 48px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            /* More menu drawer */
+            .mobile-more-drawer {
+                position: fixed;
+                bottom: 60px;
+                left: 0;
+                right: 0;
+                z-index: 99;
+                background: var(--sidebar-bg);
+                border-top: 1px solid var(--border);
+                border-radius: 20px 20px 0 0;
+                padding: 16px 16px 8px;
+                box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.08);
+                transform: translateY(100%);
+                opacity: 0;
+                pointer-events: none;
+                transition: transform 0.35s var(--fluid-ease), opacity 0.3s;
+                max-height: 50vh;
+                overflow-y: auto;
+            }
+
+            .mobile-more-drawer.is-open {
+                transform: translateY(0);
+                opacity: 1;
+                pointer-events: auto;
+            }
+
+            .drawer-handle {
+                width: 40px;
+                height: 4px;
+                border-radius: 4px;
+                background: var(--divider);
+                margin: 0 auto 12px;
+            }
+
+            .drawer-item {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                padding: 12px 14px;
+                border-radius: 12px;
+                cursor: pointer;
+                color: var(--text);
+                font-size: 14px;
+                font-weight: 600;
+                transition: background 0.2s;
+                border: none;
+                background: transparent;
+                width: 100%;
+                text-align: left;
+            }
+
+            .drawer-item:hover {
+                background: var(--nav-hover-bg);
+            }
+
+            .drawer-item svg {
+                width: 20px;
+                height: 20px;
+                flex-shrink: 0;
+                color: var(--muted);
+            }
+
+            /* Stage adjustments for mobile */
+            .stage {
+                padding-top: 52px;
+                padding-bottom: 60px;
+                margin: 0;
+                border-radius: 0;
+                border: none;
+            }
+
+            .nano-monitor {
+                bottom: 72px;
+                left: 10px;
+                padding: 5px 12px;
+                font-size: 10px;
+            }
+
+            .mobile-header {
+                padding: 0 12px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .mobile-header,
+            .sidebar-overlay,
+            .mobile-bottom-nav,
+            .mobile-more-drawer {
+                display: none !important;
+            }
+        }
+
+        /* === Reduced motion === */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            .sidebar { transition: none; }
+            .nav-item { transition: none; }
+            .logo-container { transition: none; }
+            iframe { transition: opacity 0.2s; }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- App Shell -->
+    <div class="app-shell">
+
+        <!-- === MOBILE HEADER === -->
+        <header class="mobile-header">
+            <div class="mobile-header-brand">
+                <img src="/static/october-cabin-logo.webp" alt="十月文化" loading="eager">
+                十月文化
+            </div>
+            <button class="hamburger-btn" id="hamburger-btn" type="button" aria-label="打开菜单" onclick="toggleSidebar()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </header>
+
+        <!-- === SIDEBAR OVERLAY === -->
+        <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+        <!-- === SIDEBAR === -->
+        <aside class="sidebar" id="main-sidebar">
+            <!-- Logo -->
+            <div class="logo-container">
+                <img class="logo-img" src="/static/october-cabin-logo.webp" alt="十月文化" loading="eager">
+                <div class="logo-overlay"></div>
+                <span class="logo-badge">AI 创作工作室</span>
+            </div>
+
+            <!-- Brand Name -->
+            <div class="brand-section">
+                <div class="brand-name"><span>十月</span><span>文化</span></div>
+            </div>
+
+            <div class="sidebar-divider"></div>
+
+            <!-- Navigation -->
+            <nav class="nav-list">
+                <div class="nav-group image-tools-group">
+                    <button class="nav-item active" data-tooltip="图片编辑" onclick="switchUI(this, 'klein')">
+                        <span class="nav-icon">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                            </svg>
+                        </span>
+                        <span class="nav-text" data-i18n="nav.imageEdit">图片编辑</span>
+                    </button>
+                    <div class="nav-sublist" aria-label="图片编辑工具">
+                        <button class="nav-subitem" type="button" onclick="switchUI(this, 'zimage')"><span class="nav-subitem-dot"></span><span data-i18n="nav.textToImage">文生图</span></button>
+                        <button class="nav-subitem" type="button" onclick="switchUI(this, 'enhance')"><span class="nav-subitem-dot"></span><span data-i18n="nav.enhance">细节增强</span></button>
+                        <button class="nav-subitem" type="button" onclick="switchUI(this, 'angle')"><span class="nav-subitem-dot"></span><span data-i18n="nav.angle">角度控制</span></button>
+                    </div>
+                </div>
+
+                <div class="sidebar-divider"></div>
+
+                <button class="nav-item" data-tooltip="在线生图" onclick="switchUI(this, 'online')">
+                    <span class="nav-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M2 12h20"/>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                        </svg>
+                    </span>
+                    <span class="nav-text" data-i18n="nav.online">在线生图</span>
+                </button>
+                <button class="nav-item" data-tooltip="视频生成" onclick="switchUI(this, 'video')">
+                    <span class="nav-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="5" width="18" height="14" rx="2"/>
+                            <path d="M7 5v14M17 5v14M3 9h4M3 15h4M17 9h4M17 15h4"/>
+                        </svg>
+                    </span>
+                    <span class="nav-text" data-i18n="nav.video">视频生成</span>
+                </button>
+                <button class="nav-item" data-tooltip="动作迁移" onclick="switchUI(this, 'motion-transfer')">
+                    <span class="nav-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14"/>
+                            <path d="m13 6 6 6-6 6"/>
+                            <path d="M5 5v14"/>
+                        </svg>
+                    </span>
+                    <span class="nav-text">动作迁移</span>
+                </button>
+                <button class="nav-item" data-tooltip="SD2.0提示词" onclick="switchUI(this, 'sd2-prompt')">
+                    <span class="nav-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6L12 3z"/>
+                            <path d="M19 14l.8 2.2L22 17l-2.2.8L19 20l-.8-2.2L16 17l2.2-.8L19 14z"/>
+                            <path d="M5 15l.6 1.6L7 17l-1.4.4L5 19l-.6-1.6L3 17l1.4-.4L5 15z"/>
+                        </svg>
+                    </span>
+                    <span class="nav-text">SD2.0提示词</span>
+                </button>
+                <button class="nav-item" data-tooltip="GPT 对话" onclick="switchUI(this, 'gpt-chat')">
+                    <span class="nav-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
+                    </span>
+                    <span class="nav-text" data-i18n="nav.gpt">GPT 对话</span>
+                </button>
+                <button class="nav-item" data-tooltip="无限画布" onclick="switchUI(this, 'canvas')">
+                    <span class="nav-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="7" height="7" rx="1"/>
+                            <rect x="14" y="3" width="7" height="7" rx="1"/>
+                            <rect x="14" y="14" width="7" height="7" rx="1"/>
+                            <rect x="3" y="14" width="7" height="7" rx="1"/>
+                        </svg>
+                    </span>
+                    <span class="nav-text" data-i18n="nav.canvas">无限画布</span>
+                </button>
+            </nav>
+
+            <!-- Side actions -->
+            <div class="side-actions">
+                <button class="side-pill" onclick="toggleTheme()" id="theme-toggle-btn" type="button" title="切换夜间模式">
+                    <svg id="icon-moon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                    </svg>
+                    <svg id="icon-sun" style="display:none" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"/>
+                        <line x1="12" y1="1" x2="12" y2="3"/>
+                        <line x1="12" y1="21" x2="12" y2="23"/>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                        <line x1="1" y1="12" x2="3" y2="12"/>
+                        <line x1="21" y1="12" x2="23" y2="12"/>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                    </svg>
+                    <span class="side-pill-text" data-i18n="common.darkMode">黑夜模式</span>
+                </button>
+                <button class="side-pill" onclick="toggleLanguage()" id="lang-toggle-btn" type="button" title="Language">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M2 12h20"/>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                    </svg>
+                    <span class="side-pill-text" data-i18n="common.language">中文</span>
+                </button>
+                <button class="side-pill" onclick="switchUI(this, 'api-settings')" type="button" title="API 设置">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 7h3a5 5 0 0 1 0 10h-3"/>
+                        <path d="M9 17H6A5 5 0 0 1 6 7h3"/>
+                        <line x1="8" y1="12" x2="16" y2="12"/>
+                    </svg>
+                    <span class="side-pill-text" data-i18n="common.apiSettings">API 设置</span>
+                </button>
+                <button class="side-pill" onclick="switchUI(this, 'comfyui-settings')" type="button" title="ComfyUI 设置">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7" rx="1"/>
+                        <rect x="14" y="3" width="7" height="7" rx="1"/>
+                        <rect x="3" y="14" width="7" height="7" rx="1"/>
+                        <path d="M14 14h7v7h-7z"/>
+                        <line x1="10" y1="6.5" x2="14" y2="6.5"/>
+                        <line x1="6.5" y1="10" x2="6.5" y2="14"/>
+                    </svg>
+                    <span class="side-pill-text" data-i18n="common.comfyuiSettings">ComfyUI 设置</span>
+                </button>
+                <button class="side-pill" onclick="switchUI(this, 'runninghub')" type="button" title="RunningHub">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="6" height="6" rx="1"/>
+                        <rect x="15" y="4" width="6" height="6" rx="1"/>
+                        <rect x="9" y="15" width="6" height="6" rx="1"/>
+                        <path d="M9 7h6"/>
+                        <path d="M6 10v3a2 2 0 0 0 2 2h1"/>
+                        <path d="M18 10v3a2 2 0 0 1-2 2h-1"/>
+                    </svg>
+                    <span class="side-pill-text">RunningHub</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- === MAIN STAGE === -->
+        <main class="stage">
+            <!-- iframes for all pages -->
+            <iframe id="frame-zimage" data-src="/static/zimage.html?v=20260512-i18n2" scrolling="yes" loading="lazy"></iframe>
+            <iframe id="frame-enhance" data-src="/static/enhance.html?v=20260512-i18n2" scrolling="yes" loading="lazy"></iframe>
+            <iframe id="frame-klein" data-src="/static/klein.html?v=20260512-i18n2" class="active" scrolling="yes" loading="lazy"></iframe>
+            <iframe id="frame-angle" data-src="/static/angle.html?v=20260512-i18n2" scrolling="yes" loading="lazy"></iframe>
+            <iframe id="frame-online" data-src="/static/online.html?v=20260512-i18n2" scrolling="yes" loading="lazy"></iframe>
+            <iframe id="frame-video" data-src="/static/video.html?v=20260524-seedance-params" scrolling="yes" loading="lazy"></iframe>
+            <iframe id="frame-motion-transfer" data-src="/static/motion-transfer.html?v=20260526-cloudspace-hidden-url-2" scrolling="yes" loading="lazy"></iframe>
+            <iframe id="frame-runninghub" data-src="/static/runninghub.html?v=20260604-rh-media-inputs" scrolling="yes" loading="lazy"></iframe>
+            <iframe id="frame-sd2-prompt" data-src="/static/sd2-prompt.html?v=20260525-sd2-prompt" scrolling="yes" loading="lazy"></iframe>
+            <iframe id="frame-gpt-chat" data-src="/static/gpt-chat.html?v=20260514-provider-chat-models" scrolling="yes" loading="lazy"></iframe>
+            <iframe id="frame-canvas" data-src="/static/canvas.html?v=20260604-rh-media-inputs" scrolling="yes" loading="lazy"></iframe>
+            <iframe id="frame-api-settings" data-src="/static/api-settings.html?v=20260524-seedance-mentions" scrolling="yes" loading="lazy"></iframe>
+            <iframe id="frame-comfyui-settings" data-src="/static/comfyui-settings.html?v=20260519-random-number-active-wrap" scrolling="yes" loading="lazy"></iframe>
+
+            <!-- Nano Monitor (Glassmorphism) -->
+            <div class="nano-monitor" id="nano-monitor">
+                <div class="stat-group">
+                    <div class="pulse-dot animate-pulse" id="pulse-dot"></div>
+                    <div class="spinner-nano"></div>
+                    <span class="label-nano monitor-brand">十月文化AI盒子</span>
+                    <span id="online-val" class="monitor-hidden">1</span>
+                </div>
+                <div class="monitor-divider monitor-hidden" id="monitor-divider"></div>
+                <div class="stat-group monitor-hidden" id="queue-group">
+                    <span class="label-nano">QUEUE</span>
+                    <span id="queue-val">0</span>
+                </div>
+            </div>
+        </main>
+
+        <!-- === MOBILE BOTTOM NAV === -->
+        <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+            <button class="mobile-nav-item active" onclick="switchMobileNav(this, 'klein')">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+                <span>图片</span>
+            </button>
+            <button class="mobile-nav-item" onclick="switchMobileNav(this, 'video')">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="5" width="18" height="14" rx="2"/>
+                    <path d="M7 5v14M17 5v14M3 9h4M3 15h4M17 9h4M17 15h4"/>
+                </svg>
+                <span>视频</span>
+            </button>
+            <button class="mobile-nav-item" onclick="switchMobileNav(this, 'canvas')">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7" rx="1"/>
+                    <rect x="14" y="3" width="7" height="7" rx="1"/>
+                    <rect x="14" y="14" width="7" height="7" rx="1"/>
+                    <rect x="3" y="14" width="7" height="7" rx="1"/>
+                </svg>
+                <span>画布</span>
+            </button>
+            <button class="mobile-nav-item" onclick="toggleMobileDrawer()" id="mobile-more-btn">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="5" r="1.5" fill="currentColor"/>
+                    <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+                    <circle cx="12" cy="19" r="1.5" fill="currentColor"/>
+                </svg>
+                <span>更多</span>
+            </button>
+        </nav>
+
+        <!-- === MOBILE MORE DRAWER === -->
+        <div class="mobile-more-drawer" id="mobile-more-drawer">
+            <div class="drawer-handle"></div>
+            <button class="drawer-item" onclick="switchMobileNav(this, 'zimage');closeMobileDrawer()">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                    <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.587-1.587a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                文生图
+            </button>
+            <button class="drawer-item" onclick="switchMobileNav(this, 'enhance');closeMobileDrawer()">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                    <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+                细节增强
+            </button>
+            <button class="drawer-item" onclick="switchMobileNav(this, 'angle');closeMobileDrawer()">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                    <line x1="12" y1="22.08" x2="12" y2="12"/>
+                </svg>
+                角度控制
+            </button>
+            <button class="drawer-item" onclick="switchMobileNav(this, 'online');closeMobileDrawer()">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M2 12h20"/>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                </svg>
+                在线生图
+            </button>
+            <button class="drawer-item" onclick="switchMobileNav(this, 'motion-transfer');closeMobileDrawer()">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                    <path d="M5 12h14"/>
+                    <path d="m13 6 6 6-6 6"/>
+                    <path d="M5 5v14"/>
+                </svg>
+                动作迁移
+            </button>
+            <button class="drawer-item" onclick="switchMobileNav(this, 'sd2-prompt');closeMobileDrawer()">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                    <path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6L12 3z"/>
+                    <path d="M19 14l.8 2.2L22 17l-2.2.8L19 20l-.8-2.2L16 17l2.2-.8L19 14z"/>
+                    <path d="M5 15l.6 1.6L7 17l-1.4.4L5 19l-.6-1.6L3 17l1.4-.4L5 15z"/>
+                </svg>
+                SD2.0提示词
+            </button>
+            <button class="drawer-item" onclick="switchMobileNav(this, 'gpt-chat');closeMobileDrawer()">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                GPT 对话
+            </button>
+
+            <div style="height:1px;background:var(--divider);margin:8px 0;"></div>
+
+            <button class="drawer-item" onclick="toggleTheme()">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+                <span data-i18n="common.darkMode">黑夜模式</span>
+            </button>
+            <button class="drawer-item" onclick="toggleLanguage();closeMobileDrawer()">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M2 12h20"/>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                </svg>
+                <span data-i18n="common.language">中文</span>
+            </button>
+            <button class="drawer-item" onclick="switchUI(document.querySelector('#mobile-more-btn'), 'api-settings');closeMobileDrawer()">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path d="M15 7h3a5 5 0 0 1 0 10h-3"/>
+                    <path d="M9 17H6A5 5 0 0 1 6 7h3"/>
+                    <line x1="8" y1="12" x2="16" y2="12"/>
+                </svg>
+                <span data-i18n="common.apiSettings">API 设置</span>
+            </button>
+            <button class="drawer-item" onclick="switchUI(document.querySelector('#mobile-more-btn'), 'comfyui-settings');closeMobileDrawer()">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7" rx="1"/>
+                    <rect x="14" y="3" width="7" height="7" rx="1"/>
+                    <rect x="3" y="14" width="7" height="7" rx="1"/>
+                    <path d="M14 14h7v7h-7z"/>
+                    <line x1="10" y1="6.5" x2="14" y2="6.5"/>
+                    <line x1="6.5" y1="10" x2="6.5" y2="14"/>
+                </svg>
+                <span data-i18n="common.comfyuiSettings">ComfyUI 设置</span>
+            </button>
+            <button class="drawer-item" onclick="switchUI(document.querySelector('#mobile-more-btn'), 'runninghub');closeMobileDrawer()">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <rect x="3" y="4" width="6" height="6" rx="1"/>
+                    <rect x="15" y="4" width="6" height="6" rx="1"/>
+                    <rect x="9" y="15" width="6" height="6" rx="1"/>
+                    <path d="M9 7h6"/>
+                    <path d="M6 10v3a2 2 0 0 0 2 2h1"/>
+                    <path d="M18 10v3a2 2 0 0 1-2 2h-1"/>
+                </svg>
+                RunningHub
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        //  Core Application Logic
+        // ============================================================
+
+        function generateUUID() {
+            if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+                try { return crypto.randomUUID(); } catch (e) { }
+            }
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        const CID = localStorage.getItem("client_id") || generateUUID();
+        localStorage.setItem("client_id", CID);
+        const ACTIVE_PAGE_KEY = 'studio_active_page';
+        const DEFAULT_PAGE_ID = 'klein';
+        const PAGE_IDS = ['zimage','enhance','klein','angle','online','video','motion-transfer','runninghub','sd2-prompt','gpt-chat','canvas','api-settings','comfyui-settings'];
+        const OCT_UI_HREF = '/static/oct-ui.css?v=20260528-brand-align';
+
+        function applyOctUiToFrame(iframe) {
+            try {
+                const doc = iframe && iframe.contentDocument;
+                if (!doc || !doc.head || doc.querySelector('link[data-oct-ui="true"]')) return;
+                const link = doc.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = OCT_UI_HREF;
+                link.dataset.octUi = 'true';
+                doc.head.appendChild(link);
+                doc.documentElement.classList.add('oct-ui-frame');
+            } catch (e) {}
+        }
+
+        // Main nav (sidebar) visible items for mobile bottom bar
+        const MOBILE_PRIMARY_IDS = ['klein','video','canvas'];
+
+        // ============================================================
+        //  Sidebar (tablet)
+        // ============================================================
+        function toggleSidebar() {
+            const sidebar = document.getElementById('main-sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const btn = document.getElementById('hamburger-btn');
+            const isOpen = sidebar.classList.toggle('is-open');
+            overlay.classList.toggle('is-visible', isOpen);
+            btn.classList.toggle('is-active', isOpen);
+            document.body.style.overflow = isOpen ? 'hidden' : '';
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('main-sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const btn = document.getElementById('hamburger-btn');
+            sidebar.classList.remove('is-open');
+            overlay.classList.remove('is-visible');
+            btn.classList.remove('is-active');
+            document.body.style.overflow = '';
+        }
+
+        // ============================================================
+        //  Mobile Drawer
+        // ============================================================
+        function toggleMobileDrawer() {
+            const drawer = document.getElementById('mobile-more-drawer');
+            drawer.classList.toggle('is-open');
+        }
+
+        function closeMobileDrawer() {
+            document.getElementById('mobile-more-drawer').classList.remove('is-open');
+        }
+
+        // ============================================================
+        //  UI Switching (Shared)
+        // ============================================================
+        function switchUI(el, id, options) {
+            options = options || {};
+            if (!PAGE_IDS.includes(id)) id = DEFAULT_PAGE_ID;
+
+            // Update active states
+            document.querySelectorAll('.nav-item.active, .nav-subitem.active, .side-pill.active, .mobile-nav-item.active').forEach(function(n) {
+                n.classList.remove('active');
+            });
+
+            if (el && el.classList) {
+                el.classList.add('active');
+            }
+
+            // Switch iframe
+            document.querySelectorAll('iframe').forEach(function(f) {
+                f.classList.remove('active');
+            });
+
+            var target = document.getElementById('frame-' + id);
+            if (target) {
+                target.classList.add('active');
+                if (!target.src || target.src === '' || target.src === window.location.href) {
+                    target.src = target.dataset.src;
+                }
+
+                // Sync theme & language
+                applyOctUiToFrame(target);
+                syncThemeToFrame(target);
+                syncLanguageToFrame(target);
+
+                // Notify canvas
+                if (id === 'canvas' && target.src && target.src !== 'about:blank') {
+                    try { target.contentWindow?.postMessage({ type: 'canvas-focus' }, '*'); } catch(e) {}
+                }
+            }
+
+            if (!options.skipRemember) {
+                localStorage.setItem(ACTIVE_PAGE_KEY, id);
+            }
+        }
+
+        // Mobile bottom nav switching
+        function switchMobileNav(el, id) {
+            // Close drawer if open
+            closeMobileDrawer();
+
+            // Find the sidebar nav item or side pill for this page
+            var sidebarEl = document.querySelector('.nav-item[onclick*="\'' + id + '\'"]') ||
+                           document.querySelector('.nav-subitem[onclick*="\'' + id + '\'"]') ||
+                           document.querySelector('.side-pill[onclick*="\'' + id + '\'"]');
+
+            // Update mobile nav active state
+            document.querySelectorAll('.mobile-nav-item.active').forEach(function(n) {
+                n.classList.remove('active');
+            });
+
+            if (el && el.classList) {
+                el.classList.add('active');
+            }
+
+            switchUI(sidebarEl, id);
+        }
+
+        // ============================================================
+        //  Page Restoration
+        // ============================================================
+        function restoreActivePage() {
+            const id = PAGE_IDS.includes(localStorage.getItem(ACTIVE_PAGE_KEY))
+                ? localStorage.getItem(ACTIVE_PAGE_KEY)
+                : DEFAULT_PAGE_ID;
+
+            var trigger = document.querySelector('[onclick*="\'' + id + '\'"]');
+            switchUI(trigger, id, { skipRemember: true });
+
+            // Update mobile nav
+            var mobileBtn = document.querySelector('.mobile-nav-item[onclick*="\'' + id + '\'"]');
+            if (mobileBtn) {
+                document.querySelectorAll('.mobile-nav-item.active').forEach(function(n) {
+                    n.classList.remove('active');
+                });
+                mobileBtn.classList.add('active');
+            }
+
+            document.documentElement.classList.remove('studio-route-booting');
+        }
+
+        document.addEventListener('DOMContentLoaded', restoreActivePage, { once: true });
+
+        // ============================================================
+        //  Queue & Status Monitoring
+        // ============================================================
+        async function syncStatus() {
+            try {
+                const res = await fetch('/api/queue_status?client_id=' + CID);
+                const data = await res.json();
+                const monitor = document.getElementById('nano-monitor');
+                const queueVal = document.getElementById('queue-val');
+                const queueGroup = document.getElementById('queue-group');
+                const monitorDivider = document.getElementById('monitor-divider');
+                const pulseDot = document.getElementById('pulse-dot');
+                const total = data.total || 0;
+                const pos = data.position || 0;
+
+                if (pos > 0) {
+                    monitor.classList.add('is-busy');
+                    queueVal.innerText = pos + '/' + total;
+                    queueGroup.classList.remove('monitor-hidden');
+                    monitorDivider.classList.remove('monitor-hidden');
+                    pulseDot.classList.add('is-warning');
+                } else {
+                    monitor.classList.remove('is-busy');
+                    queueVal.innerText = total > 0 ? total : '0';
+                    pulseDot.classList.remove('is-warning');
+                    if (total === 0) {
+                        queueGroup.classList.add('monitor-hidden');
+                        monitorDivider.classList.add('monitor-hidden');
+                    } else {
+                        queueGroup.classList.remove('monitor-hidden');
+                        monitorDivider.classList.remove('monitor-hidden');
+                    }
+                }
+            } catch (e) { /* silent */ }
+        }
+
+        // ============================================================
+        //  WebSocket Connection
+        // ============================================================
+        const host = window.location.host;
+        if (host) {
+            const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
+            var ws = null;
+
+            function connectWebSocket() {
+                try {
+                    ws = new WebSocket(protocol + '://' + host + '/ws/stats?client_id=' + CID);
+                    ws.onmessage = function(event) {
+                        try {
+                            const data = JSON.parse(event.data);
+                            if (data.type === 'stats') {
+                                document.getElementById('online-val').innerText = data.online_count;
+                            } else if (data.type === 'cloud_status') {
+                                const iframe = document.querySelector('iframe.active');
+                                if (iframe && iframe.contentWindow) {
+                                    iframe.contentWindow.postMessage(data, '*');
+                                }
+                            } else if (data.type === 'canvas_updated') {
+                                const iframe = document.querySelector('iframe.active');
+                                if (iframe && iframe.contentWindow) {
+                                    iframe.contentWindow.postMessage(data, '*');
+                                }
+                            }
+                        } catch(e) {}
+                    };
+                    ws.onclose = function() {
+                        setTimeout(connectWebSocket, 3000);
+                    };
+                    ws.onerror = function() {
+                        // will auto-reconnect via onclose
+                    };
+                } catch(e) {
+                    setTimeout(connectWebSocket, 5000);
+                }
+            }
+            connectWebSocket();
+
+            setInterval(syncStatus, 2000);
+        }
+
+        // ============================================================
+        //  Theme System
+        // ============================================================
+        function syncThemeToFrame(iframe) {
+            const theme = (window.StudioTheme || { get: function() { return 'light'; } }).get();
+            try {
+                if (iframe && iframe.contentWindow) {
+                    iframe.contentWindow.postMessage({ type: 'studio-theme', theme: theme }, '*');
+                }
+            } catch (e) {}
+        }
+
+        function broadcastTheme(theme) {
+            if (window.StudioTheme) {
+                window.StudioTheme.set(theme);
+            }
+            document.querySelectorAll('iframe').forEach(function(f) {
+                applyOctUiToFrame(f);
+                syncThemeToFrame(f);
+            });
+            updateThemeIcon(theme);
+        }
+
+        function updateThemeIcon(theme) {
+            const moon = document.getElementById('icon-moon');
+            const sun = document.getElementById('icon-sun');
+            if (theme === 'dark') {
+                moon.style.display = 'none';
+                sun.style.display = 'block';
+            } else {
+                moon.style.display = 'block';
+                sun.style.display = 'none';
+            }
+        }
+
+        function toggleTheme() {
+            const current = window.StudioTheme ? window.StudioTheme.get() : 'light';
+            broadcastTheme(current === 'dark' ? 'light' : 'dark');
+            closeMobileDrawer();
+        }
+
+        // ============================================================
+        //  Language / i18n
+        // ============================================================
+        function toggleLanguage() {
+            if (!window.StudioI18n) return;
+            window.StudioI18n.toggle();
+            document.querySelectorAll('iframe').forEach(function(frame) {
+                syncLanguageToFrame(frame);
+            });
+            closeMobileDrawer();
+        }
+
+        function syncLanguageToFrame(frame) {
+            if (!window.StudioI18n) return;
+            try {
+                frame.contentWindow?.postMessage({
+                    type: 'studio-lang',
+                    lang: window.StudioI18n.lang()
+                }, '*');
+            } catch(e) {}
+        }
+
+        function broadcastLanguage() {
+            document.querySelectorAll('iframe').forEach(function(frame) {
+                try {
+                    frame.contentWindow?.postMessage({
+                        type: 'studio-lang',
+                        lang: window.StudioI18n.lang()
+                    }, '*');
+                } catch(e) {}
+            });
+        }
+
+        // ============================================================
+        //  Event Listeners
+        // ============================================================
+
+        // Listen for theme changes from theme.js
+        window.addEventListener('studio-theme-change', function(e) {
+            updateThemeIcon(e.detail.theme);
+        });
+
+        // Init on DOMContentLoaded
+        window.addEventListener('DOMContentLoaded', function() {
+            const theme = window.StudioTheme ? window.StudioTheme.get() : 'light';
+            updateThemeIcon(theme);
+            if (window.StudioI18n) window.StudioI18n.apply();
+            broadcastLanguage();
+        });
+
+        // Sync theme when iframe loads
+        document.querySelectorAll('iframe').forEach(function(f) {
+            f.addEventListener('load', function() {
+                applyOctUiToFrame(f);
+                syncThemeToFrame(f);
+                syncLanguageToFrame(f);
+            });
+        });
+
+        // Close mobile drawer on outside click
+        document.addEventListener('click', function(e) {
+            var drawer = document.getElementById('mobile-more-drawer');
+            var moreBtn = document.getElementById('mobile-more-btn');
+            if (drawer.classList.contains('is-open') &&
+                !drawer.contains(e.target) &&
+                !moreBtn.contains(e.target)) {
+                closeMobileDrawer();
+            }
+        });
+
+        // Close sidebar on Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeSidebar();
+                closeMobileDrawer();
+            }
+        });
+
+        // Close mobile drawer on resize to desktop
+        var resizeTimer;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function() {
+                if (window.innerWidth >= 1024) {
+                    closeSidebar();
+                }
+                if (window.innerWidth >= 768) {
+                    closeMobileDrawer();
+                }
+            }, 100);
+        });
+    </script>
+</body>
+</html>

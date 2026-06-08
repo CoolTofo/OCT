@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/static/logo.png" type="image/png">
+    <title>十月文化 | SD2.0 提示词优化</title>
+    <script>
+        (function(){
+            try {
+                var theme = localStorage.getItem('studio_theme') || localStorage.getItem('canvas_theme') || 'light';
+                if(theme === 'dark') {
+                    document.documentElement.classList.add('studio-theme-dark');
+                    document.documentElement.classList.add('theme-dark');
+                }
+            } catch(e) {}
+        })();
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/static/theme.js?v=20260516-theme-sync"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;800;900&display=swap');
+        :root {
+            --ink:#102033;
+            --muted:#6f7d8f;
+            --soft:#f7f9fc;
+            --panel:#ffffff;
+            --line:#e5ebf3;
+            --field:#f8fafc;
+            --accent:#0f766e;
+            --accent-2:#2563eb;
+            --warn:#b45309;
+            --shadow:0 18px 56px rgba(15,23,42,.08);
+            --ease:cubic-bezier(.4,0,.2,1);
+        }
+        * { box-sizing:border-box; }
+        body {
+            min-height:100vh;
+            margin:0;
+            background:linear-gradient(180deg,#ffffff 0%,#f7f9fc 52%,#edf3f8 100%);
+            color:var(--ink);
+            font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+            -webkit-font-smoothing:antialiased;
+        }
+        button,input,select,textarea { font:inherit; }
+        button { cursor:pointer; }
+        .page { max-width:1340px; margin:0 auto; padding:42px 38px 72px; }
+        .head { display:flex; align-items:flex-end; justify-content:space-between; gap:24px; margin-bottom:24px; }
+        .eyebrow { display:inline-flex; align-items:center; gap:8px; height:28px; padding:0 11px; border:1px solid var(--line); border-radius:999px; background:rgba(255,255,255,.78); color:#64748b; font-size:10px; font-weight:900; letter-spacing:.18em; text-transform:uppercase; }
+        .title { margin:12px 0 0; font-size:42px; line-height:.98; font-weight:900; letter-spacing:-.03em; }
+        .subtitle { margin:10px 0 0; max-width:780px; color:#607087; font-size:13px; font-weight:750; line-height:1.85; }
+        .status { display:flex; align-items:center; gap:8px; min-height:34px; padding:0 12px; border-radius:999px; border:1px solid var(--line); background:#fff; color:#64748b; font-size:11px; font-weight:900; box-shadow:0 10px 28px rgba(15,23,42,.04); white-space:nowrap; }
+        .layout { display:grid; grid-template-columns:minmax(0,1.02fr) minmax(430px,.72fr); gap:24px; align-items:start; }
+        .stack { display:flex; flex-direction:column; gap:16px; min-width:0; }
+        .panel { background:rgba(255,255,255,.92); border:1px solid var(--line); border-radius:26px; box-shadow:0 2px 18px rgba(15,23,42,.03); backdrop-filter:blur(18px); padding:20px; min-width:0; }
+        .section-head { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; margin-bottom:14px; }
+        .section-title { display:flex; align-items:center; gap:8px; color:#55657a; font-size:11px; font-weight:950; letter-spacing:.12em; text-transform:uppercase; }
+        .hint { color:#8a98aa; font-size:11px; font-weight:750; line-height:1.7; }
+        .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+        .field { display:flex; flex-direction:column; gap:7px; min-width:0; }
+        .field.full { grid-column:1/-1; }
+        .label { display:flex; align-items:center; justify-content:space-between; gap:8px; color:#64748b; font-size:11px; font-weight:950; }
+        .control { width:100%; min-height:44px; border:1px solid #e3eaf3; border-radius:16px; background:var(--field); color:#111827; outline:none; padding:0 13px; font-size:12px; font-weight:820; transition:all .18s ease; }
+        textarea.control { min-height:96px; padding:12px 13px; resize:vertical; line-height:1.65; font-weight:700; }
+        textarea.tall { min-height:154px; }
+        .control:focus { border-color:#0f766e; background:#fff; box-shadow:0 0 0 3px rgba(15,118,110,.09); }
+        .segmented { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:6px; padding:4px; border:1px solid var(--line); border-radius:18px; background:#f8fafc; }
+        .segmented button { min-height:38px; border-radius:14px; color:#64748b; font-size:11px; font-weight:950; display:flex; align-items:center; justify-content:center; gap:6px; transition:all .18s var(--ease); }
+        .segmented button.active { background:#fff; color:#0f766e; box-shadow:0 6px 18px rgba(15,23,42,.08); }
+        .chips { display:flex; flex-wrap:wrap; gap:8px; }
+        .chip { min-height:34px; padding:0 12px; border-radius:999px; border:1px solid var(--line); background:#fff; color:#64748b; font-size:11px; font-weight:900; display:inline-flex; align-items:center; gap:6px; transition:all .18s var(--ease); }
+        .chip:hover { border-color:#0f766e; color:#0f766e; transform:translateY(-1px); }
+        .actions { display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:10px; align-items:stretch; }
+        .btn { min-height:54px; border-radius:20px; border:1px solid #0f766e; background:#0f766e; color:#fff; padding:0 18px; font-size:12px; font-weight:950; letter-spacing:.12em; text-transform:uppercase; display:flex; align-items:center; justify-content:center; gap:9px; transition:all .2s var(--ease); }
+        .btn:hover:not(:disabled) { background:#0b5f59; transform:translateY(-1px); box-shadow:0 16px 34px rgba(15,118,110,.18); }
+        .btn:disabled { opacity:.52; cursor:not-allowed; transform:none; box-shadow:none; }
+        .ghost { min-height:54px; border-radius:20px; border:1px solid var(--line); background:#fff; color:#64748b; padding:0 16px; font-size:11px; font-weight:950; display:flex; align-items:center; justify-content:center; gap:8px; transition:all .18s var(--ease); }
+        .ghost:hover { color:#111827; border-color:#cbd5e1; background:#f8fafc; }
+        .result-panel { position:sticky; top:24px; min-height:calc(100vh - 84px); display:flex; flex-direction:column; }
+        .result-box { flex:1; min-height:520px; border:1px solid #dfe7f1; border-radius:24px; background:linear-gradient(180deg,#fff,#fbfdff); padding:18px; overflow:auto; white-space:pre-wrap; word-break:break-word; color:#172033; font-size:13px; line-height:1.8; font-weight:720; }
+        .result-empty { height:100%; min-height:460px; display:flex; align-items:center; justify-content:center; text-align:center; color:#b5c1d0; }
+        .toolbar { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px; }
+        .mini { display:inline-flex; align-items:center; gap:7px; color:#64748b; font-size:10px; font-weight:950; letter-spacing:.1em; text-transform:uppercase; }
+        .note { border:1px solid #d9efe8; background:#f2fbf7; color:#276749; border-radius:18px; padding:12px 14px; font-size:11px; font-weight:800; line-height:1.75; }
+        .warning { border-color:#f4dfb7; background:#fffbeb; color:#92400e; }
+        .loading { animation:spin 1s linear infinite; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+        .studio-theme-dark body,.theme-dark body { background:#0b1020; color:#e5e7eb; }
+        .studio-theme-dark .panel,.studio-theme-dark .status,.studio-theme-dark .ghost,.studio-theme-dark .result-box,.studio-theme-dark .segmented button.active,.studio-theme-dark .chip { background:#111827; border-color:#253047; color:#e5e7eb; }
+        .studio-theme-dark .control,.studio-theme-dark .segmented { background:#0f172a; border-color:#253047; color:#e5e7eb; }
+        .studio-theme-dark .result-box { background:#0f172a; }
+        .studio-theme-dark .note { background:#102820; border-color:#1f6b55; color:#a7f3d0; }
+        .studio-theme-dark .warning { background:#2b2110; border-color:#7c4d12; color:#fcd99b; }
+        @media (max-width:1120px) {
+            .layout { grid-template-columns:1fr; }
+            .result-panel { position:static; min-height:auto; }
+            .result-box { min-height:420px; }
+        }
+        @media (max-width:720px) {
+            .page { padding:24px 16px 54px; }
+            .head { display:block; }
+            .title { font-size:34px; }
+            .grid,.actions,.segmented { grid-template-columns:1fr; }
+            .panel { padding:16px; border-radius:22px; }
+            .result-box { min-height:340px; }
+            .status { margin-top:14px; display:inline-flex; }
+        }
+    </style>
+    <link rel="stylesheet" href="/static/theme.css?v=20260510-studio-pages-blue-dark10">
+    <link rel="stylesheet" href="/static/oct-ui.css?v=20260528-brand-align">
+</head>
+<body>
+    <div class="page">
+        <header class="head">
+            <div>
+                <div class="eyebrow"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i><span>Seedance 2.0</span></div>
+                <h1 class="title">SD2.0 提示词优化</h1>
+                <p class="subtitle">按 Seedance 2.0 提示词指南整理主体、素材引用、动作细节、分镜、运镜和约束词，输出可直接复制到视频生成里的中文提示词。</p>
+            </div>
+            <div id="status" class="status"><i data-lucide="loader-2" class="w-3.5 h-3.5 loading"></i><span>正在读取模型配置...</span></div>
+        </header>
+
+        <main class="layout">
+            <div class="stack">
+                <section class="panel">
+                    <div class="section-head">
+                        <div>
+                            <div class="section-title"><i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i><span>优化设置</span></div>
+                            <div class="hint mt-1">选择要使用的对话模型和 Seedance 任务类型。</div>
+                        </div>
+                        <button class="ghost" type="button" onclick="loadConfig()"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i><span>刷新</span></button>
+                    </div>
+                    <div class="grid">
+                        <label class="field">
+                            <span class="label"><span>对话平台</span><span>API 设置</span></span>
+                            <select id="providerSelect" class="control" onchange="setProvider(this.value)"></select>
+                        </label>
+                        <label class="field">
+                            <span class="label"><span>模型</span><span>LLM</span></span>
+                            <select id="modelSelect" class="control" onchange="setModel(this.value)"></select>
+                        </label>
+                        <div class="field full">
+                            <span class="label"><span>任务类型</span><span id="taskHint">多模态参考</span></span>
+                            <div class="segmented" id="taskTabs">
+                                <button class="active" type="button" data-task="reference" onclick="setTask('reference')"><i data-lucide="image" class="w-3.5 h-3.5"></i><span>多模态参考</span></button>
+                                <button type="button" data-task="edit" onclick="setTask('edit')"><i data-lucide="wand-2" class="w-3.5 h-3.5"></i><span>编辑视频</span></button>
+                                <button type="button" data-task="extend" onclick="setTask('extend')"><i data-lucide="step-forward" class="w-3.5 h-3.5"></i><span>延长视频</span></button>
+                                <button type="button" data-task="combo" onclick="setTask('combo')"><i data-lucide="combine" class="w-3.5 h-3.5"></i><span>组合任务</span></button>
+                                <button type="button" data-task="flowframe" onclick="setTask('flowframe')"><i data-lucide="film" class="w-3.5 h-3.5"></i><span>流帧心法</span></button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <div class="section-head">
+                        <div>
+                            <div class="section-title"><i data-lucide="file-input" class="w-3.5 h-3.5"></i><span>创作输入</span></div>
+                            <div class="hint mt-1">素材名请用图片1、视频1、音频1这类编号。</div>
+                        </div>
+                    </div>
+                    <div class="grid">
+                        <label class="field full">
+                            <span class="label"><span>原始想法</span><span>必填</span></span>
+                            <textarea id="ideaInput" class="control tall" placeholder="例如：图片1里的女生在雨夜便利店门口等人，想做成电影感短片，情绪有点失落但最后释然。"></textarea>
+                        </label>
+                        <label class="field full">
+                            <span class="label"><span>素材说明</span><span>图片 / 视频 / 音频</span></span>
+                            <textarea id="materialInput" class="control" placeholder="图片1：女生半身照，白色衬衫、短发、手里拿着透明伞。视频1：雨夜街头慢推镜头。"></textarea>
+                        </label>
+                        <label class="field full">
+                            <span class="label"><span>主体定义</span><span>可选</span></span>
+                            <textarea id="subjectInput" class="control" placeholder="将图片1中穿白色衬衫、短发、手拿透明伞的女生定义为主体1。"></textarea>
+                        </label>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <div class="section-head">
+                        <div>
+                            <div class="section-title"><i data-lucide="clapperboard" class="w-3.5 h-3.5"></i><span>画面结构</span></div>
+                            <div class="hint mt-1">把动作、场景、镜头和风格拆开填，优化结果会自动合并。</div>
+                        </div>
+                    </div>
+                    <div class="grid">
+                        <label class="field">
+                            <span class="label"><span>分镜数量</span><span>镜头</span></span>
+                            <select id="shotCount" class="control">
+                                <option value="auto" selected>自动判断</option>
+                                <option value="1">1 个镜头</option>
+                                <option value="2">2 个镜头</option>
+                                <option value="3">3 个镜头</option>
+                                <option value="4">4 个镜头</option>
+                            </select>
+                        </label>
+                        <label class="field">
+                            <span class="label"><span>视频比例</span><span>可选</span></span>
+                            <select id="aspectInput" class="control">
+                                <option value="">不指定</option>
+                                <option>16:9 横版</option>
+                                <option>9:16 竖版</option>
+                                <option>1:1 方形</option>
+                                <option>4:3 横版</option>
+                                <option>3:4 竖版</option>
+                            </select>
+                        </label>
+                        <label class="field full">
+                            <span class="label"><span>动作与情绪</span><span>肢体 / 幅度 / 速度 / 过渡</span></span>
+                            <textarea id="actionInput" class="control" placeholder="动作要写到手、头、肩、腿等部位，例如缓慢抬手、微微低头、从停顿自然过渡到转身。"></textarea>
+                        </label>
+                        <label class="field">
+                            <span class="label"><span>场景环境</span><span>地点 / 时间 / 氛围</span></span>
+                            <textarea id="sceneInput" class="control" placeholder="雨夜便利店门口，玻璃门反射霓虹灯，地面有积水。"></textarea>
+                        </label>
+                        <label class="field">
+                            <span class="label"><span>镜头运镜</span><span>每镜头一种</span></span>
+                            <textarea id="cameraInput" class="control" placeholder="中景固定机位、缓慢推近、特写切换、平稳横移。"></textarea>
+                        </label>
+                        <label class="field">
+                            <span class="label"><span>光影风格</span><span>质感</span></span>
+                            <textarea id="styleInput" class="control" placeholder="电影纪实风，冷暖对比，雨夜霓虹，光影柔和，色彩自然。"></textarea>
+                        </label>
+                        <label class="field">
+                            <span class="label"><span>约束词</span><span>稳定性</span></span>
+                            <textarea id="constraintInput" class="control" placeholder="保持人物面部稳定，动作自然流畅，无字幕，无水印，不生成 Logo，无畸形肢体。"></textarea>
+                        </label>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <div class="section-head">
+                        <div>
+                            <div class="section-title"><i data-lucide="bookmark-plus" class="w-3.5 h-3.5"></i><span>快速模板</span></div>
+                            <div class="hint mt-1">模板只填入结构，不会覆盖已写内容。</div>
+                        </div>
+                    </div>
+                    <div class="chips">
+                        <button class="chip" type="button" onclick="applyPreset('story')"><i data-lucide="theater" class="w-3.5 h-3.5"></i><span>情绪短片</span></button>
+                        <button class="chip" type="button" onclick="applyPreset('product')"><i data-lucide="box" class="w-3.5 h-3.5"></i><span>产品广告</span></button>
+                        <button class="chip" type="button" onclick="applyPreset('fashion')"><i data-lucide="shirt" class="w-3.5 h-3.5"></i><span>人物写真</span></button>
+                        <button class="chip" type="button" onclick="applyPreset('edit')"><i data-lucide="scissors" class="w-3.5 h-3.5"></i><span>局部编辑</span></button>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <div class="note warning" id="taskRule">多模态参考任务可写“参考视频1中的运镜/动作/风格”。如果切到编辑或延长任务，优化器会避免把视频素材写成“参考视频”，降低任务识别错误的概率。</div>
+                    <div class="actions mt-4">
+                        <button id="optimizeBtn" class="btn" type="button" onclick="optimizePrompt()"><i data-lucide="sparkles" class="w-4 h-4"></i><span>优化提示词</span></button>
+                        <button class="ghost" type="button" onclick="copyResult()"><i data-lucide="copy" class="w-3.5 h-3.5"></i><span>复制</span></button>
+                        <button class="ghost" type="button" onclick="clearForm()"><i data-lucide="eraser" class="w-3.5 h-3.5"></i><span>清空</span></button>
+                    </div>
+                </section>
+            </div>
+
+            <aside class="panel result-panel">
+                <div class="toolbar">
+                    <div class="mini"><i data-lucide="scroll-text" class="w-3.5 h-3.5"></i><span>优化结果</span></div>
+                    <button class="ghost" type="button" onclick="copyResult()"><i data-lucide="copy" class="w-3.5 h-3.5"></i><span>复制结果</span></button>
+                </div>
+                <div id="resultBox" class="result-box">
+                    <div class="result-empty">
+                        <div>
+                            <i data-lucide="wand-sparkles" class="w-10 h-10 mx-auto mb-3"></i>
+                            <div class="text-[12px] font-black">等待生成 Seedance 2.0 提示词</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="note mt-4">隐私提示：本页面只处理文字提示词。不要把保密视频内容、客户真实身份、未脱敏合同信息写进提示词。</div>
+            </aside>
+        </main>
+    </div>
+
+    <script>
+        if(window.lucide) lucide.createIcons();
+
+        const DEFAULT_CONFIG = { chat_model:'gpt-5.5', chat_models:['gpt-5.5'], ms_chat_models:[], api_providers:[] };
+        const TASK_LABELS = {
+            reference:'多模态参考',
+            edit:'编辑视频',
+            extend:'延长视频',
+            combo:'组合任务',
+            flowframe:'流帧心法'
+        };
+        let config = {...DEFAULT_CONFIG};
+        let apiProviders = [];
+        let provider = localStorage.getItem('sd2_prompt_provider') || 'comfly';
+        let activeModel = localStorage.getItem('sd2_prompt_model') || '';
+        let currentTask = localStorage.getItem('sd2_prompt_task') || 'reference';
+        if(!TASK_LABELS[currentTask]) currentTask = 'reference';
+
+        function escapeHtml(str){
+            return String(str ?? '').replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+        }
+        function headers(){
+            let h = {'Content-Type':'application/json'};
+            try {
+                const userId = localStorage.getItem('gpt_chat_browser_user') || localStorage.getItem('studio_user_id') || 'sd2-prompt-user';
+                h['X-User-Id'] = userId;
+            } catch(e) {}
+            return h;
+        }
+        function uniqueModels(list){
+            const seen = new Set();
+            return (list || []).map(item => String(item || '').trim()).filter(item => item && !seen.has(item) && seen.add(item));
+        }
+        function chatProviders(){
+            const list = (apiProviders || []).filter(p => p.enabled !== false && (p.chat_models || []).length);
+            if(config.ms_chat_models?.length && !list.some(p => p.id === 'modelscope')) {
+                list.push({id:'modelscope', name:'ModelScope', chat_models:config.ms_chat_models});
+            }
+            return list.length ? list : [{id:'comfly', name:'API', chat_models:[config.chat_model || 'gpt-5.5']}];
+        }
+        function providerById(id){
+            const list = chatProviders();
+            return list.find(p => p.id === id) || list[0];
+        }
+        function modelList(){
+            return uniqueModels(providerById(provider)?.chat_models || [config.chat_model || 'gpt-5.5']);
+        }
+        function setStatus(text, icon='check-circle-2', spinning=false){
+            const el = document.getElementById('status');
+            el.innerHTML = `<i data-lucide="${icon}" class="w-3.5 h-3.5 ${spinning ? 'loading' : ''}"></i><span>${escapeHtml(text)}</span>`;
+            if(window.lucide) lucide.createIcons();
+        }
+        function renderProviderControls(){
+            const providers = chatProviders();
+            if(!providers.some(p => p.id === provider)) provider = providers[0]?.id || 'comfly';
+            const models = modelList();
+            if(!models.includes(activeModel)) activeModel = models[0] || config.chat_model || 'gpt-5.5';
+            document.getElementById('providerSelect').innerHTML = providers.map(p => `<option value="${escapeHtml(p.id)}" ${p.id === provider ? 'selected' : ''}>${escapeHtml(p.name || p.id)}</option>`).join('');
+            document.getElementById('modelSelect').innerHTML = models.map(m => `<option value="${escapeHtml(m)}" ${m === activeModel ? 'selected' : ''}>${escapeHtml(m)}</option>`).join('');
+            localStorage.setItem('sd2_prompt_provider', provider);
+            localStorage.setItem('sd2_prompt_model', activeModel);
+        }
+        async function loadConfig(){
+            setStatus('正在读取模型配置...', 'loader-2', true);
+            try {
+                const data = await fetch('/api/config').then(r => {
+                    if(!r.ok) throw new Error('读取配置失败');
+                    return r.json();
+                });
+                config = {...DEFAULT_CONFIG, ...data};
+                apiProviders = Array.isArray(config.api_providers) ? config.api_providers : [];
+                config.chat_model = (config.chat_models || []).find(m => m === 'gpt-5.5') || config.chat_model || 'gpt-5.5';
+                renderProviderControls();
+                setStatus(`已连接 ${providerById(provider)?.name || provider} / ${activeModel}`, 'check-circle-2');
+            } catch(err) {
+                renderProviderControls();
+                setStatus('配置读取失败，使用默认模型', 'alert-circle');
+            }
+        }
+        function setProvider(value){
+            provider = value;
+            activeModel = modelList()[0] || activeModel;
+            renderProviderControls();
+            setStatus(`已选择 ${providerById(provider)?.name || provider} / ${activeModel}`, 'check-circle-2');
+        }
+        function setModel(value){
+            activeModel = value;
+            localStorage.setItem('sd2_prompt_model', activeModel);
+            setStatus(`已选择 ${providerById(provider)?.name || provider} / ${activeModel}`, 'check-circle-2');
+        }
+        function setTask(task){
+            currentTask = task;
+            localStorage.setItem('sd2_prompt_task', currentTask);
+            document.querySelectorAll('#taskTabs button').forEach(btn => btn.classList.toggle('active', btn.dataset.task === task));
+            document.getElementById('taskHint').textContent = TASK_LABELS[task] || task;
+            const rule = document.getElementById('taskRule');
+            const rules = {
+                reference:'多模态参考任务可写“参考视频1中的运镜/动作/风格”，也可写“参考图片1中的主体”。',
+                edit:'编辑视频任务应直接写“对视频1进行编辑”，不要写“参考视频1”，未说明的区域默认保持不变。',
+                extend:'延长视频任务应直接写“延长视频1的前/后段”，不要写“参考视频1”，并延续原视频人物、环境和镜头节奏。',
+                combo:'组合任务可同时引用素材与编辑素材，但要明确哪个素材用于参考、哪个素材被编辑。',
+                flowframe:'流帧心法会按“模式声明 / 素材映射 / 时间码节拍 / 负面约束 / 生成设置”整理，自动判断纯文本、首尾帧或全素材参考模式。'
+            };
+            rule.textContent = rules[task] || rules.reference;
+        }
+        function value(id){
+            return (document.getElementById(id)?.value || '').trim();
+        }
+        function fillIfEmpty(id, text){
+            const el = document.getElementById(id);
+            if(el && !el.value.trim()) el.value = text;
+        }
+        function applyPreset(kind){
+            const presets = {
+                story:{
+                    idea:'主角经历一个小情绪转折，画面从克制低落过渡到释然，结尾留有余韵。',
+                    action:'主角先微微低头，肩膀放松但带一点僵硬，手指轻轻攥住衣角；随后缓慢抬头，呼吸变平稳，嘴角出现很轻的笑意。',
+                    scene:'城市夜晚的真实生活场景，有可见环境细节和自然光影。',
+                    camera:'镜头1中景固定机位，镜头2缓慢推近，镜头3切到近景后轻微拉远。',
+                    style:'电影纪实风，色彩自然，光影柔和，细节丰富。',
+                    constraints:'人物面部稳定，动作自然流畅，无字幕，无水印，不生成Logo。'
+                },
+                product:{
+                    idea:'围绕产品展示一个干净高级的短视频，强调材质、功能和使用场景。',
+                    action:'产品被轻轻拿起、缓慢旋转，手部动作稳定，展示关键细节后自然放回桌面。',
+                    scene:'整洁桌面或真实使用场景，背景有层次但不喧宾夺主。',
+                    camera:'微距特写、平稳横移、缓慢推近，每个镜头只使用一种运镜。',
+                    style:'现代商业广告质感，高清，材质纹理清晰，光影干净。',
+                    constraints:'产品外观保持一致，不变形，不出现多余文字、字幕、水印和Logo。'
+                },
+                fashion:{
+                    idea:'人物在真实环境中完成一组自然写真动作，突出服装轮廓和人物气质。',
+                    action:'主体缓慢转身，手臂自然下垂后轻轻整理衣领，眼神从侧方转向镜头，动作连贯柔和。',
+                    scene:'简洁街区、室内窗边或摄影棚场景，背景干净，有空间纵深。',
+                    camera:'中景平稳跟拍，切到半身特写，再以全景定格。',
+                    style:'高级时装影像，光影柔和，肤色自然，画面高清。',
+                    constraints:'服装结构稳定，面部不变形，手指自然，无字幕，无水印。'
+                },
+                edit:{
+                    idea:'对视频1进行局部修改，只改变指定元素，其余人物、构图、动作、镜头节奏保持不变。',
+                    action:'保持视频1中的主体动作和镜头运动不变，只让新增或修改元素自然融入原画面。',
+                    scene:'沿用视频1原有场景、光影、透视和空间关系。',
+                    camera:'保持视频1原有运镜和剪辑节奏。',
+                    style:'与视频1原始画面风格一致。',
+                    constraints:'未提及区域保持不变，不生成字幕、水印和Logo。'
+                }
+            };
+            const p = presets[kind];
+            if(!p) return;
+            fillIfEmpty('ideaInput', p.idea);
+            fillIfEmpty('actionInput', p.action);
+            fillIfEmpty('sceneInput', p.scene);
+            fillIfEmpty('cameraInput', p.camera);
+            fillIfEmpty('styleInput', p.style);
+            fillIfEmpty('constraintInput', p.constraints);
+        }
+        function clearForm(){
+            ['ideaInput','materialInput','subjectInput','actionInput','sceneInput','cameraInput','styleInput','constraintInput'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.value = '';
+            });
+            document.getElementById('shotCount').value = 'auto';
+            document.getElementById('aspectInput').value = '';
+            document.getElementById('resultBox').innerHTML = '<div class="result-empty"><div><i data-lucide="wand-sparkles" class="w-10 h-10 mx-auto mb-3"></i><div class="text-[12px] font-black">等待生成 Seedance 2.0 提示词</div></div></div>';
+            if(window.lucide) lucide.createIcons();
+        }
+        function buildUserBrief(){
+            return [
+                `任务类型：${TASK_LABELS[currentTask] || currentTask}`,
+                `原始想法：${value('ideaInput') || '未填写'}`,
+                `素材说明：${value('materialInput') || '未填写'}`,
+                `主体定义：${value('subjectInput') || '未填写'}`,
+                `分镜数量：${value('shotCount') || '自动判断'}`,
+                `视频比例：${value('aspectInput') || '不指定'}`,
+                `动作与情绪：${value('actionInput') || '未填写'}`,
+                `场景环境：${value('sceneInput') || '未填写'}`,
+                `镜头运镜：${value('cameraInput') || '未填写'}`,
+                `光影风格：${value('styleInput') || '未填写'}`,
+                `约束词：${value('constraintInput') || '未填写'}`
+            ].join('\n');
+        }
+        function flowFrameSkillPrompt(){
+            return `
+
+流帧心法 V03 模式额外要求：
+1. 先自动判断并声明模式：纯文本生成、首尾帧或全素材参考；编辑、延展、角色替换、节拍同步和多段拼接都归入全素材参考并写清素材角色。
+2. 必须输出五段：模式、素材映射、正式提示词、负面约束、生成设置。
+3. 素材映射使用 @image1/@video1/@audio1；没有素材时写“- 无”。每个素材必须说明用途，如首帧、结束画面、角色身份、镜头语言、节奏参考、产品身份锚点。
+4. 正式提示词用时间码节拍组织，4-15 秒内按 0-3秒、3-7秒、7-10秒 或等比例分段；每段只放一个主要动作，并写清动作、镜头、转场、光照连续性。
+5. 对延展写“延展 @video1 X 秒”，明确新增片段长度、连续性、交接帧；对角色替换写明 @video1 保留运动/镜头，@image1 提供身份；对节拍同步写明 @audio1 的节奏作用；对一镜到底写明无剪辑和航点顺序。
+6. 对短剧/对白，必须逐字保留用户原台词，不改写、不省略、不调序；所有台词放入中文引号「」中，并与视觉动作、音效分层。
+7. 保持 IP 安全：不要使用真实品牌、系列名、角色名或可识别标志；改成原创昵称与通用美学描述，并在负面约束中排除可推断的 IP/品牌/Logo。
+8. 输出干净可控：无水印、无 logo、无字幕、无屏幕文字、无畸形肢体、身份稳定、物理运动合理、光照连续。`;
+        }
+        function outputRequirement(){
+            if(currentTask === 'flowframe'){
+                return `输出要求：
+流帧心法模式只输出可直接复制使用的结构化提示词，必须包含“模式：”“素材映射：”“正式提示词：”“负面约束：”“生成设置：”五段。不要输出解释、检查清单、Markdown、代码块或额外说明。`;
+            }
+            return `输出要求：
+只输出最终可直接复制使用的完整中文提示词。不要输出标题、说明、检查要点、编号列表、Markdown、引号或任何额外内容。`;
+        }
+        function systemPrompt(){
+            return `你是 Seedance 2.0 视频生成提示词优化师。请根据用户输入输出可直接用于 Seedance 2.0 的中文提示词。
+
+必须遵循 Seedance 2.0 提示词指南：
+1. 基础结构使用“精准主体 + 动作细节 + 场景环境 + 光影色调 + 镜头运镜 + 视觉风格 + 画质 + 约束条件”。
+2. 多模态参考任务可写“参考图片N中的主体”“参考视频N中的动作/运镜/风格/音效”“参考音频N中的音色”。
+3. 编辑视频和延长视频任务必须直接使用“视频N”，不要写“参考视频N”，避免模型把任务误判为参考生成；编辑任务未提及部分要写明保持不变。
+4. 涉及多个素材或主体时，先明确主体定义。主体定义用 2-3 个稳定静态特征；后续持续使用同一主体标签，避免代词混乱。
+5. 复杂视频优先使用“镜头1 / 镜头2 / 镜头3”分镜。每个镜头包含运镜或切换方式、主体动作与表情、位置或空间变化、音频信息。不要强行写精确秒数，除非用户明确要求。
+6. 动作描述要细到手、头部、肩背、腿等肢体部位，并补充幅度、速度、力度和动作过渡；优先缓慢、轻柔、连续的小动作，避免不必要的大幅剧烈动作。
+7. 情绪要外化为动作细节，不要只写“悲伤、愤怒、开心”等抽象词。
+8. 运镜每个镜头尽量只指定一种方式，例如固定机位、缓慢推近、平稳横移、中景、特写、全景。
+9. 收尾添加画质、风格、稳定性和约束词，例如高清、细节丰富、电影质感、色彩自然、光影柔和、无字幕、无水印、不要生成Logo、人物面部稳定、动作自然流畅。
+
+${currentTask === 'flowframe' ? flowFrameSkillPrompt() : ''}
+
+${outputRequirement()}`;
+        }
+        function cleanOptimizedPrompt(text){
+            let value = String(text || '').trim();
+            value = value.replace(/^```(?:text|markdown|md)?\s*/i, '').replace(/```$/i, '').trim();
+            value = value.replace(/^【优化提示词】\s*/i, '').trim();
+            value = value.replace(/^优化提示词[:：]\s*/i, '').trim();
+            const cutMarkers = ['【检查要点】', '检查要点：', '检查要点:', '【说明】', '说明：', '说明:'];
+            for(const marker of cutMarkers){
+                const index = value.indexOf(marker);
+                if(index >= 0) value = value.slice(0, index).trim();
+            }
+            return value;
+        }
+        async function optimizePrompt(){
+            const idea = value('ideaInput');
+            if(!idea) {
+                alert('请先填写原始想法。');
+                return;
+            }
+            const btn = document.getElementById('optimizeBtn');
+            const box = document.getElementById('resultBox');
+            btn.disabled = true;
+            btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 loading"></i><span>优化中</span>';
+            box.textContent = currentTask === 'flowframe' ? '正在按流帧心法 V03 优化...' : '正在根据 Seedance 2.0 提示词指南优化...';
+            setStatus('正在调用提示词模型...', 'loader-2', true);
+            if(window.lucide) lucide.createIcons();
+            try {
+                const currentMsModel = provider === 'modelscope' ? activeModel : '';
+                const res = await fetch('/api/canvas-llm', {
+                    method:'POST',
+                    headers:headers(),
+                    body:JSON.stringify({
+                        provider,
+                        model: provider === 'modelscope' ? currentMsModel : activeModel,
+                        ms_model: currentMsModel,
+                        system_prompt: systemPrompt(),
+                        message: `请优化以下 Seedance 2.0 视频生成提示词输入：\n\n${buildUserBrief()}`
+                    })
+                });
+                const data = await res.json().catch(() => ({}));
+                if(!res.ok) throw new Error(data.detail || '提示词优化失败');
+                box.textContent = cleanOptimizedPrompt(data.text) || '模型没有返回内容。';
+                setStatus('提示词已生成', 'check-circle-2');
+            } catch(err) {
+                box.textContent = `优化失败：${err.message || err}`;
+                setStatus('提示词优化失败', 'alert-circle');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i data-lucide="sparkles" class="w-4 h-4"></i><span>优化提示词</span>';
+                if(window.lucide) lucide.createIcons();
+            }
+        }
+        async function copyResult(){
+            const text = document.getElementById('resultBox').innerText.trim();
+            if(!text || text.includes('等待生成')) {
+                alert('还没有可复制的结果。');
+                return;
+            }
+            try {
+                await navigator.clipboard.writeText(text);
+                setStatus('结果已复制', 'check-circle-2');
+            } catch(e) {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                ta.remove();
+                setStatus('结果已复制', 'check-circle-2');
+            }
+        }
+        window.addEventListener('message', event => {
+            if(event.data?.type === 'studio-theme') {
+                const dark = event.data.theme === 'dark';
+                document.documentElement.classList.toggle('studio-theme-dark', dark);
+                document.documentElement.classList.toggle('theme-dark', dark);
+                document.body.classList.toggle('theme-dark', dark);
+            }
+        });
+        try {
+            const apiChannel = new BroadcastChannel('studio-api');
+            apiChannel.onmessage = async (e) => {
+                if(e.data?.type === 'providers-changed') await loadConfig();
+            };
+        } catch(e) {}
+
+        setTask(currentTask);
+        loadConfig();
+    </script>
+</body>
+</html>
+

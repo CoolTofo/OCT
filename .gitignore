@@ -1,0 +1,35 @@
+# Runtime secrets and local state
+API/.env
+history.json
+global_config.json
+
+# Generated assets and user data
+assets/input/*
+!assets/input/.gitkeep
+assets/output/*
+!assets/output/.gitkeep
+output/*
+!output/.gitkeep
+data/canvases/*
+!data/canvases/.gitkeep
+data/conversations/*
+!data/conversations/.gitkeep
+
+# Caches and logs
+__pycache__/
+*.pyc
+*.pyo
+*.log
+.workbuddy/
+
+# Bundled runtime and offline dependency cache
+python/
+python.zip
+packages/
+_split_files/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

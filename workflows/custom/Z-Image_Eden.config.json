@@ -1,0 +1,32 @@
+{
+  "title": "custom/Z-Image_Eden",
+  "fields": [
+    {
+      "id": "23.text",
+      "node": "23",
+      "input": "text",
+      "name": "CLIP文本编码器 / text",
+      "nodeTitle": "CLIP文本编码器",
+      "classType": "CLIPTextEncode",
+      "type": "textarea",
+      "default": "",
+      "options": [],
+      "random_enabled": false,
+      "locked": true
+    },
+    {
+      "id": "89.rgthree_comparer",
+      "node": "89",
+      "input": "rgthree_comparer",
+      "name": "图像对比 / rgthree_comparer",
+      "nodeTitle": "图像对比",
+      "classType": "Image Comparer (rgthree)",
+      "type": "image",
+      "default": "",
+      "options": [],
+      "random_enabled": false,
+      "locked": true
+    }
+  ],
+  "mini_cards": {}
+}

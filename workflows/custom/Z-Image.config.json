@@ -1,0 +1,19 @@
+{
+  "title": "custom/Z-Image",
+  "fields": [
+    {
+      "id": "23.text",
+      "node": "23",
+      "input": "text",
+      "name": "CLIP文本编码器 / text",
+      "nodeTitle": "CLIP文本编码器",
+      "classType": "CLIPTextEncode",
+      "type": "textarea",
+      "default": "",
+      "options": [],
+      "random_enabled": false,
+      "locked": true
+    }
+  ],
+  "mini_cards": {}
+}

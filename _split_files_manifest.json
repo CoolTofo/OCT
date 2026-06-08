@@ -1,0 +1,76 @@
+[
+  {
+    "target": "python/Lib/site-packages/imageio_ffmpeg/binaries/ffmpeg-win-x86_64-v7.1.exe",
+    "bytes": 87638016,
+    "sha256": "2CE797A0F88D7F067180338FB227F7B1928EA727BD9A4D7A1D022F7C52AF71A3",
+    "parts": [
+      {
+        "path": "_split_files/python/Lib/site-packages/imageio_ffmpeg/binaries/ffmpeg-win-x86_64-v7.1.exe.part001",
+        "bytes": 8388608
+      },
+      {
+        "path": "_split_files/python/Lib/site-packages/imageio_ffmpeg/binaries/ffmpeg-win-x86_64-v7.1.exe.part002",
+        "bytes": 8388608
+      },
+      {
+        "path": "_split_files/python/Lib/site-packages/imageio_ffmpeg/binaries/ffmpeg-win-x86_64-v7.1.exe.part003",
+        "bytes": 8388608
+      },
+      {
+        "path": "_split_files/python/Lib/site-packages/imageio_ffmpeg/binaries/ffmpeg-win-x86_64-v7.1.exe.part004",
+        "bytes": 8388608
+      },
+      {
+        "path": "_split_files/python/Lib/site-packages/imageio_ffmpeg/binaries/ffmpeg-win-x86_64-v7.1.exe.part005",
+        "bytes": 8388608
+      },
+      {
+        "path": "_split_files/python/Lib/site-packages/imageio_ffmpeg/binaries/ffmpeg-win-x86_64-v7.1.exe.part006",
+        "bytes": 8388608
+      },
+      {
+        "path": "_split_files/python/Lib/site-packages/imageio_ffmpeg/binaries/ffmpeg-win-x86_64-v7.1.exe.part007",
+        "bytes": 8388608
+      },
+      {
+        "path": "_split_files/python/Lib/site-packages/imageio_ffmpeg/binaries/ffmpeg-win-x86_64-v7.1.exe.part008",
+        "bytes": 8388608
+      },
+      {
+        "path": "_split_files/python/Lib/site-packages/imageio_ffmpeg/binaries/ffmpeg-win-x86_64-v7.1.exe.part009",
+        "bytes": 8388608
+      },
+      {
+        "path": "_split_files/python/Lib/site-packages/imageio_ffmpeg/binaries/ffmpeg-win-x86_64-v7.1.exe.part010",
+        "bytes": 8388608
+      },
+      {
+        "path": "_split_files/python/Lib/site-packages/imageio_ffmpeg/binaries/ffmpeg-win-x86_64-v7.1.exe.part011",
+        "bytes": 3751936
+      }
+    ]
+  },
+  {
+    "target": "python.zip",
+    "bytes": 29433625,
+    "sha256": "D55F1DEEA7351F1E83168DB5FD533B9740FCD0BC429A6C1FBC53BDA135C33AA2",
+    "parts": [
+      {
+        "path": "_split_files/python.zip.part001",
+        "bytes": 8388608
+      },
+      {
+        "path": "_split_files/python.zip.part002",
+        "bytes": 8388608
+      },
+      {
+        "path": "_split_files/python.zip.part003",
+        "bytes": 8388608
+      },
+      {
+        "path": "_split_files/python.zip.part004",
+        "bytes": 4267801
+      }
+    ]
+  }
+]

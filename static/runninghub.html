@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/static/october-cabin-logo.webp" type="image/webp">
+    <title>十月文化 | RunningHub 工作流</title>
+    <script>
+        (function(){
+            try {
+                var theme = localStorage.getItem('studio_theme') || localStorage.getItem('canvas_theme') || 'light';
+                if(theme === 'dark') {
+                    document.documentElement.classList.add('studio-theme-dark');
+                    document.documentElement.classList.add('theme-dark');
+                }
+            } catch(e) {}
+        })();
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/static/theme.js?v=20260516-theme-sync"></script>
+    <script src="/static/image-preview.js?v=20260516"></script>
+    <script src="/static/history-bulk-manager.js?v=20260517"></script>
+    <style>
+        :root { --bg:#f7f8fb; --panel:#fff; --soft:#f1f5f9; --line:#e5eaf1; --text:#0f172a; --muted:#64748b; --faint:#94a3b8; --accent:#111827; --danger:#dc2626; }
+        html.studio-theme-dark, body.studio-theme-dark { --bg:#0e1014; --panel:#1c1f27; --soft:#282c36; --line:#343946; --text:#eef2f7; --muted:#a8b1c2; --faint:#7a8497; --accent:#f8fafc; --danger:#f87171; }
+        * { box-sizing:border-box; }
+        body { margin:0; min-height:100vh; background:var(--bg); color:var(--text); font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; -webkit-font-smoothing:antialiased; }
+        button,input,textarea,select { font:inherit; }
+        button { border:0; background:transparent; color:inherit; cursor:pointer; }
+        .page { min-height:100vh; padding:28px; }
+        .shell { max-width:1480px; margin:0 auto; display:grid; grid-template-columns:280px minmax(0,1fr) 360px; gap:18px; align-items:start; }
+        .panel { background:var(--panel); border:1px solid var(--line); border-radius:16px; min-width:0; }
+        .head { max-width:1480px; margin:0 auto 18px; display:flex; align-items:flex-end; justify-content:space-between; gap:18px; }
+        .title { font-size:26px; font-weight:900; letter-spacing:-.015em; line-height:1.05; }
+        .sub { margin-top:7px; color:var(--muted); font-size:12px; font-weight:650; line-height:1.5; }
+        .status { color:var(--muted); font-size:11px; font-weight:800; min-height:16px; }
+        .side { padding:14px; position:sticky; top:20px; }
+        .side-title { color:var(--faint); font-size:10px; font-weight:900; letter-spacing:.1em; text-transform:uppercase; padding:4px 4px 10px; }
+        .workflow-list { display:flex; flex-direction:column; gap:6px; }
+        .workflow-card { width:100%; text-align:left; display:flex; gap:10px; align-items:center; padding:10px; border-radius:12px; color:var(--muted); border:1px solid transparent; transition:.15s ease; }
+        .workflow-card:hover { border-color:var(--line); background:var(--soft); color:var(--text); }
+        .workflow-card.active { background:var(--soft); color:var(--text); }
+        .workflow-mark { width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center; background:var(--panel); border:1px solid var(--line); flex:0 0 auto; }
+        .workflow-name { font-size:12.5px; font-weight:850; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .workflow-meta { margin-top:2px; font-size:10.5px; color:var(--faint); font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .btn { height:36px; padding:0 12px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; gap:7px; border:1px solid var(--line); color:var(--muted); background:var(--panel); font-size:11.5px; font-weight:850; transition:.15s ease; }
+        .btn:hover { color:var(--text); border-color:var(--text); }
+        .btn.primary { background:var(--accent); color:var(--bg); border-color:var(--accent); }
+        .btn.primary:hover { transform:translateY(-1px); box-shadow:0 10px 20px rgba(15,23,42,.16); }
+        .btn.danger { color:var(--danger); border-color:rgba(220,38,38,.22); }
+        .btn.full { width:100%; }
+        .main { padding:18px; display:flex; flex-direction:column; gap:14px; }
+        .section { border:1px solid var(--line); border-radius:14px; padding:14px; background:var(--panel); }
+        .section-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; }
+        .section-title { font-size:12px; font-weight:950; letter-spacing:.08em; text-transform:uppercase; }
+        .section-desc { color:var(--muted); font-size:11.5px; font-weight:650; line-height:1.45; margin-top:3px; }
+        .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+        .field { display:flex; flex-direction:column; gap:6px; min-width:0; }
+        .label { color:var(--muted); font-size:11px; font-weight:850; }
+        .field .small { color:var(--muted); font-size:10.5px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .input,.textarea,.select { width:100%; border:1px solid var(--line); border-radius:11px; background:var(--soft); color:var(--text); outline:none; font-size:12.5px; font-weight:700; }
+        .input,.select { height:38px; padding:0 10px; }
+        .textarea { min-height:86px; padding:10px; resize:vertical; line-height:1.55; }
+        .input:focus,.textarea:focus,.select:focus { border-color:var(--text); background:var(--panel); }
+        .toolbar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+        .field-tools { display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:8px; align-items:end; margin-bottom:10px; }
+        .field-count { color:var(--muted); font-size:11px; font-weight:850; white-space:nowrap; padding-bottom:10px; }
+        .empty { border:1px dashed var(--line); border-radius:14px; padding:28px 18px; color:var(--faint); text-align:center; font-size:12px; font-weight:750; }
+        .field-row { display:grid; grid-template-columns:minmax(0,1.2fr) 86px 90px 110px 36px; gap:8px; align-items:end; padding:10px; border:1px solid var(--line); border-radius:12px; background:var(--soft); margin-bottom:8px; }
+        .field-row .input,.field-row .select { background:var(--panel); height:34px; font-size:12px; }
+        .run-field { display:grid; grid-template-columns:190px minmax(0,1fr); gap:10px; align-items:center; padding:10px 0; border-bottom:1px solid var(--line); }
+        .run-field:last-child { border-bottom:0; }
+        .run-label { min-width:0; }
+        .run-label strong { display:block; font-size:12.5px; font-weight:900; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .run-label span { display:block; color:var(--faint); font-size:10.5px; font-weight:700; margin-top:2px; }
+        .file-control { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; align-items:center; }
+        .file-chip { min-height:38px; border:1px solid var(--line); border-radius:11px; background:var(--soft); display:flex; align-items:center; padding:0 10px; color:var(--muted); font-size:11px; font-weight:750; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .task-panel { padding:16px; display:flex; flex-direction:column; gap:14px; position:sticky; top:20px; }
+        .task-state { border-radius:14px; background:var(--soft); border:1px solid var(--line); padding:14px; }
+        .task-state .big { font-size:17px; font-weight:950; }
+        .task-state .small { margin-top:4px; color:var(--muted); font-size:11px; font-weight:700; word-break:break-all; }
+        .results { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+        .result-item { aspect-ratio:1/1; border-radius:12px; overflow:hidden; border:1px solid var(--line); background:var(--soft); display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:11px; font-weight:800; }
+        .result-item img,.result-item video { width:100%; height:100%; object-fit:cover; display:block; }
+        .history { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+        .history-item { aspect-ratio:1/1; border-radius:12px; overflow:hidden; position:relative; background:var(--soft); border:1px solid var(--line); cursor:pointer; }
+        .history-item img,.history-item video { width:100%; height:100%; object-fit:cover; display:block; }
+        .history-item span { position:absolute; left:8px; right:8px; bottom:8px; padding:5px 7px; border-radius:8px; background:rgba(0,0,0,.58); color:#fff; font-size:10px; font-weight:800; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .hidden { display:none !important; }
+        .import-area { display:grid; grid-template-columns:minmax(0,1fr) 160px; gap:10px; align-items:start; }
+        .import-flow { display:grid; grid-template-columns:minmax(0,1fr); gap:10px; }
+        .import-card { border:1px solid var(--line); border-radius:12px; background:var(--soft); padding:12px; display:flex; flex-direction:column; gap:10px; min-width:0; }
+        .import-card .label { display:flex; align-items:center; gap:7px; color:var(--text); }
+        .advanced-import { margin-top:10px; border:1px solid var(--line); border-radius:12px; background:var(--soft); padding:10px 12px; }
+        .advanced-import summary { cursor:pointer; color:var(--muted); font-size:11px; font-weight:900; }
+        .advanced-import .import-card { margin-top:10px; background:var(--panel); }
+        .import-actions { margin-top:10px; display:flex; gap:8px; flex-wrap:wrap; }
+        .convert-summary { margin-top:10px; border:1px dashed var(--line); border-radius:12px; padding:10px 12px; background:var(--soft); color:var(--muted); font-size:11px; font-weight:750; line-height:1.55; word-break:break-word; }
+        .convert-summary strong { color:var(--text); font-weight:900; }
+        @media (max-width:1180px){ .shell{grid-template-columns:240px minmax(0,1fr)} .task-panel{position:static; grid-column:1/-1} }
+        @media (max-width:760px){ .page{padding:16px}.head{display:block}.shell{grid-template-columns:1fr}.side{position:static}.grid2,.run-field,.field-row,.import-area,.import-flow,.field-tools{grid-template-columns:1fr}.results,.history{grid-template-columns:repeat(2,1fr)} }
+    </style>
+    <link rel="stylesheet" href="/static/oct-ui.css?v=20260528-brand-align">
+    <style>
+        body:not(:has(.app-shell)) .main.panel,
+        html.oct-ui-frame .main.panel {
+            background: transparent !important;
+            border-color: transparent !important;
+            box-shadow: none !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <header class="head">
+            <div>
+                <div class="title">RunningHub 工作流</div>
+                <div class="sub">按 RunningHub 文档的 /openapi/v2/run/workflow/{workflowId} 提交任务，自动轮询结果并保存到本地历史。</div>
+            </div>
+            <div id="pageStatus" class="status"></div>
+        </header>
+
+        <div class="shell">
+            <aside class="panel side">
+                <div class="side-title">工作流模板</div>
+                <div id="workflowList" class="workflow-list"></div>
+                <div style="height:12px"></div>
+                <button class="btn full primary" type="button" onclick="newWorkflow()"><i data-lucide="plus" class="w-4 h-4"></i><span>新增工作流</span></button>
+                <div style="height:8px"></div>
+                <button class="btn full" type="button" onclick="loadAll()"><i data-lucide="refresh-cw" class="w-4 h-4"></i><span>刷新</span></button>
+            </aside>
+
+            <main class="panel main">
+                <section class="section">
+                    <div class="section-head">
+                        <div>
+                            <div class="section-title">模板设置</div>
+                            <div class="section-desc">workflowId 是 RunningHub 云端工作流编号，只用于运行任务或拉取 API 参数；它不是工作流 JSON。比如 /workflow/2061286099825287170 的最后一段就是 workflowId。</div>
+                        </div>
+                        <div class="toolbar">
+                            <button class="btn" type="button" onclick="saveWorkflow()"><i data-lucide="save" class="w-4 h-4"></i><span>保存模板</span></button>
+                            <button class="btn danger" type="button" onclick="deleteWorkflow()"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </div>
+                    </div>
+                    <div class="grid2">
+                        <label class="field">
+                            <span class="label">模板名称</span>
+                            <input id="titleInput" class="input" type="text" placeholder="角色一致性图生图">
+                        </label>
+                        <label class="field">
+                            <span class="label">workflowId（云端工作流 ID）</span>
+                            <input id="workflowIdInput" class="input" type="text" placeholder="2057430034792673281">
+                        </label>
+                    </div>
+                </section>
+
+                <section class="section">
+                    <div class="section-head">
+                        <div>
+                            <div class="section-title">工作流 JSON 转参数</div>
+                            <div class="section-desc">日常只需要 workflowId + 完整工作流 JSON。API 工作流 JSON 只是高级对照，缺字段或默认值不准时再选。</div>
+                        </div>
+                    </div>
+                    <div class="import-flow">
+                        <div class="import-card">
+                            <div class="label"><i data-lucide="file-json" class="w-4 h-4"></i><span>完整工作流 JSON</span></div>
+                            <div id="fullWorkflowFileChip" class="file-chip">未选择</div>
+                            <button class="btn full" type="button" onclick="document.getElementById('workflowJsonFile').click()"><i data-lucide="folder-open" class="w-4 h-4"></i><span>选择完整工作流</span></button>
+                        </div>
+                        <input id="workflowJsonFile" class="hidden" type="file" accept=".json,application/json" onchange="readWorkflowJsonFile(this.files[0])">
+                        <input id="frontendApiWorkflowFile" class="hidden" type="file" accept=".json,application/json" onchange="readFrontendApiWorkflowFile(this.files[0])">
+                        <textarea id="workflowJsonInput" class="textarea hidden" placeholder='完整工作流 JSON 备用粘贴区'></textarea>
+                    </div>
+                    <details class="advanced-import">
+                        <summary>高级：API 工作流对照（可选）</summary>
+                        <div class="import-card">
+                            <div class="label"><i data-lucide="file-input" class="w-4 h-4"></i><span>API 工作流 JSON</span></div>
+                            <div id="apiWorkflowFileChip" class="file-chip">未选择</div>
+                            <button class="btn full" type="button" onclick="document.getElementById('frontendApiWorkflowFile').click()"><i data-lucide="folder-open" class="w-4 h-4"></i><span>选择 API 工作流</span></button>
+                        </div>
+                    </details>
+                    <div class="import-actions">
+                        <button class="btn primary" type="button" onclick="convertFrontendWorkflow('external')"><i data-lucide="workflow" class="w-4 h-4"></i><span>拉取参数</span></button>
+                        <button class="btn" type="button" onclick="convertFrontendWorkflow('all')"><i data-lucide="list-tree" class="w-4 h-4"></i><span>拉取全部参数</span></button>
+                        <button class="btn" type="button" onclick="clearImportBox()"><i data-lucide="eraser" class="w-4 h-4"></i><span>清空选择</span></button>
+                    </div>
+                    <div class="convert-summary">必须两步：填写 <strong>workflowId</strong>，选择 <strong>完整工作流 JSON</strong>，然后点 <strong>拉取参数</strong>。默认只显示上传项和组开关，其余参数使用工作流默认值。</div>
+                    <div id="convertSummary" class="convert-summary hidden"></div>
+                </section>
+
+                <section class="section">
+                    <div class="section-head">
+                        <div>
+                            <div class="section-title">节点字段</div>
+                            <div class="section-desc">每一行会转换为 nodeInfoList 中的 nodeId、fieldName、fieldValue；默认展示全部字段，可再手动过滤或只保留常用输入。</div>
+                        </div>
+                        <button class="btn" type="button" onclick="addField()"><i data-lucide="plus" class="w-4 h-4"></i><span>字段</span></button>
+                    </div>
+                    <div class="field-tools">
+                        <label class="field">
+                            <span class="label">过滤</span>
+                            <input id="fieldFilterInput" class="input" type="text" placeholder="节点名 / nodeId / fieldName / 标签" oninput="setFieldFilter(this.value)">
+                        </label>
+                        <div class="toolbar">
+                            <button class="btn" type="button" onclick="keepMatchingFields()"><i data-lucide="list-filter" class="w-4 h-4"></i><span>只保留匹配</span></button>
+                            <button class="btn" type="button" onclick="keepCommonFields()"><i data-lucide="wand-sparkles" class="w-4 h-4"></i><span>只保留常用</span></button>
+                            <button class="btn danger" type="button" onclick="deleteMatchingFields()"><i data-lucide="trash-2" class="w-4 h-4"></i><span>删除匹配</span></button>
+                            <button class="btn" type="button" onclick="clearFieldFilter()"><i data-lucide="x" class="w-4 h-4"></i></button>
+                        </div>
+                        <div id="fieldFilterCount" class="field-count"></div>
+                    </div>
+                    <div id="fieldEditor"></div>
+                </section>
+
+                <section class="section">
+                    <div class="section-head">
+                        <div>
+                            <div class="section-title">运行参数</div>
+                            <div class="section-desc">文件字段会先上传到 RunningHub，再把返回的 URL 填入对应节点；也可以直接粘贴公开图片/视频 URL。</div>
+                        </div>
+                        <button id="runBtn" class="btn primary" type="button" onclick="runWorkflow()"><i data-lucide="play" class="w-4 h-4"></i><span>运行工作流</span></button>
+                    </div>
+                    <div id="runFields"></div>
+                </section>
+            </main>
+
+            <aside class="panel task-panel">
+                <section>
+                    <div class="section-title">任务状态</div>
+                    <div id="taskState" class="task-state" style="margin-top:10px">
+                        <div class="big">Ready</div>
+                        <div class="small">等待提交 RunningHub 任务</div>
+                    </div>
+                </section>
+                <section>
+                    <div class="section-title">结果</div>
+                    <div id="resultGrid" class="results" style="margin-top:10px"></div>
+                </section>
+                <section>
+                    <div class="section-title">历史</div>
+                    <div id="historyGrid" class="history" style="margin-top:10px"></div>
+                </section>
+            </aside>
+        </div>
+    </div>
+
+    <script>
+        let workflows = [];
+        let selectedId = '';
+        let draft = null;
+        let values = {};
+        let providers = [];
+        let runninghubProviderId = 'runninghub';
+        let polling = false;
+        let emptyExtractReason = '';
+        let fieldFilter = '';
+        let initialLoadDone = false;
+        let restoringDraft = false;
+        let localDraftDirty = false;
+        let draftTimer = null;
+        let frontendFullWorkflow = null;
+        let frontendFullWorkflowName = '';
+        let frontendApiWorkflow = null;
+        let frontendApiWorkflowName = '';
+        let lastConvertedApiWorkflow = null;
+        let lastConvertedMapping = null;
+        const LOCAL_DRAFT_KEY = 'oct-runninghub-workspace-draft-v1';
+        const LOCAL_DRAFT_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
+
+        const els = {
+            status: document.getElementById('pageStatus'),
+            list: document.getElementById('workflowList'),
+            title: document.getElementById('titleInput'),
+            workflowId: document.getElementById('workflowIdInput'),
+            accessPassword: document.getElementById('accessPasswordInput'),
+            retain: document.getElementById('retainInput'),
+            workflowJson: document.getElementById('workflowJsonInput'),
+            fullWorkflowFileChip: document.getElementById('fullWorkflowFileChip'),
+            apiWorkflowFileChip: document.getElementById('apiWorkflowFileChip'),
+            convertSummary: document.getElementById('convertSummary'),
+            fieldFilter: document.getElementById('fieldFilterInput'),
+            fieldFilterCount: document.getElementById('fieldFilterCount'),
+            fieldEditor: document.getElementById('fieldEditor'),
+            runFields: document.getElementById('runFields'),
+            taskState: document.getElementById('taskState'),
+            resultGrid: document.getElementById('resultGrid'),
+            historyGrid: document.getElementById('historyGrid'),
+            runBtn: document.getElementById('runBtn')
+        };
+
+        function refreshIcons(){ if(window.lucide) lucide.createIcons(); }
+        function setStatus(text){ els.status.textContent = text || ''; }
+        function escapeHtml(str){ return String(str ?? '').replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s])); }
+        function fieldId(field){ return field.id || `${field.nodeId || ''}.${field.fieldName || ''}` || `field_${Math.random().toString(36).slice(2,7)}`; }
+        function currentWorkflow(){ return workflows.find(w => w.id === selectedId) || draft; }
+        function isMediaField(type){ return ['image','video','audio'].includes(String(type || '').toLowerCase()); }
+        function mediaTypeLabel(type){ return type === 'video' ? '视频' : type === 'image' ? '图片' : type === 'audio' ? '音频' : '素材'; }
+        function mediaRequirementSummary(fields){
+            const counts = {image:0, video:0, audio:0};
+            (fields || []).forEach(field => {
+                const type = String(field?.type || '').toLowerCase();
+                if(counts[type] !== undefined) counts[type] += 1;
+            });
+            const parts = [];
+            if(counts.video) parts.push(`${counts.video} 个视频`);
+            if(counts.image) parts.push(`${counts.image} 张图片`);
+            if(counts.audio) parts.push(`${counts.audio} 段音频`);
+            return parts.join(' / ');
+        }
+        function isShellAgentInputField(field){
+            const text = `${field?.classType || ''} ${field?.nodeTitle || ''} ${field?.label || ''}`.toLowerCase();
+            return text.includes('shellagentplugininput') || (text.includes('shellagent plugin') && text.includes('input'));
+        }
+        function shellAgentFieldType(classType='', inputName='', defaultValue=null){
+            const text = `${classType || ''} ${inputName || ''}`.toLowerCase();
+            if(text.includes('boolean') || typeof defaultValue === 'boolean') return 'boolean';
+            if(text.includes('integer') || text.includes('int')) return 'integer';
+            if(text.includes('float') || text.includes('number')) return 'number';
+            if(text.includes('image')) return 'image';
+            if(text.includes('video')) return 'video';
+            if(text.includes('audio')) return 'audio';
+            if(text.includes('text') || text.includes('string')) return String(defaultValue || '').length > 120 ? 'textarea' : 'text';
+            return 'text';
+        }
+        function shellAgentAccept(type){
+            return {image:'image/*', video:'video/*', audio:'audio/*'}[type] || '';
+        }
+        function shellAgentOptions(value){
+            if(Array.isArray(value)) return value.map(v => String(v).trim()).filter(Boolean);
+            return String(value || '').split(/[\n,|]+/).map(v => v.trim()).filter(Boolean);
+        }
+        function isOctInputSwitchField(field){
+            const text = `${field?.classType || ''} ${field?.nodeTitle || ''} ${field?.label || ''} ${field?.fieldName || ''}`.toLowerCase();
+            return text.includes('octinput') && ['开关','switch','toggle','enable','enabled','boolean','bool','opt_connection','optconnection','primitiveboolean'].some(key => text.includes(key));
+        }
+        function scalarSwitchValue(value){
+            if(typeof value === 'boolean') return true;
+            if(typeof value === 'number') return value === 0 || value === 1;
+            if(typeof value === 'string') return ['true','false','yes','no','on','off','0','1'].includes(value.trim().toLowerCase());
+            return false;
+        }
+        function switchTypeAndOptions(value){
+            if(typeof value === 'boolean') return {type:'boolean', options:[]};
+            const text = String(value).trim().toLowerCase();
+            if(['yes','no'].includes(text)) return {type:'dropdown', options:[text, ...['yes','no'].filter(v => v !== text)]};
+            if(['on','off'].includes(text)) return {type:'dropdown', options:[text, ...['on','off'].filter(v => v !== text)]};
+            if(['true','false'].includes(text)) return {type:'dropdown', options:[text, ...['true','false'].filter(v => v !== text)]};
+            if(['0','1'].includes(text)) return {type:'dropdown', options:[text, ...['0','1'].filter(v => v !== text)]};
+            return {type:'boolean', options:[]};
+        }
+        function shellAgentVariableFields(fields){
+            const groups = new Map();
+            (fields || []).forEach(field => {
+                if(!isShellAgentInputField(field)) return;
+                const nodeId = String(field.nodeId || '').trim();
+                if(!nodeId) return;
+                if(!groups.has(nodeId)) groups.set(nodeId, {sample:field, byName:{}});
+                const group = groups.get(nodeId);
+                group.sample = {...group.sample, ...field};
+                group.byName[String(field.fieldName || '')] = field;
+            });
+            const output = [];
+            groups.forEach((group, nodeId) => {
+                const byName = group.byName || {};
+                const sample = group.sample || {};
+                const nameField = byName.input_name;
+                const valueField = byName.default_value || byName.value || nameField;
+                if(!valueField) return;
+                const inputName = String(nameField?.default || sample.label || sample.nodeTitle || `Node ${nodeId}`).trim();
+                const fieldName = valueField.fieldName || 'default_value';
+                const type = shellAgentFieldType(sample.classType, inputName, valueField.default);
+                output.push({
+                    id:`${nodeId}.${fieldName}`,
+                    label:inputName,
+                    nodeId,
+                    nodeTitle:sample.nodeTitle || inputName,
+                    classType:sample.classType || '',
+                    fieldName,
+                    type,
+                    default:valueField.default ?? '',
+                    required:false,
+                    accept:shellAgentAccept(type),
+                    options:shellAgentOptions(byName.choices?.default || valueField.options || [])
+                });
+            });
+            return output;
+        }
+        function octInputSwitchFields(fields, skipNodeIds=new Set()){
+            const output = [];
+            (fields || []).forEach(field => {
+                const nodeId = String(field?.nodeId || '').trim();
+                if(!nodeId || skipNodeIds.has(nodeId) || !isOctInputSwitchField(field)) return;
+                if(!scalarSwitchValue(field.default)) return;
+                const {type, options} = switchTypeAndOptions(field.default);
+                output.push({
+                    ...field,
+                    id:field.id || `${nodeId}.${field.fieldName || 'value'}`,
+                    label:field.label || field.nodeTitle || `Node ${nodeId}`,
+                    type,
+                    options
+                });
+            });
+            return output;
+        }
+        function isShellAgentProxyField(field){
+            const type = String(field?.type || '').toLowerCase();
+            const fieldName = String(field?.fieldName || '').trim().toLowerCase();
+            const classText = `${field?.classType || ''} ${field?.nodeTitle || ''}`.replace(/[_\s]+/g, '').toLowerCase();
+            const label = String(field?.label || '').trim().toLowerCase();
+            return type === 'video'
+                && fieldName === 'video'
+                && (classText.includes('vhsloadvideo') || classText.includes('loadvideo'))
+                && (label.startsWith('input') || label.includes('octinput'));
+        }
+        function shellAgentProxyFields(fields, skipKeys=new Set()){
+            const output = [];
+            (fields || []).forEach(field => {
+                const key = `${field?.nodeId || ''}.${field?.fieldName || ''}`;
+                if(skipKeys.has(key) || !isShellAgentProxyField(field)) return;
+                const next = {
+                    ...field,
+                    id:field.id || key,
+                    accept:field.accept || shellAgentAccept(field.type)
+                };
+                if(['', 'none', 'null'].includes(String(next.default || '').trim().toLowerCase())){
+                    next.default = '';
+                    next.required = true;
+                }
+                output.push(next);
+            });
+            return output;
+        }
+        function mergeExternalFields(...groups){
+            const seen = new Set();
+            const output = [];
+            groups.forEach(group => (group || []).forEach(field => {
+                const key = `${field?.nodeId || ''}.${field?.fieldName || ''}`;
+                if(seen.has(key)) return;
+                seen.add(key);
+                output.push(field);
+            }));
+            return output;
+        }
+        function normalizeWorkflowShellAgentFields(wf){
+            if(!wf || !Array.isArray(wf.fields)) return wf;
+            const shellFields = shellAgentVariableFields(wf.fields);
+            const switchFields = octInputSwitchFields(wf.fields, new Set(shellFields.map(field => String(field.nodeId || ''))));
+            const usedKeys = new Set([...shellFields, ...switchFields].map(field => `${field?.nodeId || ''}.${field?.fieldName || ''}`));
+            const proxyFields = shellAgentProxyFields(wf.fields, usedKeys);
+            const externalFields = mergeExternalFields(shellFields, switchFields, proxyFields);
+            if(externalFields.length) wf.fields = externalFields;
+            return wf;
+        }
+        function cloneJson(value){
+            try { return JSON.parse(JSON.stringify(value)); }
+            catch(e) { return value; }
+        }
+        function workflowSnapshot(){
+            const wf = currentWorkflow();
+            if(!wf) return null;
+            const snapshot = cloneJson(wf) || {};
+            snapshot.title = els.title?.value?.trim?.() || snapshot.title || 'RunningHub Workflow';
+            snapshot.workflowId = els.workflowId?.value?.trim?.() || snapshot.workflowId || '';
+            snapshot.accessPassword = els.accessPassword ? (els.accessPassword.value.trim() || '') : '';
+            snapshot.defaultRetainSeconds = els.retain ? (Number(els.retain.value || 0) || 0) : 0;
+            snapshot.fields = Array.isArray(snapshot.fields) ? snapshot.fields : [];
+            return snapshot;
+        }
+        function draftHasContent(payload){
+            const wf = payload?.workflow || {};
+            return Boolean(
+                String(wf.workflowId || '').trim() ||
+                String(wf.title || '').trim() ||
+                (Array.isArray(wf.fields) && wf.fields.length) ||
+                Object.keys(payload?.values || {}).length ||
+                String(payload?.workflowJson || '').trim()
+            );
+        }
+        function readLocalDraft(){
+            try {
+                const payload = JSON.parse(localStorage.getItem(LOCAL_DRAFT_KEY) || 'null');
+                if(!payload || Date.now() - Number(payload.ts || 0) > LOCAL_DRAFT_MAX_AGE){
+                    localStorage.removeItem(LOCAL_DRAFT_KEY);
+                    return null;
+                }
+                return payload;
+            } catch(e) {
+                return null;
+            }
+        }
+        function saveLocalDraft(reason='edit'){
+            if(restoringDraft) return null;
+            const payload = {
+                version:1,
+                reason,
+                ts:Date.now(),
+                selectedId:selectedId || '',
+                workflow:workflowSnapshot(),
+                values:cloneJson(values || {}) || {},
+                workflowJson:els.workflowJson?.value || '',
+                fieldFilter,
+                emptyExtractReason
+            };
+            if(!draftHasContent(payload)) return null;
+            try { localStorage.setItem(LOCAL_DRAFT_KEY, JSON.stringify(payload)); } catch(e) {}
+            localDraftDirty = true;
+            return payload;
+        }
+        function scheduleLocalDraft(reason='edit'){
+            if(restoringDraft) return;
+            localDraftDirty = true;
+            clearTimeout(draftTimer);
+            draftTimer = setTimeout(() => saveLocalDraft(reason), 200);
+        }
+        function clearLocalDraft(){
+            clearTimeout(draftTimer);
+            draftTimer = null;
+            try { localStorage.removeItem(LOCAL_DRAFT_KEY); } catch(e) {}
+            localDraftDirty = false;
+        }
+        function restoreLocalDraft(payload){
+            if(!payload?.workflow) return false;
+            restoringDraft = true;
+            try {
+                const restored = cloneJson(payload.workflow) || {};
+                const targetId = payload.selectedId || restored.id || '';
+                if(targetId){
+                    const index = workflows.findIndex(w => w.id === targetId);
+                    if(index >= 0){
+                        workflows[index] = {...workflows[index], ...restored, id:workflows[index].id || targetId};
+                        selectedId = workflows[index].id;
+                        draft = null;
+                    } else {
+                        selectedId = '';
+                        draft = {...restored, id:''};
+                    }
+                } else {
+                    selectedId = '';
+                    draft = {...restored, id:''};
+                }
+                values = cloneJson(payload.values || {}) || {};
+                emptyExtractReason = payload.emptyExtractReason || '';
+                fieldFilter = payload.fieldFilter || '';
+                if(els.fieldFilter) els.fieldFilter.value = fieldFilter;
+                if(els.workflowJson) els.workflowJson.value = payload.workflowJson || '';
+                renderList();
+                renderEditor();
+                renderRunFields();
+                localDraftDirty = true;
+                return true;
+            } finally {
+                restoringDraft = false;
+            }
+        }
+        function fieldSearchText(field){
+            return [
+                field?.label, field?.nodeId, field?.nodeTitle, field?.classType,
+                field?.fieldName, field?.type, field?.default
+            ].map(v => String(v ?? '').toLowerCase()).join(' ');
+        }
+        function fieldMatchesFilter(field, query=fieldFilter){
+            const tokens = String(query || '').trim().toLowerCase().split(/\s+/).filter(Boolean);
+            if(!tokens.length) return true;
+            const haystack = fieldSearchText(field);
+            return tokens.every(token => haystack.includes(token));
+        }
+        function filteredFieldEntries(fields){
+            return (fields || [])
+                .map((field, index) => ({field, index}))
+                .filter(item => fieldMatchesFilter(item.field));
+        }
+        function updateFieldFilterCount(total, shown){
+            if(!els.fieldFilterCount) return;
+            els.fieldFilterCount.textContent = fieldFilter.trim() ? `${shown}/${total} 匹配` : `${total} 个字段`;
+        }
+        function setFieldFilter(value){
+            fieldFilter = value || '';
+            renderFieldEditor();
+        }
+        function clearFieldFilter(){
+            fieldFilter = '';
+            if(els.fieldFilter) els.fieldFilter.value = '';
+            renderFieldEditor();
+        }
+
+        function readableFetchError(data, status){
+            const value = data?.detail ?? data?.message ?? data?.error;
+            if(typeof value === 'string' && value.trim()){
+                const text = value.trim();
+                if(/^Failed to fetch RunningHub workflow parameters:\s*$/i.test(text)){
+                    return 'RunningHub 网络请求失败：接口没有返回具体错误，请检查网络/API Key/工作流权限，或稍后重试。';
+                }
+                return text;
+            }
+            if(value && typeof value === 'object'){
+                try { return JSON.stringify(value).slice(0, 800); } catch(e) {}
+            }
+            if(typeof data === 'string' && data.trim()) return data.trim();
+            if(data && typeof data === 'object' && Object.keys(data).length){
+                try { return JSON.stringify(data).slice(0, 800); } catch(e) {}
+            }
+            return status ? `请求失败（HTTP ${status}）` : '请求失败';
+        }
+
+        async function fetchJson(url, opts){
+            const res = await fetch(url, opts);
+            const text = await res.text();
+            let data = {};
+            try { data = text ? JSON.parse(text) : {}; }
+            catch(e) { data = text || {}; }
+            if(!res.ok) throw new Error(readableFetchError(data, res.status));
+            return data;
+        }
+        function sleep(ms){ return new Promise(resolve => setTimeout(resolve, ms)); }
+
+        async function loadAll(){
+            try {
+                const preservedDraft = initialLoadDone ? (localDraftDirty ? saveLocalDraft('refresh') : readLocalDraft()) : readLocalDraft();
+                const cfg = await fetchJson('/api/config');
+                providers = Array.isArray(cfg.api_providers) ? cfg.api_providers : [];
+                const rh = providers.find(p => String(p.protocol || '').toLowerCase() === 'runninghub' && p.enabled !== false) || providers.find(p => p.id === 'runninghub');
+                runninghubProviderId = rh?.id || 'runninghub';
+                const data = await fetchJson('/api/runninghub/workflows');
+                workflows = data.workflows || [];
+                const restored = restoreLocalDraft(preservedDraft);
+                if(!restored){
+                    if(!selectedId && workflows.length) selectedId = workflows[0].id;
+                    if(!selectedId) newWorkflow(false);
+                    else selectWorkflow(selectedId, false);
+                    renderList();
+                }
+                await loadHistory();
+                initialLoadDone = true;
+                setStatus(restored ? '已恢复本地草稿，保存模板后会写入后台。' : '已连接模板数据');
+            } catch(e) {
+                setStatus(e.message || String(e));
+            }
+        }
+
+        function newWorkflow(render=true){
+            selectedId = '';
+            draft = {
+                id:'',
+                title:'新 RunningHub 工作流',
+                workflowId:'',
+                accessPassword:'',
+                defaultRetainSeconds:0,
+                fields:[],
+                options:{}
+            };
+            values = {};
+            emptyExtractReason = '';
+            if(render) {
+                renderList();
+                renderEditor();
+                renderRunFields();
+                scheduleLocalDraft('new');
+            }
+        }
+
+        function selectWorkflow(id, shouldRender=true){
+            selectedId = id;
+            draft = null;
+            const wf = currentWorkflow();
+            values = {};
+            emptyExtractReason = '';
+            (wf?.fields || []).forEach(field => values[fieldId(field)] = field.default ?? '');
+            if(shouldRender) {
+                renderList();
+                renderEditor();
+                renderRunFields();
+            } else {
+                renderEditor();
+                renderRunFields();
+            }
+        }
+
+        function renderList(){
+            if(!workflows.length){
+                els.list.innerHTML = '<div class="empty">还没有 RunningHub 模板</div>';
+                refreshIcons();
+                return;
+            }
+            els.list.innerHTML = workflows.map(w => `
+                <button class="workflow-card ${w.id === selectedId ? 'active' : ''}" type="button" onclick="selectWorkflow('${escapeHtml(w.id)}')">
+                    <span class="workflow-mark"><i data-lucide="workflow" class="w-4 h-4"></i></span>
+                    <span class="min-w-0">
+                        <div class="workflow-name">${escapeHtml(w.title || 'RunningHub Workflow')}</div>
+                        <div class="workflow-meta">${escapeHtml(w.workflowId || '未填写 workflowId')}</div>
+                    </span>
+                </button>
+            `).join('');
+            refreshIcons();
+        }
+
+        function renderEditor(){
+            const wf = currentWorkflow();
+            if(!wf) return;
+            els.title.value = wf.title || '';
+            els.workflowId.value = wf.workflowId || '';
+            if(els.accessPassword) els.accessPassword.value = wf.accessPassword || '';
+            if(els.retain) els.retain.value = wf.defaultRetainSeconds || '';
+            renderFieldEditor();
+        }
+
+        function syncWorkflowFromInputs(){
+            let wf = currentWorkflow();
+            if(!wf) {
+                newWorkflow(false);
+                wf = draft;
+            }
+            wf.title = els.title.value.trim() || 'RunningHub Workflow';
+            wf.workflowId = els.workflowId.value.trim();
+            wf.accessPassword = els.accessPassword ? els.accessPassword.value.trim() : '';
+            wf.defaultRetainSeconds = els.retain ? (Number(els.retain.value || 0) || 0) : 0;
+            return wf;
+        }
+
+        function renderFieldEditor(){
+            const wf = currentWorkflow();
+            const fields = wf?.fields || [];
+            if(!fields.length){
+                updateFieldFilterCount(0, 0);
+                els.fieldEditor.innerHTML = `<div class="empty">${escapeHtml(emptyExtractReason || '暂无字段。可以从 JSON 提取，或手动添加 nodeId + fieldName。')}</div>`;
+                refreshIcons();
+                return;
+            }
+            const visibleFields = filteredFieldEntries(fields);
+            updateFieldFilterCount(fields.length, visibleFields.length);
+            if(!visibleFields.length){
+                els.fieldEditor.innerHTML = `<div class="empty">没有匹配字段</div>`;
+                refreshIcons();
+                return;
+            }
+            els.fieldEditor.innerHTML = visibleFields.map(({field, index:i}) => `
+                <div class="field-row">
+                    <label class="field">
+                        <span class="label">标签</span>
+                        <input class="input" value="${escapeHtml(field.label || '')}" oninput="updateField(${i}, 'label', this.value)">
+                        <span class="small">${escapeHtml([field.nodeTitle || '', field.classType || ''].filter(Boolean).join(' · ') || '无节点名')}</span>
+                    </label>
+                    <label class="field">
+                        <span class="label">nodeId</span>
+                        <input class="input" value="${escapeHtml(field.nodeId || '')}" oninput="updateField(${i}, 'nodeId', this.value)">
+                    </label>
+                    <label class="field">
+                        <span class="label">fieldName</span>
+                        <input class="input" value="${escapeHtml(field.fieldName || '')}" oninput="updateField(${i}, 'fieldName', this.value)">
+                    </label>
+                    <label class="field">
+                        <span class="label">类型</span>
+                        <select class="select" onchange="updateField(${i}, 'type', this.value)">
+                            ${['text','textarea','integer','number','boolean','dropdown','image','video','audio','json'].map(t => `<option value="${t}" ${field.type === t ? 'selected' : ''}>${t}</option>`).join('')}
+                        </select>
+                    </label>
+                    <button class="btn danger" type="button" onclick="removeField(${i})"><i data-lucide="x" class="w-4 h-4"></i></button>
+                </div>
+            `).join('');
+            refreshIcons();
+        }
+
+        function updateField(index, key, value){
+            const wf = syncWorkflowFromInputs();
+            const field = wf.fields[index];
+            if(!field) return;
+            field[key] = value;
+            if(key === 'nodeId' || key === 'fieldName'){
+                field.id = `${field.nodeId || ''}.${field.fieldName || ''}`.replace(/^\./,'').replace(/\.$/,'') || field.id;
+            }
+            if(key === 'type' && isMediaField(value)) field.accept = value === 'image' ? 'image/*' : value === 'video' ? 'video/*' : 'audio/*';
+            renderRunFields();
+            scheduleLocalDraft('field');
+        }
+
+        function addField(){
+            const wf = syncWorkflowFromInputs();
+            emptyExtractReason = '';
+            wf.fields.push({id:`field_${Date.now()}`, label:'新字段', nodeId:'', nodeTitle:'', classType:'', fieldName:'', type:'text', default:'', required:false, accept:'', options:[]});
+            renderFieldEditor();
+            renderRunFields();
+            scheduleLocalDraft('field');
+        }
+
+        function removeField(index){
+            const wf = syncWorkflowFromInputs();
+            wf.fields.splice(index, 1);
+            renderFieldEditor();
+            renderRunFields();
+            scheduleLocalDraft('field');
+        }
+
+        function pruneFields(keepMatches){
+            const query = fieldFilter.trim();
+            if(!query){ alert('请先输入过滤关键词'); return; }
+            const wf = syncWorkflowFromInputs();
+            const before = wf.fields.length;
+            const matched = wf.fields.filter(field => fieldMatchesFilter(field, query)).length;
+            const removed = keepMatches ? before - matched : matched;
+            if(!removed){
+                setStatus(keepMatches ? '没有可删除的非匹配字段' : '没有匹配字段可删除');
+                return;
+            }
+            const action = keepMatches ? `只保留 ${matched} 个匹配字段，删除 ${removed} 个非匹配字段` : `删除 ${removed} 个匹配字段`;
+            if(!confirm(`${action}？`)) return;
+            wf.fields = wf.fields.filter(field => keepMatches ? fieldMatchesFilter(field, query) : !fieldMatchesFilter(field, query));
+            values = {};
+            wf.fields.forEach(field => values[fieldId(field)] = field.default ?? '');
+            renderFieldEditor();
+            renderRunFields();
+            setStatus(`${action}。未提交的字段会使用 RunningHub 工作流默认值。`);
+            scheduleLocalDraft('field');
+        }
+
+        function keepMatchingFields(){ pruneFields(true); }
+        function deleteMatchingFields(){ pruneFields(false); }
+        function keepCommonFields(){
+            const wf = syncWorkflowFromInputs();
+            const result = compactRunningHubFields(wf.fields);
+            if(!result.compacted){
+                setStatus('当前字段没有可自动精简的内容');
+                return;
+            }
+            const removed = result.total - result.fields.length;
+            if(!confirm(`只保留 ${result.fields.length} 个常用字段，删除 ${removed} 个其他字段？\n\n未提交的字段会使用 RunningHub 工作流默认值。`)) return;
+            wf.fields = result.fields;
+            values = {};
+            wf.fields.forEach(field => values[fieldId(field)] = field.default ?? '');
+            renderFieldEditor();
+            renderRunFields();
+            setStatus(`已保留 ${result.fields.length}/${result.total} 个常用字段。未提交的字段会使用 RunningHub 工作流默认值。`);
+            scheduleLocalDraft('field');
+        }
+
+        async function saveWorkflow(){
+            const wf = syncWorkflowFromInputs();
+            if(!wf.workflowId){ alert('请先填写 workflowId'); return; }
+            try {
+                const method = selectedId ? 'PUT' : 'POST';
+                const url = selectedId ? `/api/runninghub/workflows/${encodeURIComponent(selectedId)}` : '/api/runninghub/workflows';
+                const data = await fetchJson(url, {method, headers:{'Content-Type':'application/json'}, body:JSON.stringify(wf)});
+                workflows = data.workflows || workflows;
+                selectedId = data.workflow?.id || selectedId;
+                draft = null;
+                selectWorkflow(selectedId);
+                clearLocalDraft();
+                setStatus('模板已保存');
+            } catch(e) {
+                alert(e.message || String(e));
+            }
+        }
+
+        async function deleteWorkflow(){
+            if(!selectedId){ newWorkflow(); return; }
+            if(!confirm('删除这个 RunningHub 模板？')) return;
+            try {
+                const data = await fetchJson(`/api/runninghub/workflows/${encodeURIComponent(selectedId)}`, {method:'DELETE'});
+                workflows = data.workflows || [];
+                selectedId = workflows[0]?.id || '';
+                if(selectedId) selectWorkflow(selectedId);
+                else newWorkflow();
+                renderList();
+                clearLocalDraft();
+                setStatus('模板已删除');
+            } catch(e) {
+                alert(e.message || String(e));
+            }
+        }
+
+        function renderImportFileChips(){
+            if(els.fullWorkflowFileChip) {
+                els.fullWorkflowFileChip.textContent = frontendFullWorkflowName || '未选择';
+                els.fullWorkflowFileChip.title = frontendFullWorkflowName || '';
+            }
+            if(els.apiWorkflowFileChip) {
+                els.apiWorkflowFileChip.textContent = frontendApiWorkflowName || '未选择';
+                els.apiWorkflowFileChip.title = frontendApiWorkflowName || '';
+            }
+        }
+
+        async function readWorkflowJsonFile(file){
+            if(!file) return;
+            try {
+                const text = await file.text();
+                const parsed = parseRunningHubImport(text);
+                frontendFullWorkflow = parsed.workflow;
+                frontendFullWorkflowName = file.name || '完整工作流 JSON';
+                els.workflowJson.value = text;
+                if(parsed.workflowId && !els.workflowId.value.trim()) els.workflowId.value = parsed.workflowId;
+                renderImportFileChips();
+                setStatus(`已选择完整工作流 JSON：${frontendFullWorkflowName}`);
+                scheduleLocalDraft('import');
+            } catch(e) {
+                frontendFullWorkflow = null;
+                frontendFullWorkflowName = '';
+                renderImportFileChips();
+                alert('完整工作流 JSON 解析失败：' + (e.message || e));
+            }
+        }
+
+        async function readFrontendApiWorkflowFile(file){
+            if(!file) return;
+            try {
+                frontendApiWorkflow = JSON.parse(await file.text());
+                frontendApiWorkflowName = file.name || 'API 工作流 JSON';
+                renderImportFileChips();
+                setStatus(`已选择 API 工作流 JSON：${frontendApiWorkflowName}`);
+                scheduleLocalDraft('import');
+            } catch(e) {
+                frontendApiWorkflow = null;
+                frontendApiWorkflowName = '';
+                renderImportFileChips();
+                alert('API 工作流 JSON 解析失败：' + (e.message || e));
+            }
+        }
+
+        function clearImportBox(){
+            frontendFullWorkflow = null;
+            frontendFullWorkflowName = '';
+            frontendApiWorkflow = null;
+            frontendApiWorkflowName = '';
+            els.workflowJson.value = '';
+            lastConvertedApiWorkflow = null;
+            lastConvertedMapping = null;
+            const fullInput = document.getElementById('workflowJsonFile');
+            const apiInput = document.getElementById('frontendApiWorkflowFile');
+            if(fullInput) fullInput.value = '';
+            if(apiInput) apiInput.value = '';
+            renderImportFileChips();
+            if(els.convertSummary) els.convertSummary.classList.add('hidden');
+            scheduleLocalDraft('import');
+        }
+
+        function findFirstJsonObject(text){
+            for(let start = text.indexOf('{'); start >= 0; start = text.indexOf('{', start + 1)){
+                let depth = 0;
+                let inString = false;
+                let quote = '';
+                let escaped = false;
+                for(let i = start; i < text.length; i++){
+                    const ch = text[i];
+                    if(inString){
+                        if(escaped) escaped = false;
+                        else if(ch === '\\') escaped = true;
+                        else if(ch === quote) inString = false;
+                        continue;
+                    }
+                    if(ch === '"' || ch === "'"){
+                        inString = true;
+                        quote = ch;
+                        continue;
+                    }
+                    if(ch === '{') depth++;
+                    if(ch === '}'){
+                        depth--;
+                        if(depth === 0) return text.slice(start, i + 1);
+                    }
+                }
+            }
+            return '';
+        }
+
+        function parseRunningHubImport(text){
+            const workflowId = (text.match(/run\/workflow\/([0-9A-Za-z_-]+)/) || text.match(/workflowId["'\s:=]+([0-9A-Za-z_-]+)/) || [])[1] || '';
+            let jsonText = text.trim();
+            const fenced = jsonText.match(/```(?:json|curl)?\s*([\s\S]*?)```/i);
+            if(fenced) jsonText = fenced[1].trim();
+            const dataRaw = jsonText.match(/--data-raw\s+(['"`])([\s\S]*?)\1/i);
+            if(dataRaw) jsonText = dataRaw[2].trim();
+            if(!jsonText.startsWith('{')) jsonText = findFirstJsonObject(jsonText);
+            if(!jsonText) throw new Error('没有找到可解析的 JSON 请求体');
+            return {workflowId, workflow: JSON.parse(jsonText)};
+        }
+
+        function workflowLooksFrontend(workflow){
+            if(!workflow || typeof workflow !== 'object') return false;
+            if(Array.isArray(workflow.nodes) || Array.isArray(workflow.nodeList) || Array.isArray(workflow.node_list) || Array.isArray(workflow.nodeInfoList)) return true;
+            const data = workflow.data;
+            return Boolean(data && typeof data === 'object' && (Array.isArray(data.nodes) || Array.isArray(data.nodeList) || Array.isArray(data.node_list) || Array.isArray(data.nodeInfoList)));
+        }
+
+        function renderConvertSummary(data){
+            if(!els.convertSummary) return;
+            const c = data?.conversion || {};
+            const parts = [];
+            if(data?.note) parts.push(escapeHtml(data.note));
+            if(c.mode) parts.push(`模式 <strong>${escapeHtml(c.mode)}</strong>`);
+            if(c.profile) parts.push(`配置 <strong>${escapeHtml(c.profile)}</strong>`);
+            if(Number.isFinite(Number(c.field_count))) {
+                const shown = Number(c.field_count);
+                const all = Number(c.all_field_count);
+                parts.push(Number.isFinite(all) && all > shown
+                    ? `字段 <strong>${escapeHtml(shown)} / ${escapeHtml(all)}</strong>`
+                    : `字段 <strong>${escapeHtml(shown)}</strong>`);
+            }
+            if(Number.isFinite(Number(c.switch_count))) parts.push(`开关 <strong>${escapeHtml(c.switch_count)}</strong>`);
+            if(Number.isFinite(Number(c.candidate_count)) && Number(c.candidate_count)) parts.push(`候选 <strong>${escapeHtml(c.candidate_count)}</strong>`);
+            if(c.api_output) parts.push(`API 输出 <strong>${escapeHtml(String(c.api_output).split(/[\\/]/).pop())}</strong>`);
+            els.convertSummary.innerHTML = parts.length ? parts.join(' · ') : '等待选择完整工作流 JSON 和 API 工作流 JSON';
+            els.convertSummary.classList.remove('hidden');
+            refreshIcons();
+        }
+
+        function downloadJsonBlob(data, filename){
+            const blob = new Blob([JSON.stringify(data || {}, null, 2)], {type:'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 800);
+        }
+
+        function downloadConvertedJson(kind){
+            if(kind === 'mapping') {
+                if(!lastConvertedMapping){ alert('还没有可下载的 mapping'); return; }
+                downloadJsonBlob(lastConvertedMapping, 'runninghub-conversion-mapping.json');
+                return;
+            }
+            if(!lastConvertedApiWorkflow){ alert('还没有可下载的 API workflow'); return; }
+            downloadJsonBlob(lastConvertedApiWorkflow, 'runninghub-api-workflow.json');
+        }
+
+        function applyConvertedRunningHubFields(wf, fields){
+            wf.fields = Array.isArray(fields) ? fields : [];
+            values = {};
+            wf.fields.forEach(field => values[fieldId(field)] = field.default ?? '');
+            emptyExtractReason = wf.fields.length ? '' : '转换完成，但没有识别到可提交参数。可以检查 workflow 是否为完整前端 JSON 或 API JSON。';
+            renderFieldEditor();
+            renderRunFields();
+        }
+
+        async function convertParsedFrontendWorkflow(parsed, outputMode='external'){
+            const wf = syncWorkflowFromInputs();
+            if(parsed?.workflowId && !els.workflowId.value.trim()) {
+                els.workflowId.value = parsed.workflowId;
+                wf.workflowId = parsed.workflowId;
+            }
+            setStatus('正在转换完整工作流 JSON...');
+            const data = await fetchJson('/api/runninghub/workflow-fields/convert', {
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({
+                    provider_id: runninghubProviderId,
+                    workflowId: wf.workflowId,
+                    workflow: parsed.workflow,
+                    api_workflow: frontendApiWorkflow,
+                    profile:'auto',
+                    output_mode: outputMode || 'external',
+                    main_output_id:'312'
+                })
+            });
+            lastConvertedApiWorkflow = data.workflow || null;
+            lastConvertedMapping = data.mapping || null;
+            applyConvertedRunningHubFields(wf, data.fields || []);
+            renderConvertSummary(data);
+            const count = wf.fields.length;
+            const total = Number(data?.conversion?.all_field_count || 0);
+            const suffix = total && total > count ? `（全量 ${total} 个，其余保持工作流默认）` : '';
+            setStatus(count ? `已转换并导入 ${count} 个 RunningHub 参数${suffix}` : '转换完成，但没有识别到参数');
+            scheduleLocalDraft('convert');
+            return data;
+        }
+
+        async function convertFrontendWorkflow(outputMode='external'){
+            const workflowId = els.workflowId.value.trim();
+            if(!workflowId){ alert('请先填写 workflowId'); return; }
+            let workflow = frontendFullWorkflow;
+            if(!workflow && els.workflowJson.value.trim()){
+                try {
+                    workflow = parseRunningHubImport(els.workflowJson.value.trim()).workflow;
+                    frontendFullWorkflow = workflow;
+                    frontendFullWorkflowName = frontendFullWorkflowName || '已粘贴的完整工作流 JSON';
+                    renderImportFileChips();
+                } catch(e) {}
+            }
+            if(!workflow){ alert('请先选择完整工作流 JSON'); return; }
+            if(!workflowLooksFrontend(workflow)){ alert('这份 JSON 看起来不是完整前端工作流。请在 RunningHub 里选择“导出工作流”，不是“导出工作流API”。'); return; }
+            try {
+                await convertParsedFrontendWorkflow({workflowId, workflow}, outputMode || 'external');
+            } catch(e) {
+                alert('转换失败：' + (e.message || e));
+                setStatus('转换失败');
+            }
+        }
+
+        function compactRunningHubFields(fields){
+            const list = Array.isArray(fields) ? fields : [];
+            if(list.length <= 80) return {fields:list, total:list.length, compacted:false};
+            const importantNames = new Set([
+                'image','video','audio','prompt','text','positive','negative','positive_prompt','negative_prompt',
+                'seed','steps','cfg','denoise','denoise_strength','width','height','resolution',
+                'custom_width','custom_height','frame_load_cap','skip_first_frames','pose_strength','face_strength'
+            ]);
+            const keep = [];
+            const seen = new Set();
+            list.forEach(field => {
+                const id = fieldId(field);
+                const name = String(field.fieldName || '').toLowerCase();
+                const type = String(field.type || '').toLowerCase();
+                const label = String(field.label || '').toLowerCase();
+                const nodeTitle = String(field.nodeTitle || '').toLowerCase();
+                const namedExternalInput = /^(input_|get_|set_)/.test(nodeTitle) || /(^|\/\s*)(input_|get_|set_)/.test(label);
+                const isMedia = ['image','video','audio'].includes(type) && importantNames.has(name);
+                const isPrompt = ['text','textarea'].includes(type) && /prompt|text|caption|positive|negative/.test(name);
+                const isTuning = importantNames.has(name);
+                const isKnownUsefulNode = /load image|load video|textencode|seed|sampler settings|animate embeds|^text \//.test(label);
+                if((namedExternalInput || isMedia || isPrompt || isTuning || isKnownUsefulNode) && !seen.has(id)){
+                    keep.push(field);
+                    seen.add(id);
+                }
+            });
+            return keep.length ? {fields:keep, total:list.length, compacted:keep.length < list.length} : {fields:list, total:list.length, compacted:false};
+        }
+
+        function applyRunningHubFields(wf, fields, compact=false){
+            const list = Array.isArray(fields) ? fields : [];
+            const shellFields = shellAgentVariableFields(list);
+            const switchFields = octInputSwitchFields(list, new Set(shellFields.map(field => String(field.nodeId || ''))));
+            const usedKeys = new Set([...shellFields, ...switchFields].map(field => `${field?.nodeId || ''}.${field?.fieldName || ''}`));
+            const proxyFields = shellAgentProxyFields(list, usedKeys);
+            const externalFields = mergeExternalFields(shellFields, switchFields, proxyFields);
+            const result = externalFields.length
+                ? {fields:externalFields, total:list.length, compacted:externalFields.length < list.length, external:true, shellagent:shellFields.length, switches:switchFields.length, proxies:proxyFields.length}
+                : (compact ? compactRunningHubFields(list) : {fields:list, total:list.length, compacted:false});
+            wf.fields = result.fields;
+            values = {};
+            wf.fields.forEach(field => values[fieldId(field)] = field.default ?? '');
+            return result;
+        }
+
+        function fieldSummary(prefix, result){
+            if(!result || !result.fields.length) return '';
+            if(result.external){
+                const parts = [];
+                if(result.shellagent) parts.push(`${result.shellagent} 个 ShellAgent 输入`);
+                if(result.switches) parts.push(`${result.switches} 个 OCTInput 开关`);
+                return `${prefix} ${result.total} 个字段，已只保留 ${parts.join('、')}`;
+            }
+            return result.compacted
+                ? `${prefix} ${result.total} 个字段，已保留 ${result.fields.length} 个常用字段`
+                : `${prefix} ${result.fields.length} 个字段`;
+        }
+
+        async function extractFields(){
+            const text = els.workflowJson.value.trim();
+            if(!text){ alert('请先粘贴或选择 RunningHub curl / JSON'); return; }
+            try {
+                const parsed = parseRunningHubImport(text);
+                if(parsed.workflowId && !els.workflowId.value.trim()) els.workflowId.value = parsed.workflowId;
+                if(workflowLooksFrontend(parsed.workflow)){
+                    await convertParsedFrontendWorkflow(parsed);
+                    return;
+                }
+                const data = await fetchJson('/api/runninghub/workflow-fields/extract', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({workflow: parsed.workflow})});
+                const wf = syncWorkflowFromInputs();
+                let summary = applyRunningHubFields(wf, data.fields || []);
+                if(!wf.fields.length && wf.workflowId){
+                    setStatus('nodeInfoList 为空，正在按 workflowId 拉取 API 参数...');
+                    const fetched = await fetchRunningHubWorkflowFields(wf.workflowId);
+                    summary = applyRunningHubFields(wf, fetched.fields || []);
+                }
+                emptyExtractReason = wf.fields.length
+                    ? ''
+                    : '这段请求里的 nodeInfoList 是空数组，也没有从 RunningHub 拉到可编辑字段。可以直接按默认参数运行，或手动添加 nodeId + fieldName。';
+                renderFieldEditor();
+                renderRunFields();
+                setStatus(wf.fields.length ? fieldSummary('已提取', summary) : 'nodeInfoList 为空，未提取到字段');
+                scheduleLocalDraft('extract');
+            } catch(e) {
+                alert('提取失败：' + (e.message || e));
+            }
+        }
+
+        async function fetchRunningHubWorkflowFields(workflowId){
+            let lastError = null;
+            for(let attempt = 0; attempt < 2; attempt++){
+                try {
+                    return await fetchJson('/api/runninghub/workflow-fields/fetch', {
+                        method:'POST',
+                        headers:{'Content-Type':'application/json'},
+                        body:JSON.stringify({provider_id: runninghubProviderId, workflowId})
+                    });
+                } catch(e) {
+                    lastError = e;
+                    if(attempt === 0 && /runninghub|network|fetch|网络|请求失败/i.test(e.message || '')){
+                        setStatus('拉取失败，正在重试一次...');
+                        await sleep(1000);
+                        continue;
+                    }
+                    throw e;
+                }
+            }
+            throw lastError || new Error('RunningHub API 参数拉取失败');
+        }
+
+        async function fetchFieldsFromRunningHub(){
+            const wf = syncWorkflowFromInputs();
+            if(!wf.workflowId){ alert('请先填写 workflowId'); return; }
+            try {
+                setStatus('正在按 workflowId 拉取 API 参数...');
+                const data = await fetchRunningHubWorkflowFields(wf.workflowId);
+                const summary = applyRunningHubFields(wf, data.fields || []);
+                emptyExtractReason = wf.fields.length ? '' : 'RunningHub 没有返回可编辑 API 参数。可以按默认参数运行，或手动添加 nodeId + fieldName。';
+                renderFieldEditor();
+                renderRunFields();
+                setStatus(wf.fields.length ? fieldSummary('已按 ID 拉取 API 参数', summary) : 'RH 未返回 API 参数');
+                scheduleLocalDraft('fetch');
+            } catch(e) {
+                alert('API 参数拉取失败：' + (e.message || e));
+                setStatus('API 参数拉取失败');
+            }
+        }
+
+        function renderRunFields(){
+            const wf = currentWorkflow();
+            const fields = wf?.fields || [];
+            if(!fields.length){
+                els.runFields.innerHTML = `<div class="empty">${escapeHtml(emptyExtractReason || '保存或添加字段后，就可以在这里填写运行参数。')}</div>`;
+                refreshIcons();
+                return;
+            }
+            const mediaSummary = mediaRequirementSummary(fields);
+            const mediaIndexes = {image:0, video:0, audio:0};
+            els.runFields.innerHTML = `${mediaSummary ? `<div class="convert-summary" style="margin:0 0 8px">此工作流需要 <strong>${escapeHtml(mediaSummary)}</strong>；点击对应的上传按钮即可。</div>` : ''}` + fields.map((field, i) => {
+                const id = fieldId(field);
+                if(values[id] === undefined) values[id] = field.default ?? '';
+                const type = String(field.type || 'text').toLowerCase();
+                const mediaIndex = isMediaField(type) ? ++mediaIndexes[type] : 0;
+                const displayLabel = isMediaField(type) ? `上传${mediaTypeLabel(type)} ${mediaIndex}` : (field.label || id);
+                let control = '';
+                if(type === 'textarea'){
+                    control = `<textarea class="textarea" oninput="setValue('${escapeHtml(id)}', this.value)">${escapeHtml(values[id])}</textarea>`;
+                } else if(type === 'boolean'){
+                    control = `<select class="select" onchange="setValue('${escapeHtml(id)}', this.value === 'true')"><option value="false" ${!values[id] ? 'selected' : ''}>false</option><option value="true" ${values[id] ? 'selected' : ''}>true</option></select>`;
+                } else if(type === 'dropdown'){
+                    const opts = Array.isArray(field.options) && field.options.length ? field.options : [values[id] || field.default || ''];
+                    control = `<select class="select" onchange="setValue('${escapeHtml(id)}', this.value)">${opts.map(opt => `<option value="${escapeHtml(opt)}" ${String(values[id]) === String(opt) ? 'selected' : ''}>${escapeHtml(opt)}</option>`).join('')}</select>`;
+                } else if(isMediaField(type)){
+                    const accept = field.accept || (type === 'image' ? 'image/*' : type === 'video' ? 'video/*' : 'audio/*');
+                    control = `<div class="file-control">
+                        <div class="file-chip" title="${escapeHtml(values[id] || '')}">${escapeHtml(values[id] || '尚未上传')}</div>
+                        <label class="btn"><input class="hidden" type="file" accept="${escapeHtml(accept)}" onchange="uploadFieldFile(${i}, this.files[0])"><i data-lucide="upload" class="w-4 h-4"></i><span>选择${escapeHtml(mediaTypeLabel(type))}</span></label>
+                    </div>`;
+                } else {
+                    const inputType = type === 'integer' || type === 'number' ? 'number' : 'text';
+                    control = `<input class="input" type="${inputType}" value="${escapeHtml(values[id])}" oninput="setValue('${escapeHtml(id)}', this.value)">`;
+                }
+                return `<div class="run-field">
+                    <div class="run-label">
+                        <strong>${escapeHtml(displayLabel)}</strong>
+                        <span>${escapeHtml(field.nodeTitle || '节点')} · ${escapeHtml(field.nodeId || '?')}.${escapeHtml(field.fieldName || '?')} · ${escapeHtml(type)}</span>
+                    </div>
+                    ${control}
+                </div>`;
+            }).join('');
+            refreshIcons();
+        }
+
+        function setValue(id, value){ values[id] = value; scheduleLocalDraft('value'); }
+
+        async function uploadFieldFile(index, file){
+            if(!file) return;
+            const wf = currentWorkflow();
+            const field = wf?.fields?.[index];
+            if(!field) return;
+            const id = fieldId(field);
+            setStatus('正在上传到 RunningHub...');
+            try {
+                const form = new FormData();
+                form.append('files', file);
+                const data = await fetchJson(`/api/runninghub/upload?provider_id=${encodeURIComponent(runninghubProviderId)}&fileType=input`, {method:'POST', body:form});
+                const item = data.files?.[0];
+                const uploadedValue = item?.fileName || item?.url || item?.download_url || '';
+                if(!uploadedValue) throw new Error('RunningHub 未返回可用文件地址');
+                values[id] = uploadedValue;
+                renderRunFields();
+                setStatus('上传完成');
+                scheduleLocalDraft('value');
+            } catch(e) {
+                alert(e.message || String(e));
+                setStatus('上传失败');
+            }
+        }
+
+        async function runWorkflow(){
+            const wf = syncWorkflowFromInputs();
+            if(!wf.workflowId){ alert('请先填写 workflowId'); return; }
+            if(!wf.fields.length && !confirm('当前没有 nodeInfoList 字段，将按 RunningHub 默认参数直接运行。继续？')) return;
+            els.runBtn.disabled = true;
+            setTaskState('提交中', wf.workflowId);
+            els.resultGrid.innerHTML = '';
+            try {
+                const data = await fetchJson('/api/runninghub/tasks', {
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({
+                        provider_id: runninghubProviderId,
+                        workflow_local_id: selectedId || '',
+                        workflowId: wf.workflowId,
+                        accessPassword: wf.accessPassword,
+                        retainSeconds: wf.defaultRetainSeconds || undefined,
+                        fields: wf.fields,
+                        values
+                    })
+                });
+                setTaskState(data.status || 'RUNNING', data.task_id);
+                const hasImmediateOutputs = [...(data.images || []), ...(data.videos || []), ...(data.files || [])].filter(Boolean).length || (data.texts || []).length;
+                if(String(data.status || '').toUpperCase() === 'SUCCESS' && hasImmediateOutputs){
+                    renderResults(data);
+                    await loadHistory();
+                    return;
+                }
+                await pollTask(data.task_id);
+            } catch(e) {
+                setTaskState('FAILED', e.message || String(e));
+                alert(e.message || String(e));
+            } finally {
+                els.runBtn.disabled = false;
+            }
+        }
+
+        async function pollTask(taskId){
+            polling = true;
+            let queryFailures = 0;
+            for(let i = 0; i < 240 && polling; i++){
+                await new Promise(resolve => setTimeout(resolve, i === 0 ? 1200 : 4000));
+                let data = null;
+                try {
+                    data = await fetchJson(`/api/runninghub/tasks/${encodeURIComponent(taskId)}?provider_id=${encodeURIComponent(runninghubProviderId)}&workflow_local_id=${encodeURIComponent(selectedId || '')}`);
+                    queryFailures = 0;
+                } catch(e) {
+                    queryFailures += 1;
+                    setTaskState('QUERY_RETRY', `${taskId} (${queryFailures}/3)`);
+                    if(queryFailures < 3) continue;
+                    throw e;
+                }
+                setTaskState(data.status || 'RUNNING', taskId);
+                if(data.status === 'SUCCESS'){
+                    renderResults(data);
+                    await loadHistory();
+                    return;
+                }
+                if(data.status === 'FAILED'){
+                    throw new Error(data.error || 'RunningHub task failed');
+                }
+            }
+            throw new Error('任务等待超时');
+        }
+
+        function setTaskState(status, detail){
+            els.taskState.innerHTML = `<div class="big">${escapeHtml(status || 'Ready')}</div><div class="small">${escapeHtml(detail || '')}</div>`;
+        }
+
+        function renderResults(data){
+            const images = data.images || [];
+            const videos = data.videos || [];
+            const files = data.files || [];
+            const html = [
+                ...images.map(url => `<a class="result-item" href="${escapeHtml(url)}" target="_blank"><img src="${escapeHtml(url)}" loading="lazy"></a>`),
+                ...videos.map(url => `<a class="result-item" href="${escapeHtml(url)}" target="_blank"><video src="${escapeHtml(url)}" controls></video></a>`),
+                ...files.map(url => `<a class="result-item" href="${escapeHtml(url)}" target="_blank">文件</a>`)
+            ].join('');
+            els.resultGrid.innerHTML = html || '<div class="empty" style="grid-column:1/-1">任务成功，但没有文件结果。</div>';
+            refreshIcons();
+        }
+
+        async function loadHistory(){
+            const data = await fetchJson('/api/history?type=runninghub');
+            els.historyGrid.innerHTML = (data || []).slice(0, 24).map(item => {
+                const url = (item.images || [])[0] || (item.videos || [])[0] || '';
+                const isVideo = (item.videos || [])[0];
+                if(!url) return '';
+                return `<a class="history-item" href="${escapeHtml(url)}" target="_blank" data-history-ts="${escapeHtml(item.timestamp)}">
+                    ${isVideo ? `<video src="${escapeHtml(url)}"></video>` : `<img src="${escapeHtml(url)}" loading="lazy">`}
+                    <span>${escapeHtml(item.prompt || item.task_id || 'RunningHub')}</span>
+                </a>`;
+            }).join('') || '<div class="empty" style="grid-column:1/-1">暂无历史</div>';
+            window.HistoryBulkManager?.attach({masonry:'#historyGrid'});
+        }
+
+        window.addEventListener('message', event => {
+            if(event.data?.type === 'studio-theme' && window.StudioTheme){
+                StudioTheme.apply(event.data.theme);
+            }
+        });
+        document.addEventListener('input', event => {
+            if(event.target?.matches?.('#titleInput,#workflowIdInput,#accessPasswordInput,#retainInput,#workflowJsonInput,#fieldFilterInput')){
+                scheduleLocalDraft('input');
+            }
+        }, true);
+        document.addEventListener('change', event => {
+            if(event.target?.matches?.('#titleInput,#workflowIdInput,#accessPasswordInput,#retainInput,#workflowJsonInput,#fieldFilterInput')){
+                scheduleLocalDraft('input');
+            }
+        }, true);
+        window.addEventListener('beforeunload', event => {
+            if(localDraftDirty) saveLocalDraft('beforeunload');
+            if(localDraftDirty && readLocalDraft()){
+                event.preventDefault();
+                event.returnValue = '';
+            }
+        });
+
+        window.onload = async () => {
+            refreshIcons();
+            renderImportFileChips();
+            await loadAll();
+        };
+    </script>
+</body>
+</html>
+

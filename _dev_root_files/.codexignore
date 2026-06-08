@@ -1,0 +1,36 @@
+# Release bundles and archives
+dist/
+*.zip
+
+# Bundled runtimes and dependency caches
+OCT/python/
+OCT/python.zip
+OCT/packages/
+**/__pycache__/
+*.pyc
+*.pyo
+
+# Runtime logs and local diagnostics
+*.log
+*.tmp
+gcm-diagnose.log
+
+# App runtime state and generated user data
+OCT/history.json
+OCT/global_config.json
+OCT/data/conversations/
+OCT/data/canvases/
+OCT/data/comfyui_exports/
+OCT/assets/input/
+OCT/assets/output/
+OCT/assets/preview/
+OCT/output/
+
+# Workspace helper state
+.workbuddy/
+
+# Nested VCS/editor metadata
+OCT/.svn/
+**/.git/
+.vscode/
+.idea/

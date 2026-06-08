@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/static/logo.png" type="image/png">
+    <title>十月文化 | 动作迁移</title>
+    <script>
+        (function(){
+            try {
+                var theme = localStorage.getItem('studio_theme') || localStorage.getItem('canvas_theme') || 'light';
+                if(theme === 'dark') {
+                    document.documentElement.classList.add('studio-theme-dark');
+                    document.documentElement.classList.add('theme-dark');
+                }
+            } catch(e) {}
+        })();
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/static/theme.js?v=20260516-theme-sync"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;800;900&display=swap');
+        :root { --accent:#111827; --bg:#f7f9fc; --card:#fff; --line:#e8edf4; --muted:#7b8798; --soft:#f3f6fa; --shadow:0 22px 70px rgba(15,23,42,.08); --ease:cubic-bezier(.4,0,.2,1); }
+        * { box-sizing:border-box; }
+        body { min-height:100vh; margin:0; background:linear-gradient(180deg,#fff 0,var(--bg) 58%,#edf2f7 100%); font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; color:var(--accent); -webkit-font-smoothing:antialiased; }
+        button,input,select,textarea { font:inherit; }
+        .page { max-width:1320px; margin:0 auto; padding:42px 38px 72px; }
+        .head { display:flex; align-items:flex-end; justify-content:space-between; gap:24px; margin-bottom:30px; }
+        .eyebrow { display:inline-flex; align-items:center; gap:8px; height:28px; padding:0 10px; border:1px solid var(--line); border-radius:999px; background:rgba(255,255,255,.74); color:#64748b; font-size:10px; font-weight:900; letter-spacing:.18em; text-transform:uppercase; }
+        .title { margin-top:12px; font-size:42px; line-height:.98; font-weight:900; letter-spacing:-.04em; }
+        .subtitle { margin-top:10px; color:#64748b; font-size:13px; font-weight:700; max-width:720px; line-height:1.8; }
+        .status { display:flex; align-items:center; gap:8px; min-height:34px; padding:0 12px; border-radius:999px; border:1px solid var(--line); background:#fff; color:#64748b; font-size:11px; font-weight:900; box-shadow:0 10px 28px rgba(15,23,42,.04); }
+        .layout { display:grid; grid-template-columns:minmax(0,1fr) minmax(430px,.82fr); gap:26px; align-items:start; }
+        .stack { display:flex; flex-direction:column; gap:18px; }
+        .mode-tabs { display:inline-grid; grid-template-columns:1fr 1fr; gap:4px; padding:4px; border:1px solid var(--line); border-radius:16px; background:#fff; box-shadow:0 10px 28px rgba(15,23,42,.04); }
+        .mode-tab { height:34px; border-radius:12px; padding:0 12px; color:#64748b; background:transparent; display:flex; align-items:center; justify-content:center; gap:7px; font-size:11px; font-weight:950; }
+        .mode-tab.active { background:#111827; color:#fff; }
+        .card { background:rgba(255,255,255,.9); border:1px solid var(--line); border-radius:26px; box-shadow:0 2px 16px rgba(15,23,42,.025); backdrop-filter:blur(18px); padding:20px; }
+        .section-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:14px; }
+        .section-title { display:flex; align-items:center; gap:8px; color:#64748b; font-size:11px; font-weight:950; letter-spacing:.12em; text-transform:uppercase; }
+        .help { color:#94a3b8; font-size:11px; font-weight:750; line-height:1.7; }
+        .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+        .field { display:flex; flex-direction:column; gap:7px; min-width:0; }
+        .field.full { grid-column:1/-1; }
+        .label { display:flex; align-items:center; justify-content:space-between; gap:8px; color:#64748b; font-size:11px; font-weight:950; }
+        .control { width:100%; min-height:44px; border:1px solid #e7edf5; border-radius:16px; background:#f8fafc; color:#111827; outline:none; padding:0 13px; font-size:12px; font-weight:850; transition:all .18s ease; }
+        textarea.control { min-height:78px; padding:12px 13px; resize:vertical; line-height:1.65; }
+        .control:focus { border-color:#111827; background:#fff; box-shadow:0 0 0 3px rgba(17,24,39,.06); }
+        .drop { min-height:170px; border:1px dashed #cbd5e1; border-radius:24px; background:linear-gradient(180deg,#fff,#f8fafc); display:flex; align-items:center; justify-content:center; text-align:center; cursor:pointer; overflow:hidden; transition:all .2s var(--ease); }
+        .drop:hover,.drop.drag { border-color:#111827; transform:translateY(-1px); box-shadow:0 14px 34px rgba(15,23,42,.06); }
+        .preview { width:100%; height:100%; min-height:170px; object-fit:contain; background:#f8fafc; display:none; }
+        .drop.has-image .empty,.drop.has-video .empty { display:none; }
+        .drop.has-image .preview,.drop.has-video .preview { display:block; }
+        .toggle { min-height:44px; border:1px solid #111827; border-radius:16px; background:#111827; color:#fff; padding:0 13px; display:flex; align-items:center; justify-content:center; gap:8px; font-size:11px; font-weight:950; }
+        .toggle.off { background:#f8fafc; color:#64748b; border-color:#e7edf5; }
+        .actions { display:grid; grid-template-columns:1fr auto; gap:10px; }
+        .btn { min-height:54px; border-radius:20px; border:1px solid #111827; background:#111827; color:#fff; font-size:12px; font-weight:950; letter-spacing:.16em; text-transform:uppercase; display:flex; align-items:center; justify-content:center; gap:10px; transition:all .2s var(--ease); }
+        .btn:hover:not(:disabled) { background:#000; transform:translateY(-1px); box-shadow:0 16px 34px rgba(15,23,42,.14); }
+        .btn:disabled { opacity:.55; cursor:not-allowed; transform:none; box-shadow:none; }
+        .small { min-height:54px; padding:0 16px; border-radius:20px; border:1px solid var(--line); background:#fff; color:#64748b; font-size:11px; font-weight:950; display:flex; align-items:center; justify-content:center; gap:8px; }
+        .result { min-height:620px; background:#fff; border-radius:30px; border:1px solid #edf2f7; box-shadow:var(--shadow); display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; padding:20px; }
+        .placeholder { text-align:center; color:#cbd5e1; display:flex; flex-direction:column; align-items:center; gap:14px; }
+        .video { width:100%; max-height:570px; border-radius:22px; background:#020617; box-shadow:0 16px 40px rgba(15,23,42,.16); }
+        .download { position:absolute; right:28px; bottom:28px; min-height:40px; display:inline-flex; align-items:center; padding:0 16px; border-radius:999px; background:rgba(255,255,255,.92); border:1px solid #edf2f7; color:#0f172a; font-size:10px; font-weight:950; letter-spacing:.12em; text-transform:uppercase; box-shadow:0 14px 32px rgba(15,23,42,.1); }
+        .hidden { display:none !important; }
+        .log { border:1px solid #edf2f7; border-radius:18px; background:#f8fafc; padding:12px; color:#64748b; font-size:11px; font-weight:800; line-height:1.7; white-space:pre-wrap; word-break:break-word; }
+        .history-list { display:grid; grid-template-columns:1fr; gap:12px; max-height:520px; overflow:auto; padding-right:4px; }
+        .history-empty { color:#94a3b8; font-size:11px; font-weight:850; line-height:1.7; padding:12px; border:1px dashed #dbe3ee; border-radius:16px; background:#f8fafc; }
+        .history-card { border:1px solid #edf2f7; border-radius:18px; background:#fff; padding:10px; display:grid; grid-template-columns:116px minmax(0,1fr); gap:10px; align-items:center; cursor:pointer; transition:all .16s var(--ease); }
+        .history-card:hover { border-color:#111827; transform:translateY(-1px); box-shadow:0 12px 28px rgba(15,23,42,.08); }
+        .history-card video { width:116px; aspect-ratio:16/9; border-radius:12px; background:#020617; object-fit:cover; }
+        .history-meta { min-width:0; display:flex; flex-direction:column; gap:6px; }
+        .history-title { color:#111827; font-size:12px; font-weight:950; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .history-sub { color:#94a3b8; font-size:10px; font-weight:850; line-height:1.5; }
+        .history-actions { display:flex; gap:8px; flex-wrap:wrap; }
+        .history-mini { height:28px; border:1px solid #edf2f7; background:#f8fafc; color:#64748b; border-radius:999px; padding:0 10px; display:inline-flex; align-items:center; gap:6px; font-size:10px; font-weight:950; }
+        .local-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+        .local-fields .field.full { grid-column:1/-1; }
+        .local-upload-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+        .local-upload-tile { min-height:118px; border:1px dashed #cbd5e1; border-radius:22px; background:linear-gradient(180deg,#fff,#f8fafc); color:#64748b; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; text-align:center; font-size:11px; font-weight:950; transition:all .18s var(--ease); }
+        .local-upload-tile:hover { border-color:#111827; color:#111827; transform:translateY(-1px); box-shadow:0 12px 30px rgba(15,23,42,.06); }
+        .local-upload-name { max-width:100%; color:#94a3b8; font-size:10px; font-weight:850; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding:0 12px; }
+        .engine-cloud .local-only, .engine-local .cloud-only { display:none !important; }
+        .studio-theme-dark body,.theme-dark body { background:#0b1020; color:#e5e7eb; }
+        .studio-theme-dark .card,.studio-theme-dark .result,.studio-theme-dark .status,.studio-theme-dark .small,.studio-theme-dark .mode-tabs { background:#111827; border-color:#253047; color:#e5e7eb; }
+        .studio-theme-dark .control,.studio-theme-dark .drop,.studio-theme-dark .log,.studio-theme-dark .history-empty,.studio-theme-dark .history-card,.studio-theme-dark .history-mini { background:#0f172a; border-color:#253047; color:#e5e7eb; }
+        .studio-theme-dark .history-title { color:#e5e7eb; }
+        .studio-theme-dark .btn,.studio-theme-dark .toggle { background:#e5e7eb; color:#0f172a; border-color:#e5e7eb; }
+        @media (max-width:1080px){ .layout{grid-template-columns:1fr}.result{min-height:460px} }
+        @media (max-width:720px){ .page{padding:24px 16px 54px}.head{display:block}.title{font-size:34px}.grid,.actions,.local-fields,.local-upload-grid{grid-template-columns:1fr}.card{padding:16px}.result{min-height:360px;border-radius:24px} }
+    </style>
+    <link rel="stylesheet" href="/static/theme.css?v=20260510-studio-pages-blue-dark10">
+    <link rel="stylesheet" href="/static/oct-ui.css?v=20260528-brand-align">
+</head>
+<body class="engine-cloud">
+    <div class="page">
+        <header class="head">
+            <div>
+                <div class="eyebrow"><i data-lucide="move-3d" class="w-3.5 h-3.5"></i><span>DreamActor 2.0</span></div>
+                <h1 class="title">动作迁移</h1>
+                <p class="subtitle">上传一张主体图片和模板视频，将图片中的人物、动漫或宠物按模板视频的动作、表情和口型驱动起来。</p>
+            </div>
+            <div class="flex flex-col items-end gap-3">
+                <div class="mode-tabs">
+                    <button id="modeCloud" class="mode-tab active" type="button" onclick="switchMotionEngine('cloud')"><i data-lucide="cloud" class="w-3.5 h-3.5"></i><span>云端 API</span></button>
+                    <button id="modeLocal" class="mode-tab" type="button" onclick="switchMotionEngine('local')"><i data-lucide="workflow" class="w-3.5 h-3.5"></i><span>本地流程</span></button>
+                </div>
+                <div id="providerStatus" class="status"><i data-lucide="loader-2" class="w-3.5 h-3.5"></i><span>正在加载动作迁移平台...</span></div>
+            </div>
+        </header>
+
+        <main class="layout">
+            <div class="stack">
+                <input id="imageFile" class="hidden" type="file" accept="image/png,image/jpeg,image/jpg" onchange="handleImageFile(this.files[0])">
+                <input id="videoFile" class="hidden" type="file" accept="video/mp4,video/quicktime,video/webm" onchange="handleVideoFile(this.files[0])">
+                <section class="card cloud-only">
+                    <div class="section-head">
+                        <div>
+                            <div class="section-title"><i data-lucide="settings-2" class="w-3.5 h-3.5"></i><span>接口设置</span></div>
+                            <div class="help mt-1">使用火山 Visual API：Action=CVSync2AsyncSubmitTask / CVSync2AsyncGetResult。</div>
+                        </div>
+                        <button class="small" type="button" onclick="initProviders()"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i><span>刷新</span></button>
+                    </div>
+                    <div class="grid">
+                        <label class="field full">
+                            <span class="label"><span>动作迁移平台</span><span>API 设置</span></span>
+                            <select id="providerSelect" class="control"></select>
+                        </label>
+                        <label class="field full">
+                            <span class="label"><span>服务标识</span><span>req_key</span></span>
+                            <input id="reqKeyInput" class="control" value="jimeng_dreamactor_m20_gen_video">
+                        </label>
+                    </div>
+                </section>
+
+                <section class="card local-only">
+                    <div class="section-head">
+                        <div>
+                            <div class="section-title"><i data-lucide="hard-drive-upload" class="w-3.5 h-3.5"></i><span>本地素材</span></div>
+                            <div class="help mt-1">只上传到 ComfyUI 输入目录，不走云端 API，不共用云端上传限制。</div>
+                        </div>
+                    </div>
+                    <div class="local-upload-grid">
+                        <button class="local-upload-tile" type="button" onclick="document.getElementById('imageFile').click()">
+                            <i data-lucide="image-plus" class="w-8 h-8"></i>
+                            <span>上传主体图片</span>
+                            <span id="localImageName" class="local-upload-name">未上传</span>
+                        </button>
+                        <button class="local-upload-tile" type="button" onclick="document.getElementById('videoFile').click()">
+                            <i data-lucide="file-video" class="w-8 h-8"></i>
+                            <span>上传模板视频</span>
+                            <span id="localVideoName" class="local-upload-name">未上传</span>
+                        </button>
+                    </div>
+                </section>
+
+                <section class="card local-only">
+                    <div class="section-head">
+                        <div>
+                            <div class="section-title"><i data-lucide="workflow" class="w-3.5 h-3.5"></i><span>MotionTransfer 本地流程</span></div>
+                            <div class="help mt-1">使用 workflows/MotionTransfer.json，自动暴露所有 Input / Output 前缀变量。</div>
+                        </div>
+                        <button class="small" type="button" onclick="loadLocalWorkflowFields()"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i><span>刷新</span></button>
+                    </div>
+                    <div id="localWorkflowStatus" class="log mb-3">正在读取 MotionTransfer.json...</div>
+                    <div id="localWorkflowFields" class="local-fields"></div>
+                </section>
+
+                <section class="card cloud-only">
+                    <div class="section-head">
+                        <div>
+                            <div class="section-title"><i data-lucide="image-plus" class="w-3.5 h-3.5"></i><span>主体图片</span></div>
+                            <div class="help mt-1">云端 API 可用 base64/公网 URL；本地流程会同步上传到 ComfyUI。</div>
+                        </div>
+                    </div>
+                    <div id="dropZone" class="drop" onclick="document.getElementById('imageFile').click()">
+                        <div class="empty px-4">
+                            <i data-lucide="upload-cloud" class="w-9 h-9 mx-auto text-slate-300"></i>
+                            <div class="mt-3 text-[12px] font-black text-slate-500">点击、拖拽或粘贴主体图片</div>
+                            <div class="mt-1 text-[10px] font-bold text-slate-400">支持 jpeg / jpg / png，接口限制 4.7MB 以下。</div>
+                        </div>
+                        <img id="imagePreview" class="preview" alt="">
+                    </div>
+                    <label class="field mt-4">
+                        <span class="label"><span>图片 URL</span><span>可选</span></span>
+                        <input id="imageUrlInput" class="control" placeholder="https://example.com/character.png">
+                    </label>
+                </section>
+
+                <section class="card cloud-only">
+                    <div class="section-head">
+                        <div>
+                            <div class="section-title"><i data-lucide="film" class="w-3.5 h-3.5"></i><span>模板视频</span></div>
+                            <div class="help mt-1">云端 API 会上传到云空间；本地流程会同步上传到 ComfyUI 输入目录。</div>
+                        </div>
+                    </div>
+                    <div id="videoDropZone" class="drop" onclick="document.getElementById('videoFile').click()">
+                        <div class="empty px-4">
+                            <i data-lucide="file-video" class="w-9 h-9 mx-auto text-slate-300"></i>
+                            <div class="mt-3 text-[12px] font-black text-slate-500">点击或拖拽上传模板视频</div>
+                            <div class="mt-1 text-[10px] font-bold text-slate-400">接口限制 30 秒内，分辨率 200x200 以上、2K 以内。</div>
+                        </div>
+                        <video id="videoPreview" class="preview" controls playsinline></video>
+                    </div>
+                    <input id="videoUrlInput" type="hidden">
+                    <button id="cutToggle" class="toggle mt-4 cloud-only" type="button" onclick="toggleCut()"><i data-lucide="scissors" class="w-3.5 h-3.5"></i><span>裁剪结果视频第 1 秒</span></button>
+                </section>
+
+                <section class="card cloud-only">
+                    <div class="section-head">
+                        <div>
+                            <div class="section-title"><i data-lucide="stamp" class="w-3.5 h-3.5"></i><span>隐式标识</span></div>
+                            <div class="help mt-1">可选参数，会在查询任务时作为 req_json 传给上游。</div>
+                        </div>
+                    </div>
+                    <div class="grid">
+                        <label class="field">
+                            <span class="label"><span>content_producer</span><span>可选</span></span>
+                            <input id="contentProducerInput" class="control">
+                        </label>
+                        <label class="field">
+                            <span class="label"><span>producer_id</span><span>可选</span></span>
+                            <input id="producerIdInput" class="control">
+                        </label>
+                        <label class="field">
+                            <span class="label"><span>content_propagator</span><span>可选</span></span>
+                            <input id="contentPropagatorInput" class="control">
+                        </label>
+                        <label class="field">
+                            <span class="label"><span>propagate_id</span><span>可选</span></span>
+                            <input id="propagateIdInput" class="control">
+                        </label>
+                    </div>
+                </section>
+
+                <div class="actions">
+                    <button id="genBtn" class="btn" onclick="submitMotion()"><i data-lucide="play" class="w-4 h-4"></i><span>开始迁移</span></button>
+                    <button class="small" type="button" onclick="openApiSettings()"><i data-lucide="key-round" class="w-3.5 h-3.5"></i><span>API 设置</span></button>
+                </div>
+            </div>
+
+            <aside class="stack">
+                <div class="result">
+                    <div id="placeholder" class="placeholder">
+                        <i data-lucide="person-standing" class="w-16 h-16 stroke-[1]"></i>
+                        <p class="text-[11px] font-black uppercase tracking-[0.34em]">等待动作迁移</p>
+                        <p class="text-[12px] font-bold max-w-sm leading-7">准备主体图片和模板视频后开始生成。完成后视频会保存到本地 output。</p>
+                    </div>
+                    <div id="loader" class="hidden text-center space-y-4">
+                        <div class="w-10 h-10 border-2 border-black border-t-transparent rounded-full animate-spin mx-auto"></div>
+                        <p class="text-[10px] font-bold uppercase tracking-[0.3em]">动作迁移中...</p>
+                    </div>
+                    <video id="outputVideo" class="video hidden" controls playsinline></video>
+                    <a id="downloadBtn" class="download hidden" download>Download</a>
+                </div>
+                <section class="card">
+                    <div class="section-title mb-3"><i data-lucide="terminal" class="w-3.5 h-3.5"></i><span>任务信息</span></div>
+                    <div id="taskLog" class="log">暂无任务。</div>
+                </section>
+                <section class="card">
+                    <div class="section-head">
+                        <div class="section-title"><i data-lucide="history" class="w-3.5 h-3.5"></i><span>历史记录</span></div>
+                        <button class="small" type="button" onclick="loadMotionHistory()"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i><span>刷新</span></button>
+                    </div>
+                    <div id="historyList" class="history-list">
+                        <div class="history-empty">暂无动作迁移历史。</div>
+                    </div>
+                </section>
+            </aside>
+        </main>
+    </div>
+
+    <script>
+        let providers = [];
+        let imageBase64 = '';
+        let imageComfyName = '';
+        let videoLocalUrl = '';
+        let videoPublicUrl = '';
+        let videoComfyName = '';
+        let cutFirstSecond = true;
+        let motionEngine = localStorage.getItem('motion_transfer_engine') || 'cloud';
+        let localWorkflowFields = [];
+        function escapeHtml(str){ return String(str || '').replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s])); }
+        function isMotionProvider(item){
+            const protocol = String(item?.protocol || '').toLowerCase();
+            const id = String(item?.id || '').toLowerCase();
+            const name = String(item?.name || '').toLowerCase();
+            const base = String(item?.base_url || '').toLowerCase();
+            return item && item.enabled !== false && (protocol === 'volc_visual' || id.includes('motion-transfer') || id.includes('dreamactor') || name.includes('动作迁移') || name.includes('动作模仿') || base.includes('visual.volcengineapi.com'));
+        }
+        function setStatus(text, ok=false){
+            const el = document.getElementById('providerStatus');
+            el.innerHTML = `<i data-lucide="${ok ? 'check-circle-2' : 'info'}" class="w-3.5 h-3.5"></i><span>${escapeHtml(text)}</span>`;
+            if(window.lucide) lucide.createIcons();
+        }
+        function switchMotionEngine(mode){
+            motionEngine = mode === 'local' ? 'local' : 'cloud';
+            localStorage.setItem('motion_transfer_engine', motionEngine);
+            document.body.classList.toggle('engine-local', motionEngine === 'local');
+            document.body.classList.toggle('engine-cloud', motionEngine !== 'local');
+            document.getElementById('modeCloud')?.classList.toggle('active', motionEngine !== 'local');
+            document.getElementById('modeLocal')?.classList.toggle('active', motionEngine === 'local');
+            const genText = document.querySelector('#genBtn span');
+            if(genText) genText.textContent = motionEngine === 'local' ? '运行本地流程' : '开始迁移';
+            setStatus(motionEngine === 'local' ? '本地 MotionTransfer 工作流模式' : (providers.length ? `已检测到 ${providers.length} 个动作迁移平台` : '未检测到动作迁移平台'), motionEngine === 'local' || Boolean(providers.length));
+            document.getElementById('genBtn').disabled = motionEngine === 'cloud' && !providers.length;
+            if(motionEngine === 'local' && !localWorkflowFields.length) loadLocalWorkflowFields();
+            if(window.lucide) lucide.createIcons();
+        }
+        async function initProviders(){
+            setStatus('正在加载动作迁移平台...');
+            try {
+                const data = await fetch('/api/providers', {cache:'no-store'}).then(r => r.json());
+                providers = (data.providers || []).filter(isMotionProvider);
+            } catch(e) {
+                providers = [];
+            }
+            const select = document.getElementById('providerSelect');
+            select.innerHTML = providers.length
+                ? providers.map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.name || p.id)}${p.has_key ? '' : '（未配置 Key）'}</option>`).join('')
+                : '<option value="">未配置动作迁移平台</option>';
+            document.getElementById('genBtn').disabled = motionEngine === 'cloud' && !providers.length;
+            setStatus(motionEngine === 'local' ? '本地 MotionTransfer 工作流模式' : (providers.length ? `已检测到 ${providers.length} 个动作迁移平台` : '未检测到动作迁移平台'), motionEngine === 'local' || Boolean(providers.length));
+        }
+        async function fileToDataUrl(file){
+            return await new Promise(resolve => {
+                const reader = new FileReader();
+                reader.onload = e => resolve(e.target.result || '');
+                reader.readAsDataURL(file);
+            });
+        }
+        async function uploadToComfy(file){
+            const form = new FormData();
+            form.append('files', file);
+            const data = await fetch('/api/upload', {method:'POST', body:form}).then(async r => {
+                if(!r.ok) throw new Error((await r.json()).detail || '上传到 ComfyUI 失败');
+                return r.json();
+            });
+            return data.files?.[0]?.comfy_name || file.name || '';
+        }
+        async function handleImageFile(file){
+            if(!file) return;
+            if(motionEngine === 'cloud' && file.size > 4.7 * 1024 * 1024) {
+                alert('图片超过接口 4.7MB 限制，请压缩后再上传。');
+                return;
+            }
+            const dataUrl = await fileToDataUrl(file);
+            imageBase64 = String(dataUrl).split(',', 2)[1] || '';
+            const preview = document.getElementById('imagePreview');
+            preview.src = dataUrl;
+            document.getElementById('dropZone').classList.add('has-image');
+            try {
+                imageComfyName = await uploadToComfy(file);
+                fillLocalMediaField('image', imageComfyName);
+                const localName = document.getElementById('localImageName');
+                if(localName) localName.textContent = imageComfyName || file.name || '已上传';
+            } catch(e) {
+                if(motionEngine === 'local') setTaskLog(e.message || String(e));
+            }
+        }
+        async function handleVideoFile(file){
+            if(!file) return;
+            const okTypes = ['video/mp4', 'video/quicktime', 'video/webm'];
+            const extOk = /\.(mp4|mov|webm)$/i.test(file.name || '');
+            if(!okTypes.includes(file.type) && !extOk) {
+                alert('模板视频仅支持 mp4、mov、webm。');
+                return;
+            }
+            const previewUrl = URL.createObjectURL(file);
+            const preview = document.getElementById('videoPreview');
+            preview.src = previewUrl;
+            document.getElementById('videoDropZone').classList.add('has-video');
+            setTaskLog(motionEngine === 'local' ? '正在上传模板视频到 ComfyUI 输入目录...' : '正在上传模板视频到云空间...');
+            try {
+                videoComfyName = await uploadToComfy(file);
+                fillLocalMediaField('video', videoComfyName);
+                const localName = document.getElementById('localVideoName');
+                if(localName) localName.textContent = videoComfyName || file.name || '已上传';
+            } catch(e) {
+                if(motionEngine === 'local') setTaskLog(e.message || String(e));
+            }
+            if(motionEngine === 'local'){
+                setTaskLog(videoComfyName ? '模板视频已上传到 ComfyUI 输入目录。' : '模板视频上传到 ComfyUI 失败，请检查后端地址。');
+                return;
+            }
+            try {
+                const form = new FormData();
+                form.append('files', file);
+                const data = await fetch('/api/motion-transfer/upload-video', {method:'POST', body:form}).then(async r => {
+                    if(!r.ok) throw new Error((await r.json()).detail || '视频上传失败');
+                    return r.json();
+                });
+                const uploaded = data.files?.[0] || {};
+                videoLocalUrl = uploaded.url || '';
+                videoPublicUrl = uploaded.public_url || '';
+                document.getElementById('videoUrlInput').value = '';
+                setTaskLog(uploaded.local_only
+                    ? '模板视频已保存到本地素材目录，但云空间未返回公网地址。提交时后端会再次尝试上传云空间。'
+                    : '模板视频已上传到云空间，可直接开始迁移。');
+            } catch(e) {
+                videoLocalUrl = '';
+                videoPublicUrl = '';
+                document.getElementById('videoUrlInput').value = '';
+                setTaskLog(e.message || String(e));
+                alert(e.message || '视频上传失败');
+            }
+        }
+        const dropZone = document.getElementById('dropZone');
+        dropZone.ondragover = e => { e.preventDefault(); dropZone.classList.add('drag'); };
+        dropZone.ondragleave = () => dropZone.classList.remove('drag');
+        dropZone.ondrop = e => { e.preventDefault(); dropZone.classList.remove('drag'); handleImageFile([...e.dataTransfer.files].find(f => f.type.startsWith('image/'))); };
+        const videoDropZone = document.getElementById('videoDropZone');
+        videoDropZone.ondragover = e => { e.preventDefault(); videoDropZone.classList.add('drag'); };
+        videoDropZone.ondragleave = () => videoDropZone.classList.remove('drag');
+        videoDropZone.ondrop = e => { e.preventDefault(); videoDropZone.classList.remove('drag'); handleVideoFile([...e.dataTransfer.files].find(f => f.type.startsWith('video/') || /\.(mp4|mov|webm)$/i.test(f.name || ''))); };
+        window.addEventListener('paste', e => {
+            const file = [...(e.clipboardData?.items || [])].filter(x => x.kind === 'file' && x.type.startsWith('image/')).map(x => x.getAsFile()).find(Boolean);
+            if(file) handleImageFile(file);
+        });
+        function toggleCut(){
+            cutFirstSecond = !cutFirstSecond;
+            document.getElementById('cutToggle').classList.toggle('off', !cutFirstSecond);
+        }
+        function openApiSettings(){
+            try {
+                const parentDoc = window.parent?.document;
+                const trigger = parentDoc?.querySelector(`[onclick*="'api-settings'"],[onclick*='"api-settings"']`);
+                if(window.parent?.switchUI) window.parent.switchUI(trigger, 'api-settings');
+                else window.location.href = '/static/api-settings.html';
+            } catch(e) {
+                window.location.href = '/static/api-settings.html';
+            }
+        }
+        function setTaskLog(text){ document.getElementById('taskLog').textContent = text || '暂无任务。'; }
+        function fieldInputType(field){
+            if(field.type === 'integer' || field.type === 'number') return 'number';
+            return 'text';
+        }
+        function localFieldControl(field){
+            const id = `local_${field.id.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+            if(field.type === 'readonly'){
+                return `<div class="field full"><span class="label"><span>${escapeHtml(field.name)}</span><span>${escapeHtml(field.class_type || '')}</span></span><div class="log">该 ${field.section === 'input' ? 'Input' : 'Output'} 节点没有可编辑常量输入。</div></div>`;
+            }
+            if(field.type === 'boolean'){
+                return `<label class="field"><span class="label"><span>${escapeHtml(field.name)}</span><span>${escapeHtml(field.input)}</span></span><select id="${id}" class="control local-field" data-node="${escapeHtml(field.node)}" data-input="${escapeHtml(field.input)}" data-type="boolean"><option value="true">true</option><option value="false">false</option></select></label>`;
+            }
+            const type = fieldInputType(field);
+            const extra = field.type === 'image' ? ' data-media="image"' : field.type === 'video' ? ' data-media="video"' : '';
+            return `<label class="field"><span class="label"><span>${escapeHtml(field.name)}</span><span>${escapeHtml(field.input)}</span></span><input id="${id}" class="control local-field" type="${type}" value="${escapeHtml(field.default ?? '')}" data-node="${escapeHtml(field.node)}" data-input="${escapeHtml(field.input)}" data-type="${escapeHtml(field.type)}"${extra}></label>`;
+        }
+        function renderLocalWorkflowFields(){
+            const box = document.getElementById('localWorkflowFields');
+            const status = document.getElementById('localWorkflowStatus');
+            if(!box) return;
+            const inputs = localWorkflowFields.filter(f => f.section === 'input');
+            const outputs = localWorkflowFields.filter(f => f.section === 'output');
+            box.innerHTML = `
+                <div class="field full"><div class="section-title"><i data-lucide="log-in" class="w-3.5 h-3.5"></i><span>Input 变量</span></div></div>
+                ${inputs.map(localFieldControl).join('')}
+                <div class="field full mt-2"><div class="section-title"><i data-lucide="log-out" class="w-3.5 h-3.5"></i><span>Output 变量</span></div></div>
+                ${outputs.map(localFieldControl).join('')}
+            `;
+            localWorkflowFields.forEach(field => {
+                if(field.type === 'boolean'){
+                    const el = box.querySelector(`[data-node="${CSS.escape(field.node)}"][data-input="${CSS.escape(field.input)}"]`);
+                    if(el) el.value = String(Boolean(field.default));
+                }
+            });
+            fillLocalMediaField('image', imageComfyName);
+            fillLocalMediaField('video', videoComfyName);
+            if(status) status.textContent = `已读取 ${inputs.length} 个 Input 变量、${outputs.length} 个 Output 变量。`;
+            if(window.lucide) lucide.createIcons();
+        }
+        function fillLocalMediaField(kind, value){
+            if(!value) return;
+            document.querySelectorAll(`.local-field[data-media="${kind}"]`).forEach(el => { el.value = value; });
+        }
+        async function loadLocalWorkflowFields(){
+            const status = document.getElementById('localWorkflowStatus');
+            if(status) status.textContent = '正在读取 MotionTransfer.json...';
+            try {
+                const data = await fetch('/api/motion-transfer/local-workflow', {cache:'no-store'}).then(async r => {
+                    if(!r.ok) throw new Error((await r.json()).detail || '读取本地流程失败');
+                    return r.json();
+                });
+                localWorkflowFields = data.fields || [];
+                renderLocalWorkflowFields();
+            } catch(e) {
+                localWorkflowFields = [];
+                if(status) status.textContent = e.message || String(e);
+            }
+        }
+        function localWorkflowParams(){
+            const params = {};
+            document.querySelectorAll('.local-field').forEach(el => {
+                const node = el.dataset.node;
+                const input = el.dataset.input;
+                if(!node || !input) return;
+                params[node] = params[node] || {};
+                let value = el.value;
+                if(el.dataset.type === 'boolean') value = value === 'true';
+                else if(el.dataset.type === 'integer') value = parseInt(value || '0', 10);
+                else if(el.dataset.type === 'number') value = parseFloat(value || '0');
+                params[node][input] = value;
+            });
+            return params;
+        }
+        async function runLocalMotionTransfer(){
+            if(!imageComfyName && !document.querySelector('.local-field[data-media="image"]')?.value){ alert('请先上传主体图片'); return null; }
+            if(!videoComfyName && !document.querySelector('.local-field[data-media="video"]')?.value){ alert('请先上传模板视频'); return null; }
+            setTaskLog('正在运行本地 MotionTransfer ComfyUI 工作流...');
+            const res = await fetch('/api/generate', {
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({
+                    workflow_json:'MotionTransfer.json',
+                    params:localWorkflowParams(),
+                    type:'motion_transfer_local',
+                    client_id:`motion_local_${Date.now()}`
+                })
+            });
+            const data = await res.json();
+            if(data.error) throw new Error(data.error);
+            const url = data.videos?.[0] || data.outputs?.[0] || data.images?.[0] || '';
+            if(!url) throw new Error('本地流程完成但没有返回输出');
+            return {videos:data.videos || data.outputs || [url], task_id:data.prompt_id || data.task_id || '', local:true};
+        }
+        function formatHistoryTime(ts){
+            const n = Number(ts || 0);
+            if(!n) return '';
+            return new Date(n * 1000).toLocaleString('zh-CN', {month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'});
+        }
+        function showMotionResult(url, metaText=''){
+            const placeholder = document.getElementById('placeholder');
+            const loader = document.getElementById('loader');
+            const out = document.getElementById('outputVideo');
+            const dl = document.getElementById('downloadBtn');
+            if(!url) return;
+            loader.classList.add('hidden');
+            placeholder.classList.add('hidden');
+            out.src = url;
+            out.classList.remove('hidden');
+            dl.href = url;
+            dl.classList.remove('hidden');
+            if(metaText) setTaskLog(metaText);
+        }
+        function renderMotionHistory(items){
+            const list = document.getElementById('historyList');
+            if(!items?.length){
+                list.innerHTML = '<div class="history-empty">暂无动作迁移历史。</div>';
+                return;
+            }
+            list.innerHTML = items.map(item => {
+                const url = item.videos?.[0] || '';
+                const title = item.task_id ? `任务 ${item.task_id}` : '动作迁移结果';
+                const sub = [formatHistoryTime(item.timestamp), item.provider_name || item.provider_id || '', item.req_key || ''].filter(Boolean).join(' · ');
+                return `<article class="history-card" data-video="${escapeHtml(url)}" data-ts="${escapeHtml(item.timestamp)}" data-task="${escapeHtml(item.task_id || '')}">
+                    <video src="${escapeHtml(url)}" muted preload="metadata"></video>
+                    <div class="history-meta">
+                        <div class="history-title">${escapeHtml(title)}</div>
+                        <div class="history-sub">${escapeHtml(sub)}</div>
+                        <div class="history-actions">
+                            <button class="history-mini" type="button" data-action="reuse"><i data-lucide="play" class="w-3 h-3"></i><span>查看</span></button>
+                            <a class="history-mini" href="${escapeHtml(url)}" download onclick="event.stopPropagation()"><i data-lucide="download" class="w-3 h-3"></i><span>下载</span></a>
+                        </div>
+                    </div>
+                </article>`;
+            }).join('');
+            list.querySelectorAll('.history-card').forEach(card => {
+                card.onclick = () => showMotionResult(card.dataset.video, `历史记录\ntask_id: ${card.dataset.task || '-'}\nvideo: ${card.dataset.video}`);
+            });
+            if(window.lucide) lucide.createIcons();
+        }
+        async function loadMotionHistory(){
+            try {
+                const items = await fetch('/api/history?type=motion-transfer', {cache:'no-store'}).then(r => r.json());
+                renderMotionHistory(items || []);
+            } catch(e) {
+                document.getElementById('historyList').innerHTML = `<div class="history-empty">${escapeHtml(e.message || '历史加载失败')}</div>`;
+            }
+        }
+        async function submitMotion(){
+            const providerId = document.getElementById('providerSelect').value;
+            const videoUrl = document.getElementById('videoUrlInput').value.trim() || videoPublicUrl || videoLocalUrl;
+            const imageUrl = document.getElementById('imageUrlInput').value.trim();
+            if(motionEngine === 'cloud'){
+                if(!providerId){ alert('请先到 API 设置添加动作迁移平台'); return; }
+                if(!videoUrl){ alert('请上传模板视频或填写视频 URL'); return; }
+                if(!imageUrl && !imageBase64){ alert('请上传主体图片或填写图片 URL'); return; }
+            } else {
+                if(!imageComfyName && !document.querySelector('.local-field[data-media="image"]')?.value){ alert('请先上传主体图片'); return; }
+                if(!videoComfyName && !document.querySelector('.local-field[data-media="video"]')?.value){ alert('请先上传模板视频'); return; }
+            }
+            const btn = document.getElementById('genBtn');
+            const loader = document.getElementById('loader');
+            const placeholder = document.getElementById('placeholder');
+            const out = document.getElementById('outputVideo');
+            const dl = document.getElementById('downloadBtn');
+            btn.disabled = true;
+            placeholder.classList.add('hidden');
+            out.classList.add('hidden');
+            dl.classList.add('hidden');
+            loader.classList.remove('hidden');
+            setTaskLog('已提交请求，等待上游任务完成。');
+            const payload = {
+                provider_id: providerId,
+                req_key: document.getElementById('reqKeyInput').value.trim() || 'jimeng_dreamactor_m20_gen_video',
+                image_url: imageUrl,
+                image_base64: imageUrl ? '' : imageBase64,
+                video_url: videoUrl,
+                cut_result_first_second_switch: cutFirstSecond,
+                poll: true,
+                aigc_content_producer: document.getElementById('contentProducerInput').value.trim(),
+                aigc_producer_id: document.getElementById('producerIdInput').value.trim(),
+                aigc_content_propagator: document.getElementById('contentPropagatorInput').value.trim(),
+                aigc_propagate_id: document.getElementById('propagateIdInput').value.trim()
+            };
+            try {
+                const result = motionEngine === 'local'
+                    ? await runLocalMotionTransfer()
+                    : await fetch('/api/motion-transfer', {
+                        method:'POST',
+                        headers:{'Content-Type':'application/json'},
+                        body:JSON.stringify(payload)
+                    }).then(async r => { if(!r.ok) throw new Error((await r.json()).detail || '动作迁移失败'); return r.json(); });
+                const url = result.videos?.[0] || '';
+                if(!url) throw new Error('任务完成但没有返回视频');
+                showMotionResult(url, `${motionEngine === 'local' ? '本地流程完成' : '任务完成'}\ntask_id: ${result.task_id || '-'}\nvideo: ${url}`);
+                loadMotionHistory();
+            } catch(e) {
+                placeholder.classList.remove('hidden');
+                setTaskLog(e.message || String(e));
+                alert(e.message || '动作迁移失败');
+            } finally {
+                loader.classList.add('hidden');
+                btn.disabled = motionEngine === 'cloud' && !providers.length;
+            }
+        }
+        window.addEventListener('message', event => {
+            if(event.data?.type === 'providers-changed') initProviders();
+        });
+        window.onload = async () => { await initProviders(); await loadMotionHistory(); switchMotionEngine(motionEngine); if(window.lucide) lucide.createIcons(); };
+    </script>
+</body>
+</html>
+
+

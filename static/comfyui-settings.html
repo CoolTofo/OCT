@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/static/october-cabin-logo.webp" type="image/webp">
+    <title>十月文化 | ComfyUI 设置</title>
+    <script>
+        (function(){
+            try {
+                var theme = localStorage.getItem('studio_theme') || localStorage.getItem('canvas_theme') || 'light';
+                if(theme === 'dark') {
+                    document.documentElement.classList.add('studio-theme-dark');
+                    document.documentElement.classList.add('theme-dark');
+                }
+            } catch(e) {}
+        })();
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/static/theme.js?v=20260516-theme-sync"></script>
+    <style>
+        :root { --bg:#f7f8fb; --panel:#fff; --soft:#f1f5f9; --line:#e5eaf1; --text:#0f172a; --muted:#64748b; --faint:#94a3b8; --accent:#111827; --danger:#dc2626; }
+        html.studio-theme-dark, body.studio-theme-dark { --bg:#0e1014; --panel:#1c1f27; --soft:#282c36; --line:#343946; --text:#eef2f7; --muted:#a8b1c2; --faint:#7a8497; --accent:#f8fafc; --danger:#f87171; }
+        * { box-sizing:border-box; }
+        body { margin:0; min-height:100vh; background:var(--bg); color:var(--text); font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; -webkit-font-smoothing:antialiased; }
+        button,input,textarea,select { font:inherit; }
+        button { border:0; background:transparent; color:inherit; cursor:pointer; }
+        .page { min-height:100vh; padding:28px; }
+        .head { max-width:1480px; margin:0 auto 18px; display:flex; align-items:flex-end; justify-content:space-between; gap:18px; }
+        .title { font-size:26px; font-weight:900; letter-spacing:-.015em; line-height:1.05; }
+        .sub { margin-top:7px; color:var(--muted); font-size:12px; font-weight:650; line-height:1.55; max-width:720px; }
+        .status { color:var(--muted); font-size:11px; font-weight:800; min-height:16px; }
+        .shell { max-width:1480px; margin:0 auto; display:grid; grid-template-columns:340px minmax(0,1fr) 360px; gap:18px; align-items:start; }
+        .panel { background:var(--panel); border:1px solid var(--line); border-radius:16px; min-width:0; }
+        .side { padding:14px; position:sticky; top:20px; display:flex; flex-direction:column; gap:14px; }
+        .side-card { border:1px solid var(--line); border-radius:14px; padding:14px; background:var(--panel); }
+        .side-title { color:var(--faint); font-size:10px; font-weight:900; letter-spacing:.1em; text-transform:uppercase; padding:0 2px 10px; }
+        .instance-list,.workflow-list { display:flex; flex-direction:column; gap:6px; }
+        .workflow-list { max-height:390px; overflow:auto; }
+        .instance-row { display:grid; grid-template-columns:22px minmax(0,1fr) 30px; align-items:center; gap:6px; padding:5px; border:1px solid var(--line); border-radius:10px; background:var(--soft); }
+        .instance-row span { color:var(--faint); font-size:10.5px; font-weight:850; text-align:center; }
+        .workflow-card { width:100%; text-align:left; display:flex; gap:10px; align-items:center; padding:10px; border-radius:12px; color:var(--muted); border:1px solid transparent; transition:.15s ease; }
+        .workflow-card:hover { border-color:var(--line); background:var(--soft); color:var(--text); }
+        .workflow-card.active { background:var(--soft); color:var(--text); }
+        .workflow-mark { width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center; background:var(--panel); border:1px solid var(--line); flex:0 0 auto; }
+        .workflow-name { font-size:12.5px; font-weight:850; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .workflow-meta { margin-top:2px; font-size:10.5px; color:var(--faint); font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .badge { font-size:9.5px; font-weight:900; letter-spacing:.05em; padding:2px 6px; border-radius:5px; background:var(--panel); color:var(--muted); border:1px solid var(--line); margin-left:auto; }
+        .main { padding:18px; display:flex; flex-direction:column; gap:14px; }
+        .task-panel { padding:16px; display:flex; flex-direction:column; gap:14px; position:sticky; top:20px; }
+        .section { border:1px solid var(--line); border-radius:14px; padding:14px; background:var(--panel); }
+        .section-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; }
+        .section-title { font-size:12px; font-weight:950; letter-spacing:.08em; text-transform:uppercase; }
+        .section-desc { color:var(--muted); font-size:11.5px; font-weight:650; line-height:1.45; margin-top:3px; }
+        .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+        .field { display:flex; flex-direction:column; gap:6px; min-width:0; }
+        .label { color:var(--muted); font-size:11px; font-weight:850; }
+        .field .small { color:var(--muted); font-size:10.5px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .input,.textarea,.select { width:100%; border:1px solid var(--line); border-radius:11px; background:var(--soft); color:var(--text); outline:none; font-size:12.5px; font-weight:700; }
+        .input,.select { height:38px; padding:0 10px; }
+        .textarea { min-height:86px; padding:10px; resize:vertical; line-height:1.55; }
+        .input:focus,.textarea:focus,.select:focus { border-color:var(--text); background:var(--panel); }
+        .btn { height:36px; padding:0 12px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; gap:7px; border:1px solid var(--line); color:var(--muted); background:var(--panel); font-size:11.5px; font-weight:850; transition:.15s ease; }
+        .btn:hover { color:var(--text); border-color:var(--text); }
+        .btn.primary { background:var(--accent); color:var(--bg); border-color:var(--accent); }
+        .btn.primary:hover { transform:translateY(-1px); box-shadow:0 10px 20px rgba(15,23,42,.16); }
+        .btn.danger { color:var(--danger); border-color:rgba(220,38,38,.22); }
+        .btn.full { width:100%; }
+        .toolbar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+        .import-area { display:grid; grid-template-columns:minmax(0,1fr) 160px; gap:10px; align-items:start; }
+        .field-tools { display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:8px; align-items:end; margin-bottom:10px; }
+        .field-count { color:var(--muted); font-size:11px; font-weight:850; white-space:nowrap; padding-bottom:10px; }
+        .field-row { display:grid; grid-template-columns:minmax(0,1.2fr) 74px 96px 106px 86px 36px; gap:8px; align-items:end; padding:10px; border:1px solid var(--line); border-radius:12px; background:var(--soft); margin-bottom:8px; }
+        .field-row.locked { border-color:rgba(245,158,11,.45); background:linear-gradient(0deg, rgba(245,158,11,.08), rgba(245,158,11,.08)), var(--soft); }
+        .field-row .input,.field-row .select { background:var(--panel); height:34px; font-size:12px; }
+        .field-actions { align-self:stretch; display:flex; flex-direction:column; justify-content:space-between; gap:6px; }
+        .field-actions .btn { width:36px; height:34px; padding:0; flex:0 0 auto; }
+        .field-lock.active { color:#b45309; border-color:rgba(245,158,11,.55); background:rgba(245,158,11,.12); }
+        .field-delete:disabled { cursor:not-allowed; opacity:.35; filter:grayscale(1); }
+        .field-extra { grid-column:1/-1; display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:8px; padding-top:8px; border-top:1px dashed var(--line); }
+        .empty { border:1px dashed var(--line); border-radius:14px; padding:28px 18px; color:var(--faint); text-align:center; font-size:12px; font-weight:750; }
+        .run-field { display:grid; grid-template-columns:190px minmax(0,1fr); gap:10px; align-items:center; padding:10px 0; border-bottom:1px solid var(--line); }
+        .run-field:last-child { border-bottom:0; }
+        .run-label { min-width:0; }
+        .run-label strong { display:block; font-size:12.5px; font-weight:900; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .run-label span { display:block; color:var(--faint); font-size:10.5px; font-weight:700; margin-top:2px; }
+        .file-control { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; align-items:center; }
+        .file-chip { min-height:38px; border:1px solid var(--line); border-radius:11px; background:var(--soft); display:flex; align-items:center; padding:0 10px; color:var(--muted); font-size:11px; font-weight:750; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .export-summary { border:1px dashed var(--line); border-radius:12px; padding:10px 12px; background:var(--soft); color:var(--muted); font-size:11px; font-weight:750; line-height:1.55; word-break:break-all; }
+        .export-summary strong { color:var(--text); font-weight:900; }
+        .upload-modal { position:fixed; inset:0; z-index:80; display:none; align-items:center; justify-content:center; padding:24px; background:rgba(15,23,42,.32); backdrop-filter:blur(14px); }
+        .upload-modal.open { display:flex; }
+        .upload-panel { width:min(780px,calc(100vw - 32px)); max-height:calc(100vh - 40px); overflow:auto; border:1px solid var(--line); border-radius:18px; background:var(--panel); box-shadow:0 28px 90px rgba(15,23,42,.24); padding:16px; }
+        .upload-head { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; margin-bottom:14px; }
+        .upload-title { font-size:18px; font-weight:950; line-height:1.15; }
+        .upload-desc { margin-top:5px; color:var(--muted); font-size:11.5px; font-weight:700; line-height:1.5; }
+        .upload-tabs { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:4px; border:1px solid var(--line); border-radius:13px; background:var(--soft); margin-bottom:14px; }
+        .upload-tabs button { height:38px; border-radius:10px; color:var(--muted); font-size:12px; font-weight:900; }
+        .upload-tabs button.active { color:var(--bg); background:var(--accent); box-shadow:0 10px 22px rgba(15,23,42,.15); }
+        .upload-pane { display:none; }
+        .upload-pane.active { display:block; }
+        .upload-box { border:1px solid var(--line); border-radius:14px; padding:12px; background:var(--soft); display:flex; flex-direction:column; gap:10px; }
+        .upload-file-row { display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:10px; align-items:center; }
+        .upload-file-name { min-height:38px; border:1px solid var(--line); border-radius:11px; background:var(--panel); color:var(--muted); display:flex; align-items:center; padding:0 10px; font-size:11px; font-weight:800; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .upload-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:14px; }
+        .task-state { border-radius:14px; background:var(--soft); border:1px solid var(--line); padding:14px; }
+        .task-state .big { font-size:17px; font-weight:950; }
+        .task-state .small { margin-top:4px; color:var(--muted); font-size:11px; font-weight:700; word-break:break-all; }
+        .results { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+        .result-item { aspect-ratio:1/1; border-radius:12px; overflow:hidden; border:1px solid var(--line); background:var(--soft); display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:11px; font-weight:800; }
+        .result-item img,.result-item video { width:100%; height:100%; object-fit:cover; display:block; }
+        .hidden { display:none !important; }
+        @media (max-width:1180px){ .shell{grid-template-columns:300px minmax(0,1fr)} .task-panel{position:static; grid-column:1/-1} }
+        @media (max-width:760px){ .page{padding:16px}.head{display:block}.shell{grid-template-columns:1fr}.side{position:static}.grid2,.run-field,.field-row,.field-extra,.import-area,.field-tools,.upload-file-row{grid-template-columns:1fr}.results{grid-template-columns:repeat(2,1fr)} }
+    </style>
+    <link rel="stylesheet" href="/static/oct-ui.css?v=20260528-brand-align">
+</head>
+<body onload="boot()">
+    <div class="page">
+        <header class="head">
+            <div>
+                <div class="title">ComfyUI 设置</div>
+                <div class="sub">管理本地 ComfyUI API 工作流的参数模板。只保存你想在无限画布里暴露的字段；未保存的字段会继续使用工作流 JSON 中的默认值。</div>
+            </div>
+            <div id="pageStatus" class="status"></div>
+        </header>
+
+        <div class="shell">
+            <aside class="side">
+                <section class="side-card">
+                    <div class="side-title">ComfyUI 后端地址</div>
+                    <div id="comfyInstancesList" class="instance-list"></div>
+                    <div style="height:10px"></div>
+                    <div class="toolbar">
+                        <button class="btn full" type="button" onclick="addComfyInstance()"><i data-lucide="plus" class="w-4 h-4"></i><span>添加后端</span></button>
+                        <button class="btn full primary" type="button" onclick="saveComfyInstances()"><i data-lucide="save" class="w-4 h-4"></i><span>保存后端</span></button>
+                    </div>
+                </section>
+
+                <section class="side-card">
+                    <div class="side-title">工作流列表</div>
+                    <div id="workflowList" class="workflow-list"></div>
+                    <div style="height:10px"></div>
+                    <input id="workflowFileInput" class="hidden" type="file" accept=".json,application/json" onchange="uploadWorkflowFile(this.files[0])">
+                    <button class="btn full primary" type="button" onclick="openWorkflowUploadDialog()"><i data-lucide="upload" class="w-4 h-4"></i><span>上传工作流</span></button>
+                    <div style="height:8px"></div>
+                    <button class="btn full" type="button" onclick="loadWorkflows()"><i data-lucide="refresh-cw" class="w-4 h-4"></i><span>刷新</span></button>
+                </section>
+            </aside>
+
+            <main class="panel main">
+                <section class="section">
+                    <div class="section-head">
+                        <div>
+                            <div class="section-title">模板设置</div>
+                            <div class="section-desc">保存后会出现在无限画布的 ComfyUI 自定义工作流下拉列表中。</div>
+                        </div>
+                        <div class="toolbar">
+                            <button id="deleteBtn" class="btn danger" type="button" onclick="deleteWorkflow()"><i data-lucide="trash-2" class="w-4 h-4"></i><span>删除</span></button>
+                            <button class="btn primary" type="button" onclick="saveWorkflowConfig()"><i data-lucide="save" class="w-4 h-4"></i><span>保存配置</span></button>
+                        </div>
+                    </div>
+                    <div class="grid2">
+                        <label class="field">
+                            <span class="label">模板名称</span>
+                            <input id="titleInput" class="input" type="text" placeholder="工作流名称" oninput="updateTitle(this.value)">
+                        </label>
+                        <label class="field">
+                            <span class="label">工作流文件</span>
+                            <input id="nameInput" class="input" type="text" readonly placeholder="custom/example.json">
+                        </label>
+                    </div>
+                </section>
+
+                <section class="section">
+                    <div class="section-head">
+                        <div>
+                            <div class="section-title">ComfyUI 工作流转换</div>
+                            <div class="section-desc">使用 OCT_Box 内置转换器，把完整 ComfyUI 画布工作流修复并导出成可运行的 API 工作流。</div>
+                        </div>
+                        <div class="toolbar">
+                            <button class="btn" type="button" onclick="loadComfyExportWorkflows()"><i data-lucide="refresh-cw" class="w-4 h-4"></i><span>刷新列表</span></button>
+                            <button id="exportConvertBtn" class="btn primary" type="button" onclick="convertSelectedComfyWorkflow()"><i data-lucide="workflow" class="w-4 h-4"></i><span>转换并导入</span></button>
+                        </div>
+                    </div>
+                    <div class="grid2">
+                        <label class="field">
+                            <span class="label">本地完整 workflow</span>
+                            <select id="exportWorkflowSelect" class="select" onchange="onExportWorkflowSelected()"></select>
+                            <span id="exportWorkflowMeta" class="small"></span>
+                        </label>
+                        <label class="field">
+                            <span class="label">导入名称</span>
+                            <input id="exportNameInput" class="input" type="text" placeholder="MotionTransfer_api_fixed">
+                        </label>
+                        <label class="field">
+                            <span class="label">转换配置</span>
+                            <select id="exportProfileSelect" class="select">
+                                <option value="auto">auto</option>
+                                <option value="motiontransfer">motiontransfer</option>
+                                <option value="generic">generic</option>
+                            </select>
+                        </label>
+                        <label class="field">
+                            <span class="label">输出范围</span>
+                            <select id="exportModeSelect" class="select">
+                                <option value="all">all - 保留全部可执行节点</option>
+                                <option value="main">main - 只保留主输出链路</option>
+                            </select>
+                        </label>
+                        <label class="field">
+                            <span class="label">主输出节点 ID</span>
+                            <input id="exportMainOutputInput" class="input" type="text" value="312">
+                        </label>
+                        <div class="field">
+                            <span class="label">选择完整 workflow</span>
+                            <div class="toolbar">
+                                <input id="exportFullWorkflowFile" class="hidden" type="file" accept=".json,application/json" onchange="readExportFullWorkflowFile(this.files[0])">
+                                <button class="btn" type="button" onclick="document.getElementById('exportFullWorkflowFile').click()"><i data-lucide="file-up" class="w-4 h-4"></i><span>上传完整 JSON</span></button>
+                                <button class="btn" type="button" onclick="clearExportFullWorkflow()"><i data-lucide="x" class="w-4 h-4"></i><span>取消上传</span></button>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <span class="label">可选：原生 Export(API)</span>
+                            <div class="toolbar">
+                                <input id="exportApiInputFile" class="hidden" type="file" accept=".json,application/json" onchange="readExportApiInputFile(this.files[0])">
+                                <button class="btn" type="button" onclick="document.getElementById('exportApiInputFile').click()"><i data-lucide="file-json" class="w-4 h-4"></i><span>选择 JSON</span></button>
+                                <button class="btn" type="button" onclick="clearExportApiInput()"><i data-lucide="eraser" class="w-4 h-4"></i><span>清空</span></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="exportSummary" class="export-summary" style="margin-top:10px">等待读取 ComfyUI 已保存工作流。</div>
+                </section>
+
+                <section class="section">
+                    <div class="section-head">
+                        <div>
+                            <div class="section-title">导入字段</div>
+                            <div class="section-desc">从当前工作流 JSON 中提取所有可覆盖输入；再用过滤和批量删除只留下画布需要控制的参数。</div>
+                        </div>
+                        <div class="toolbar">
+                            <button class="btn" type="button" onclick="extractAllFields()"><i data-lucide="scan-search" class="w-4 h-4"></i><span>提取全部字段</span></button>
+                            <button class="btn" type="button" onclick="keepNamedInputFields()"><i data-lucide="wand-sparkles" class="w-4 h-4"></i><span>只保留命名输入</span></button>
+                        </div>
+                    </div>
+                    <div class="import-area">
+                        <textarea id="workflowJsonInput" class="textarea" placeholder="也可以粘贴 ComfyUI API JSON，然后点提取全部字段"></textarea>
+                        <div class="toolbar" style="flex-direction:column;align-items:stretch">
+                            <input id="workflowJsonFile" class="hidden" type="file" accept=".json,application/json" onchange="readWorkflowJsonFile(this.files[0])">
+                            <button class="btn full" type="button" onclick="document.getElementById('workflowJsonFile').click()"><i data-lucide="file-json" class="w-4 h-4"></i><span>选择 JSON</span></button>
+                            <button class="btn full" type="button" onclick="clearImportBox()"><i data-lucide="eraser" class="w-4 h-4"></i><span>清空</span></button>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="section">
+                    <div class="section-head">
+                        <div>
+                            <div class="section-title">节点字段</div>
+                            <div class="section-desc">字段会在无限画布里按类型展示。删除的字段不会提交覆盖值，会使用 ComfyUI 工作流默认值。</div>
+                        </div>
+                        <button class="btn" type="button" onclick="addField()"><i data-lucide="plus" class="w-4 h-4"></i><span>字段</span></button>
+                    </div>
+                    <div class="field-tools">
+                        <label class="field">
+                            <span class="label">过滤</span>
+                            <input id="fieldFilterInput" class="input" type="text" placeholder="节点名 / nodeId / input / 标签 / 类型" oninput="setFieldFilter(this.value)">
+                        </label>
+                        <div class="toolbar">
+                            <button class="btn" type="button" onclick="keepMatchingFields()"><i data-lucide="list-filter" class="w-4 h-4"></i><span>只保留匹配</span></button>
+                            <button class="btn danger" type="button" onclick="deleteMatchingFields()"><i data-lucide="trash-2" class="w-4 h-4"></i><span>删除匹配</span></button>
+                            <button class="btn" type="button" onclick="clearFieldFilter()"><i data-lucide="x" class="w-4 h-4"></i></button>
+                        </div>
+                        <div id="fieldFilterCount" class="field-count"></div>
+                    </div>
+                    <div id="fieldEditor"></div>
+                </section>
+
+                <section class="section">
+                    <div class="section-head">
+                        <div>
+                            <div class="section-title">运行参数</div>
+                            <div class="section-desc">这里可选做本地测试；无限画布会使用同一套字段配置。</div>
+                        </div>
+                        <button id="runBtn" class="btn primary" type="button" onclick="runWorkflowTest()"><i data-lucide="play" class="w-4 h-4"></i><span>运行测试</span></button>
+                    </div>
+                    <div id="runFields"></div>
+                </section>
+            </main>
+
+            <aside class="panel task-panel">
+                <section>
+                    <div class="section-title">任务状态</div>
+                    <div id="taskState" class="task-state" style="margin-top:10px">
+                        <div class="big">Ready</div>
+                        <div class="small">等待运行 ComfyUI 工作流</div>
+                    </div>
+                </section>
+                <section>
+                    <div class="section-title">结果</div>
+                    <div id="resultGrid" class="results" style="margin-top:10px"></div>
+                </section>
+            </aside>
+        </div>
+    </div>
+
+    <div id="workflowUploadModal" class="upload-modal" role="dialog" aria-modal="true" aria-labelledby="workflowUploadTitle" onclick="closeWorkflowUploadDialog()">
+        <div class="upload-panel" onclick="event.stopPropagation()">
+            <div class="upload-head">
+                <div>
+                    <div id="workflowUploadTitle" class="upload-title">上传工作流</div>
+                    <div class="upload-desc">手动选择要导入的工作流类型。删除或未暴露的字段不会覆盖参数，会继续使用工作流 JSON 里的默认值。</div>
+                </div>
+                <button class="btn" type="button" onclick="closeWorkflowUploadDialog()" aria-label="关闭"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+
+            <div class="upload-tabs">
+                <button id="workflowUploadModeApi" type="button" onclick="setWorkflowUploadMode('api')">API JSON 直接导入</button>
+                <button id="workflowUploadModeFull" type="button" onclick="setWorkflowUploadMode('full')">完整 workflow 转换</button>
+            </div>
+
+            <div id="workflowUploadApiPanel" class="upload-pane">
+                <div class="grid2">
+                    <label class="field">
+                        <span class="label">导入名称</span>
+                        <input id="workflowUploadNameInput" class="input" type="text" placeholder="custom/MyWorkflow">
+                    </label>
+                    <div class="field">
+                        <span class="label">API 工作流 JSON</span>
+                        <div class="upload-file-row">
+                            <div id="workflowUploadApiFileName" class="upload-file-name">未选择文件</div>
+                            <button class="btn" type="button" onclick="document.getElementById('workflowUploadApiFile').click()"><i data-lucide="file-json" class="w-4 h-4"></i><span>选择 JSON</span></button>
+                            <button class="btn" type="button" onclick="clearWorkflowUploadApiFile()"><i data-lucide="eraser" class="w-4 h-4"></i><span>清空</span></button>
+                        </div>
+                        <input id="workflowUploadApiFile" class="hidden" type="file" accept=".json,application/json" onchange="readWorkflowUploadApiFile(this.files[0])">
+                    </div>
+                </div>
+            </div>
+
+            <div id="workflowUploadFullPanel" class="upload-pane">
+                <div class="grid2">
+                    <label class="field">
+                        <span class="label">本地完整 workflow</span>
+                        <select id="workflowUploadFullSelect" class="select" onchange="onWorkflowUploadFullSelected()"></select>
+                    </label>
+                    <label class="field">
+                        <span class="label">导入名称</span>
+                        <input id="workflowUploadConvertNameInput" class="input" type="text" placeholder="MotionTransfer_api_fixed">
+                    </label>
+                    <label class="field">
+                        <span class="label">转换配置</span>
+                        <select id="workflowUploadProfileSelect" class="select">
+                            <option value="auto">auto</option>
+                            <option value="motiontransfer">motiontransfer</option>
+                            <option value="generic">generic</option>
+                        </select>
+                    </label>
+                    <label class="field">
+                        <span class="label">输出范围</span>
+                        <select id="workflowUploadModeSelect" class="select">
+                            <option value="all">all - 保留全部可执行节点</option>
+                            <option value="main">main - 只保留主输出链路</option>
+                        </select>
+                    </label>
+                    <label class="field">
+                        <span class="label">主输出节点 ID</span>
+                        <input id="workflowUploadMainOutputInput" class="input" type="text" value="312">
+                    </label>
+                    <div class="field">
+                        <span class="label">或上传完整 workflow</span>
+                        <div class="upload-file-row">
+                            <div id="workflowUploadFullFileName" class="upload-file-name">未选择文件</div>
+                            <button class="btn" type="button" onclick="document.getElementById('workflowUploadFullFile').click()"><i data-lucide="file-up" class="w-4 h-4"></i><span>选择 JSON</span></button>
+                            <button class="btn" type="button" onclick="clearWorkflowUploadFullFile()"><i data-lucide="eraser" class="w-4 h-4"></i><span>清空</span></button>
+                        </div>
+                        <input id="workflowUploadFullFile" class="hidden" type="file" accept=".json,application/json" onchange="readWorkflowUploadFullFile(this.files[0])">
+                    </div>
+                    <div class="field" style="grid-column:1/-1">
+                        <span class="label">可选：原生 Export(API) JSON</span>
+                        <div class="upload-file-row">
+                            <div id="workflowUploadNativeApiFileName" class="upload-file-name">未选择文件</div>
+                            <button class="btn" type="button" onclick="document.getElementById('workflowUploadNativeApiFile').click()"><i data-lucide="file-json" class="w-4 h-4"></i><span>选择 JSON</span></button>
+                            <button class="btn" type="button" onclick="clearWorkflowUploadNativeApiFile()"><i data-lucide="eraser" class="w-4 h-4"></i><span>清空</span></button>
+                        </div>
+                        <input id="workflowUploadNativeApiFile" class="hidden" type="file" accept=".json,application/json" onchange="readWorkflowUploadNativeApiFile(this.files[0])">
+                    </div>
+                </div>
+            </div>
+
+            <div id="workflowUploadSummary" class="export-summary" style="margin-top:12px">请选择导入方式。</div>
+            <div class="upload-actions">
+                <button class="btn" type="button" onclick="closeWorkflowUploadDialog()">取消</button>
+                <button id="workflowUploadConfirmBtn" class="btn primary" type="button" onclick="confirmWorkflowUploadDialog()"><i data-lucide="check" class="w-4 h-4"></i><span>确认导入</span></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let workflows = [];
+        let selectedName = '';
+        let currentWorkflow = null;
+        let currentConfig = { title:'', fields:[] };
+        let isBuiltin = false;
+        let comfyInstances = [];
+        let comfyExportWorkflows = [];
+        let exportFullWorkflowJson = null;
+        let exportFullWorkflowName = '';
+        let exportApiInputJson = null;
+        let exportApiInputName = '';
+        let workflowUploadMode = 'full';
+        let workflowUploadApiJson = null;
+        let workflowUploadApiName = '';
+        let workflowUploadFullJson = null;
+        let workflowUploadFullName = '';
+        let workflowUploadNativeApiJson = null;
+        let workflowUploadNativeApiName = '';
+        let values = {};
+        let fieldFilter = '';
+        let mediaPreviewUrls = {};
+
+        const els = {
+            status: document.getElementById('pageStatus'),
+            list: document.getElementById('workflowList'),
+            instances: document.getElementById('comfyInstancesList'),
+            title: document.getElementById('titleInput'),
+            name: document.getElementById('nameInput'),
+            workflowJson: document.getElementById('workflowJsonInput'),
+            exportWorkflow: document.getElementById('exportWorkflowSelect'),
+            exportWorkflowMeta: document.getElementById('exportWorkflowMeta'),
+            exportName: document.getElementById('exportNameInput'),
+            exportProfile: document.getElementById('exportProfileSelect'),
+            exportMode: document.getElementById('exportModeSelect'),
+            exportMainOutput: document.getElementById('exportMainOutputInput'),
+            exportSummary: document.getElementById('exportSummary'),
+            exportConvertBtn: document.getElementById('exportConvertBtn'),
+            workflowUploadModal: document.getElementById('workflowUploadModal'),
+            workflowUploadModeApi: document.getElementById('workflowUploadModeApi'),
+            workflowUploadModeFull: document.getElementById('workflowUploadModeFull'),
+            workflowUploadApiPanel: document.getElementById('workflowUploadApiPanel'),
+            workflowUploadFullPanel: document.getElementById('workflowUploadFullPanel'),
+            workflowUploadName: document.getElementById('workflowUploadNameInput'),
+            workflowUploadConvertName: document.getElementById('workflowUploadConvertNameInput'),
+            workflowUploadApiFileName: document.getElementById('workflowUploadApiFileName'),
+            workflowUploadFullFileName: document.getElementById('workflowUploadFullFileName'),
+            workflowUploadNativeApiFileName: document.getElementById('workflowUploadNativeApiFileName'),
+            workflowUploadFullSelect: document.getElementById('workflowUploadFullSelect'),
+            workflowUploadProfile: document.getElementById('workflowUploadProfileSelect'),
+            workflowUploadModeSelect: document.getElementById('workflowUploadModeSelect'),
+            workflowUploadMainOutput: document.getElementById('workflowUploadMainOutputInput'),
+            workflowUploadSummary: document.getElementById('workflowUploadSummary'),
+            workflowUploadConfirmBtn: document.getElementById('workflowUploadConfirmBtn'),
+            fieldFilter: document.getElementById('fieldFilterInput'),
+            fieldFilterCount: document.getElementById('fieldFilterCount'),
+            fieldEditor: document.getElementById('fieldEditor'),
+            runFields: document.getElementById('runFields'),
+            taskState: document.getElementById('taskState'),
+            resultGrid: document.getElementById('resultGrid'),
+            runBtn: document.getElementById('runBtn'),
+            deleteBtn: document.getElementById('deleteBtn'),
+        };
+
+        function refreshIcons(){ if(window.lucide) lucide.createIcons(); }
+        function setStatus(text){ els.status.textContent = text || ''; }
+        function escapeHtml(str){ return String(str ?? '').replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s])); }
+        function escapeAttr(str){ return escapeHtml(str); }
+        function fieldId(field){ return field.id || `${field.node || ''}.${field.input || ''}` || `field_${Math.random().toString(36).slice(2,7)}`; }
+        function fieldStableKey(field){ return fieldId(field); }
+        function makeFieldId(node, input){ return `${node}.${input}`.replace(/[^A-Za-z0-9_.-]+/g, '_').slice(0, 80) || `field_${Date.now()}`; }
+        function isConnectedInput(value){ return Array.isArray(value) && value.length === 2 && typeof value[0] === 'string' && (typeof value[1] === 'number' || typeof value[1] === 'string'); }
+        function isMediaType(type){ return ['image','video','audio'].includes(String(type || '').toLowerCase()); }
+        function fieldKind(field){
+            if(field.type === 'image') return 'image';
+            if(field.type === 'video') return 'video';
+            if(field.type === 'audio') return 'audio';
+            const key = `${field.input || ''} ${field.name || ''}`.toLowerCase();
+            if(field.type === 'textarea' || /prompt|text|提示词|正向|负向/.test(key)) return 'prompt';
+            return 'setting';
+        }
+        function fieldSearchText(field){
+            return [
+                field?.name, field?.node, field?.input, field?.nodeTitle,
+                field?.classType, field?.type, field?.default
+            ].map(v => String(v ?? '').toLowerCase()).join(' ');
+        }
+        function fieldMatchesFilter(field, query=fieldFilter){
+            const tokens = String(query || '').trim().toLowerCase().split(/\s+/).filter(Boolean);
+            if(!tokens.length) return true;
+            const haystack = fieldSearchText(field);
+            return tokens.every(token => haystack.includes(token));
+        }
+        function filteredFieldEntries(fields){
+            return (fields || []).map((field, index) => ({field, index})).filter(item => fieldMatchesFilter(item.field));
+        }
+        function isEssentialWorkflowField(field){
+            const type = String(field?.type || '').toLowerCase();
+            const input = String(field?.input || '').toLowerCase();
+            const classType = String(field?.classType || field?.class_type || '').toLowerCase();
+            const label = `${field?.name || ''} ${field?.nodeTitle || ''} ${field?.classType || field?.class_type || ''}`.toLowerCase();
+            if(['filename_prefix','filename','prefix'].includes(input)) return false;
+            if(['image','video','audio'].includes(type)) return true;
+            if(classType === 'loadimage' && input === 'image') return true;
+            if(['vhs_loadvideo','loadvideo','videoload'].includes(classType) && input === 'video') return true;
+            if(['positive_prompt','prompt','text','text1','caption'].includes(input) && /textencode|prompt|caption|提示词|正向|正面/.test(label)) return true;
+            return false;
+        }
+        function protectEssentialField(field){
+            if(isEssentialWorkflowField(field)) field.locked = true;
+            return field;
+        }
+        function isFieldLocked(field){
+            return field?.locked === true || isEssentialWorkflowField(field);
+        }
+        function countLockedFields(fields){
+            return (fields || []).filter(isFieldLocked).length;
+        }
+        function mergeExtractedFieldsWithLocked(extracted){
+            const lockedFields = (currentConfig?.fields || []).filter(isFieldLocked);
+            if(!lockedFields.length) return extracted;
+            const lockedByKey = new Map(lockedFields.map(field => [fieldStableKey(field), field]));
+            const usedKeys = new Set();
+            const merged = extracted.map(field => {
+                const key = fieldStableKey(field);
+                const locked = lockedByKey.get(key);
+                if(locked){
+                    usedKeys.add(key);
+                    return locked;
+                }
+                return field;
+            });
+            lockedFields.forEach(field => {
+                const key = fieldStableKey(field);
+                if(!usedKeys.has(key)) merged.push(field);
+            });
+            return merged;
+        }
+        function updateFieldFilterCount(total, shown){
+            const locked = countLockedFields(currentConfig?.fields || []);
+            const suffix = locked ? ` · ${locked} 锁定` : '';
+            els.fieldFilterCount.textContent = (fieldFilter.trim() ? `${shown}/${total} 匹配` : `${total} 个字段`) + suffix;
+        }
+        function setFieldFilter(value){ fieldFilter = value || ''; renderFieldEditor(); }
+        function clearFieldFilter(){ fieldFilter = ''; els.fieldFilter.value = ''; renderFieldEditor(); }
+
+        async function fetchJson(url, opts){
+            const res = await fetch(url, opts);
+            const data = await res.json().catch(() => ({}));
+            if(!res.ok) throw new Error(data.detail || data.message || '请求失败');
+            return data;
+        }
+
+        async function loadComfyInstances(){
+            try {
+                const data = await fetchJson('/api/comfyui/instances');
+                comfyInstances = Array.isArray(data.instances) ? data.instances : [];
+                renderComfyInstances();
+            } catch(e){ setStatus(e.message || String(e)); }
+        }
+        function renderComfyInstances(){
+            els.instances.innerHTML = comfyInstances.map((addr, i) => `
+                <div class="instance-row">
+                    <span>${i + 1}</span>
+                    <input class="input" type="text" value="${escapeAttr(addr)}" placeholder="host:port" oninput="updateComfyInstance(${i}, this.value)" style="height:30px;background:var(--panel);font-family:ui-monospace,Menlo,monospace">
+                    <button class="btn danger" type="button" onclick="removeComfyInstance(${i})" style="width:30px;height:30px;padding:0"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+                </div>
+            `).join('') || '<div class="empty">暂无后端地址</div>';
+            refreshIcons();
+        }
+        function addComfyInstance(){ comfyInstances.push(''); renderComfyInstances(); }
+        function updateComfyInstance(index, value){ comfyInstances[index] = value; }
+        function removeComfyInstance(index){ comfyInstances = comfyInstances.filter((_, i) => i !== index); renderComfyInstances(); }
+        async function saveComfyInstances(){
+            const cleaned = comfyInstances.map(s => String(s || '').trim()).filter(Boolean);
+            if(!cleaned.length){ alert('请至少填一个 ComfyUI 后端地址'); return; }
+            try {
+                const data = await fetchJson('/api/comfyui/instances', {
+                    method:'PUT',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({instances: cleaned})
+                });
+                comfyInstances = data.instances || cleaned;
+                renderComfyInstances();
+                setStatus('ComfyUI 后端地址已保存');
+            } catch(e){ alert(e.message || '保存失败'); }
+        }
+
+        function formatBytes(bytes){
+            const n = Number(bytes) || 0;
+            if(n < 1024) return `${n} B`;
+            if(n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+            return `${(n / 1024 / 1024).toFixed(1)} MB`;
+        }
+        function selectedExportWorkflow(){
+            if(exportFullWorkflowJson) return null;
+            const path = els.exportWorkflow?.value || '';
+            return comfyExportWorkflows.find(item => item.path === path) || comfyExportWorkflows[0] || null;
+        }
+        function renderComfyExportWorkflows(meta={}){
+            if(!els.exportWorkflow) return;
+            if(!comfyExportWorkflows.length){
+                els.exportWorkflow.innerHTML = '<option value="">未找到已保存工作流</option>';
+                els.exportWorkflowMeta.textContent = '';
+                els.exportSummary.innerHTML = meta.tool_ready === false
+                    ? `未找到转换器：${escapeHtml(meta.tool_dir || '')}`
+                    : `未找到 ComfyUI 保存工作流：${escapeHtml(meta.workflow_dir || '')}`;
+                renderWorkflowUploadFullOptions(meta);
+                refreshIcons();
+                return;
+            }
+            const current = els.exportWorkflow.value;
+            els.exportWorkflow.innerHTML = comfyExportWorkflows.map(item => `
+                <option value="${escapeAttr(item.path)}" ${item.path === current ? 'selected' : ''}>${escapeHtml(item.name)} · ${item.nodes || 0} 节点</option>
+            `).join('');
+            if(!comfyExportWorkflows.some(item => item.path === els.exportWorkflow.value)){
+                els.exportWorkflow.value = comfyExportWorkflows[0].path;
+            }
+            onExportWorkflowSelected(true);
+            renderWorkflowUploadFullOptions(meta);
+            refreshIcons();
+        }
+        async function loadComfyExportWorkflows(){
+            try {
+                const data = await fetchJson('/api/comfyui/export/workflows');
+                comfyExportWorkflows = data.workflows || [];
+                renderComfyExportWorkflows(data);
+                if(comfyExportWorkflows.length) setStatus(`已读取 ${comfyExportWorkflows.length} 个 ComfyUI 保存工作流`);
+            } catch(e){
+                comfyExportWorkflows = [];
+                renderComfyExportWorkflows({});
+                setStatus(e.message || String(e));
+            }
+        }
+        function onExportWorkflowSelected(updateName=true){
+            const item = selectedExportWorkflow();
+            if(exportFullWorkflowJson){
+                els.exportWorkflowMeta.textContent = `已上传：${exportFullWorkflowName}`;
+                if(updateName && els.exportName && !els.exportName.value.trim()){
+                    els.exportName.value = `${exportFullWorkflowName.replace(/\.json$/i, '')}_api_fixed`;
+                }
+                els.exportSummary.innerHTML = `将转换已上传的完整 workflow：<strong>${escapeHtml(exportFullWorkflowName)}</strong>。${exportApiInputName ? `<br>已选择原生 Export(API)：${escapeHtml(exportApiInputName)}` : ''}`;
+                return;
+            }
+            if(!item){
+                if(els.exportWorkflowMeta) els.exportWorkflowMeta.textContent = '';
+                return;
+            }
+            const modified = item.mtime ? new Date(item.mtime * 1000).toLocaleString() : '';
+            els.exportWorkflowMeta.textContent = `${item.nodes || 0} 节点 · ${item.links || 0} 连线 · ${formatBytes(item.size)}${modified ? ` · ${modified}` : ''}`;
+            if(updateName && els.exportName && !els.exportName.value.trim()){
+                els.exportName.value = `${(item.title || item.name || 'workflow').replace(/\.json$/i, '')}_api_fixed`;
+            }
+            els.exportSummary.innerHTML = `将转换 <strong>${escapeHtml(item.name)}</strong>，输出到本地自定义工作流列表。${exportApiInputName ? `<br>已选择原生 Export(API)：${escapeHtml(exportApiInputName)}` : ''}`;
+        }
+        async function readExportApiInputFile(file){
+            document.getElementById('exportApiInputFile').value = '';
+            if(!file) return;
+            try {
+                exportApiInputJson = JSON.parse(await file.text());
+                exportApiInputName = file.name;
+                if(exportApiInputJson?.nodes){
+                    exportApiInputJson = null;
+                    exportApiInputName = '';
+                    alert('这里请选择 ComfyUI 原生 Export(API) JSON，不是完整画布 workflow JSON。');
+                    return;
+                }
+                onExportWorkflowSelected(false);
+                setStatus(`已读取 Export(API)：${file.name}`);
+            } catch(e){
+                exportApiInputJson = null;
+                exportApiInputName = '';
+                alert(e.message || '读取 Export(API) JSON 失败');
+            }
+        }
+        async function readExportFullWorkflowFile(file){
+            document.getElementById('exportFullWorkflowFile').value = '';
+            if(!file) return;
+            try {
+                const data = JSON.parse(await file.text());
+                if(!Array.isArray(data?.nodes)){
+                    alert('请选择完整 ComfyUI workflow JSON，需要包含 nodes 列表。');
+                    return;
+                }
+                exportFullWorkflowJson = data;
+                exportFullWorkflowName = file.name;
+                if(els.exportName && !els.exportName.value.trim()){
+                    els.exportName.value = `${file.name.replace(/\.json$/i, '')}_api_fixed`;
+                }
+                onExportWorkflowSelected(false);
+                setStatus(`已读取完整 workflow：${file.name}`);
+            } catch(e){
+                exportFullWorkflowJson = null;
+                exportFullWorkflowName = '';
+                alert(e.message || '读取完整 workflow JSON 失败');
+            }
+        }
+        function clearExportFullWorkflow(){
+            exportFullWorkflowJson = null;
+            exportFullWorkflowName = '';
+            onExportWorkflowSelected(false);
+            setStatus('已取消使用上传的完整 workflow');
+        }
+        function clearExportApiInput(){
+            exportApiInputJson = null;
+            exportApiInputName = '';
+            onExportWorkflowSelected(false);
+            setStatus('已清空可选 Export(API)');
+        }
+        async function convertSelectedComfyWorkflow(){
+            const item = selectedExportWorkflow();
+            if(!item && !exportFullWorkflowJson){ alert('请先选择或上传一个完整 ComfyUI workflow'); return; }
+            const sourceTitle = exportFullWorkflowName || item?.title || item?.name || 'workflow';
+            const name = (els.exportName?.value || '').trim() || `${sourceTitle.replace(/\.json$/i, '')}_api_fixed`;
+            els.exportConvertBtn.disabled = true;
+            els.exportSummary.innerHTML = `正在转换 <strong>${escapeHtml(exportFullWorkflowName || item.name)}</strong>...`;
+            try {
+                const data = await fetchJson('/api/comfyui/export/convert', {
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({
+                        workflow_path:exportFullWorkflowJson ? '' : item.path,
+                        workflow:exportFullWorkflowJson,
+                        name,
+                        profile:els.exportProfile?.value || 'auto',
+                        output_mode:els.exportMode?.value || 'all',
+                        main_output_id:els.exportMainOutput?.value || '312',
+                        api_input:exportApiInputJson,
+                        save_config:true,
+                    })
+                });
+                const mapping = data.mapping || {};
+                const validation = mapping.validation || {};
+                const reroutes = mapping.strip_reroute_nodes || {};
+                const setGet = mapping.flatten_set_get?.converted || [];
+                const switches = mapping.frontend_switches?.converted || [];
+                selectedName = data.workflow?.name || selectedName;
+                await loadWorkflows();
+                if(selectedName) await selectWorkflow(selectedName);
+                els.exportSummary.innerHTML = [
+                    `<strong>转换完成：</strong>${escapeHtml(data.workflow?.name || '')}`,
+                    `字段：${Number(data.workflow?.field_count || 0)} · 节点：${validation.nodes ?? '-'} · 连线：${validation.links ?? '-'}`,
+                    `Reroute 清理：${reroutes.removed || 0} · Set/Get 修复：${setGet.length} · 前端开关转换：${switches.length}`,
+                    `报告：${escapeHtml(data.mapping_output || '')}`,
+                ].join('<br>');
+                setStatus('转换完成，已导入到 ComfyUI 自定义工作流');
+                new BroadcastChannel('studio-api').postMessage({type:'workflows-changed'});
+            } catch(e){
+                els.exportSummary.innerHTML = `转换失败：${escapeHtml(e.message || String(e))}`;
+                alert(e.message || '转换失败');
+            } finally {
+                els.exportConvertBtn.disabled = false;
+            }
+        }
+
+        function defaultWorkflowNameFromFile(fileName, suffix=''){
+            const stem = String(fileName || 'workflow').replace(/\.json$/i, '').trim() || 'workflow';
+            return `${stem}${suffix}`;
+        }
+        function isFullWorkflowJson(data){
+            return Array.isArray(data?.nodes);
+        }
+        function renderWorkflowUploadFullOptions(meta={}){
+            if(!els.workflowUploadFullSelect) return;
+            const current = els.workflowUploadFullSelect.value;
+            if(!comfyExportWorkflows.length){
+                els.workflowUploadFullSelect.innerHTML = '<option value="">未找到已保存工作流</option>';
+            } else {
+                els.workflowUploadFullSelect.innerHTML = comfyExportWorkflows.map(item => `
+                    <option value="${escapeAttr(item.path)}" ${item.path === current ? 'selected' : ''}>${escapeHtml(item.name)} · ${item.nodes || 0} 节点</option>
+                `).join('');
+                if(!comfyExportWorkflows.some(item => item.path === els.workflowUploadFullSelect.value)){
+                    els.workflowUploadFullSelect.value = comfyExportWorkflows[0].path;
+                }
+            }
+            onWorkflowUploadFullSelected(false);
+        }
+        function selectedWorkflowUploadFullItem(){
+            if(workflowUploadFullJson) return null;
+            const path = els.workflowUploadFullSelect?.value || '';
+            return comfyExportWorkflows.find(item => item.path === path) || comfyExportWorkflows[0] || null;
+        }
+        function openWorkflowUploadDialog(){
+            renderWorkflowUploadFullOptions();
+            if(!workflowUploadFullJson && els.workflowUploadConvertName && !els.workflowUploadConvertName.value.trim()){
+                onWorkflowUploadFullSelected(true);
+            }
+            setWorkflowUploadMode(workflowUploadMode || 'full');
+            els.workflowUploadModal?.classList.add('open');
+            document.body.style.overflow = 'hidden';
+            refreshIcons();
+        }
+        function closeWorkflowUploadDialog(){
+            els.workflowUploadModal?.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+        function setWorkflowUploadMode(mode){
+            workflowUploadMode = mode === 'api' ? 'api' : 'full';
+            els.workflowUploadModeApi?.classList.toggle('active', workflowUploadMode === 'api');
+            els.workflowUploadModeFull?.classList.toggle('active', workflowUploadMode === 'full');
+            els.workflowUploadApiPanel?.classList.toggle('active', workflowUploadMode === 'api');
+            els.workflowUploadFullPanel?.classList.toggle('active', workflowUploadMode === 'full');
+            updateWorkflowUploadSummary();
+        }
+        function onWorkflowUploadFullSelected(updateName=true){
+            const item = selectedWorkflowUploadFullItem();
+            if(item && updateName && els.workflowUploadConvertName && !els.workflowUploadConvertName.value.trim()){
+                els.workflowUploadConvertName.value = defaultWorkflowNameFromFile(item.title || item.name, '_api_fixed');
+            }
+            updateWorkflowUploadSummary();
+        }
+        function updateWorkflowUploadSummary(){
+            if(!els.workflowUploadSummary) return;
+            if(workflowUploadMode === 'api'){
+                els.workflowUploadSummary.innerHTML = workflowUploadApiJson
+                    ? `将直接导入 <strong>${escapeHtml(workflowUploadApiName)}</strong>，并自动提取可暴露字段。`
+                    : '请选择一个已经是 ComfyUI API 格式的 JSON。完整画布 workflow 请切到“完整 workflow 转换”。';
+                return;
+            }
+            const item = selectedWorkflowUploadFullItem();
+            const sourceName = workflowUploadFullName || item?.name || '';
+            if(!sourceName){
+                els.workflowUploadSummary.innerHTML = '请选择本地保存的完整 workflow，或上传一个完整 ComfyUI workflow JSON。';
+                return;
+            }
+            const apiPart = workflowUploadNativeApiName ? `<br>已选择原生 Export(API)：${escapeHtml(workflowUploadNativeApiName)}` : '';
+            els.workflowUploadSummary.innerHTML = `将转换 <strong>${escapeHtml(sourceName)}</strong> 后导入到自定义 ComfyUI 工作流列表。${apiPart}`;
+        }
+        async function readWorkflowUploadApiFile(file){
+            document.getElementById('workflowUploadApiFile').value = '';
+            if(!file) return;
+            try {
+                const data = JSON.parse(await file.text());
+                if(isFullWorkflowJson(data)){
+                    alert('这个文件是完整画布 workflow。请切换到“完整 workflow 转换”后再选择。');
+                    return;
+                }
+                workflowUploadApiJson = data;
+                workflowUploadApiName = file.name;
+                els.workflowUploadApiFileName.textContent = file.name;
+                if(els.workflowUploadName && !els.workflowUploadName.value.trim()){
+                    els.workflowUploadName.value = defaultWorkflowNameFromFile(file.name);
+                }
+                updateWorkflowUploadSummary();
+                setStatus(`已读取 API 工作流：${file.name}`);
+            } catch(e){
+                workflowUploadApiJson = null;
+                workflowUploadApiName = '';
+                els.workflowUploadApiFileName.textContent = '未选择文件';
+                updateWorkflowUploadSummary();
+                alert(e.message || '读取 API 工作流失败');
+            }
+        }
+        async function readWorkflowUploadFullFile(file){
+            document.getElementById('workflowUploadFullFile').value = '';
+            if(!file) return;
+            try {
+                const data = JSON.parse(await file.text());
+                if(!isFullWorkflowJson(data)){
+                    alert('请选择完整 ComfyUI workflow JSON，需要包含 nodes 列表。');
+                    return;
+                }
+                workflowUploadFullJson = data;
+                workflowUploadFullName = file.name;
+                els.workflowUploadFullFileName.textContent = file.name;
+                if(els.workflowUploadConvertName && !els.workflowUploadConvertName.value.trim()){
+                    els.workflowUploadConvertName.value = defaultWorkflowNameFromFile(file.name, '_api_fixed');
+                }
+                updateWorkflowUploadSummary();
+                setStatus(`已读取完整 workflow：${file.name}`);
+            } catch(e){
+                workflowUploadFullJson = null;
+                workflowUploadFullName = '';
+                els.workflowUploadFullFileName.textContent = '未选择文件';
+                updateWorkflowUploadSummary();
+                alert(e.message || '读取完整 workflow 失败');
+            }
+        }
+        async function readWorkflowUploadNativeApiFile(file){
+            document.getElementById('workflowUploadNativeApiFile').value = '';
+            if(!file) return;
+            try {
+                const data = JSON.parse(await file.text());
+                if(isFullWorkflowJson(data)){
+                    alert('这里请选择 ComfyUI 原生 Export(API) JSON，不是完整画布 workflow JSON。');
+                    return;
+                }
+                workflowUploadNativeApiJson = data;
+                workflowUploadNativeApiName = file.name;
+                els.workflowUploadNativeApiFileName.textContent = file.name;
+                updateWorkflowUploadSummary();
+                setStatus(`已读取 Export(API)：${file.name}`);
+            } catch(e){
+                workflowUploadNativeApiJson = null;
+                workflowUploadNativeApiName = '';
+                els.workflowUploadNativeApiFileName.textContent = '未选择文件';
+                updateWorkflowUploadSummary();
+                alert(e.message || '读取 Export(API) JSON 失败');
+            }
+        }
+        function clearWorkflowUploadApiFile(){
+            workflowUploadApiJson = null;
+            workflowUploadApiName = '';
+            if(els.workflowUploadApiFileName) els.workflowUploadApiFileName.textContent = '未选择文件';
+            updateWorkflowUploadSummary();
+        }
+        function clearWorkflowUploadFullFile(){
+            workflowUploadFullJson = null;
+            workflowUploadFullName = '';
+            if(els.workflowUploadFullFileName) els.workflowUploadFullFileName.textContent = '未选择文件';
+            updateWorkflowUploadSummary();
+        }
+        function clearWorkflowUploadNativeApiFile(){
+            workflowUploadNativeApiJson = null;
+            workflowUploadNativeApiName = '';
+            if(els.workflowUploadNativeApiFileName) els.workflowUploadNativeApiFileName.textContent = '未选择文件';
+            updateWorkflowUploadSummary();
+        }
+        async function importApiWorkflowObject(inputName, workflow){
+            const name = String(inputName || '').trim();
+            if(!name) throw new Error('请输入导入名称');
+            const data = await fetchJson('/api/workflows', {
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({name, workflow})
+            });
+            selectedName = data.name;
+            await loadWorkflows();
+            await selectWorkflow(data.name);
+            currentConfig.fields = extractFieldsFromWorkflow(workflow);
+            values = {};
+            currentConfig.fields.forEach(field => values[fieldId(field)] = field.default ?? '');
+            renderEditor();
+            await fetchJson(`/api/workflows/${encodeURIComponent(data.name)}/config`, {
+                method:'PUT',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify(syncConfigFromInputs())
+            });
+            await loadWorkflows();
+            if(selectedName) await selectWorkflow(selectedName, false);
+            return {name:data.name, fieldCount:currentConfig.fields.length};
+        }
+        async function confirmWorkflowUploadDialog(){
+            els.workflowUploadConfirmBtn.disabled = true;
+            try {
+                if(workflowUploadMode === 'api'){
+                    if(!workflowUploadApiJson){ alert('请先选择一个 API 工作流 JSON'); return; }
+                    const name = els.workflowUploadName?.value?.trim() || defaultWorkflowNameFromFile(workflowUploadApiName);
+                    const result = await importApiWorkflowObject(name, workflowUploadApiJson);
+                    setStatus(`已导入并提取 ${result.fieldCount} 个字段`);
+                    new BroadcastChannel('studio-api').postMessage({type:'workflows-changed'});
+                    closeWorkflowUploadDialog();
+                    return;
+                }
+
+                const item = selectedWorkflowUploadFullItem();
+                if(!item && !workflowUploadFullJson){ alert('请先选择或上传一个完整 ComfyUI workflow'); return; }
+                const sourceTitle = workflowUploadFullName || item?.title || item?.name || 'workflow';
+                const name = els.workflowUploadConvertName?.value?.trim() || defaultWorkflowNameFromFile(sourceTitle, '_api_fixed');
+                els.workflowUploadSummary.innerHTML = `正在转换 <strong>${escapeHtml(sourceTitle)}</strong>...`;
+                const data = await fetchJson('/api/comfyui/export/convert', {
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({
+                        workflow_path:workflowUploadFullJson ? '' : item.path,
+                        workflow:workflowUploadFullJson,
+                        name,
+                        profile:els.workflowUploadProfile?.value || 'auto',
+                        output_mode:els.workflowUploadModeSelect?.value || 'all',
+                        main_output_id:els.workflowUploadMainOutput?.value || '312',
+                        api_input:workflowUploadNativeApiJson,
+                        save_config:true,
+                    })
+                });
+                selectedName = data.workflow?.name || selectedName;
+                await loadWorkflows();
+                if(selectedName) await selectWorkflow(selectedName);
+                setStatus(`转换完成：${data.workflow?.name || name}`);
+                new BroadcastChannel('studio-api').postMessage({type:'workflows-changed'});
+                closeWorkflowUploadDialog();
+            } catch(e){
+                updateWorkflowUploadSummary();
+                alert(e.message || '导入失败');
+            } finally {
+                els.workflowUploadConfirmBtn.disabled = false;
+            }
+        }
+
+        async function loadWorkflows(){
+            try {
+                const data = await fetchJson('/api/workflows');
+                workflows = data.workflows || [];
+                if(!selectedName && workflows.length) selectedName = workflows[0].name;
+                renderList();
+                if(selectedName) await selectWorkflow(selectedName, false);
+                else renderEmpty();
+            } catch(e){ setStatus(e.message || String(e)); }
+        }
+        function renderList(){
+            els.list.innerHTML = workflows.map(w => `
+                <button class="workflow-card ${w.name === selectedName ? 'active' : ''}" type="button" onclick="selectWorkflow('${escapeAttr(w.name)}')">
+                    <span class="workflow-mark"><i data-lucide="${w.builtin ? 'package' : 'file-json-2'}" class="w-4 h-4"></i></span>
+                    <span class="min-w-0" style="flex:1">
+                        <div class="workflow-name">${escapeHtml(w.title || w.name)}</div>
+                        <div class="workflow-meta">${escapeHtml(w.name)} · ${Number(w.field_count || 0)} 字段</div>
+                    </span>
+                    ${w.builtin ? '<span class="badge">内置</span>' : ''}
+                </button>
+            `).join('') || '<div class="empty">还没有工作流</div>';
+            refreshIcons();
+        }
+        async function selectWorkflow(name, rerenderList=true){
+            selectedName = name;
+            if(rerenderList) renderList();
+            try {
+                setStatus('加载中...');
+                const data = await fetchJson(`/api/workflows/${encodeURIComponent(name)}`);
+                currentWorkflow = data.workflow || {};
+                currentConfig = data.config || {title:name.replace('.json',''), fields:[]};
+                currentConfig.fields = normalizeFields(currentConfig.fields || []);
+                isBuiltin = !!data.builtin;
+                values = {};
+                currentConfig.fields.forEach(field => values[fieldId(field)] = field.default ?? '');
+                Object.values(mediaPreviewUrls).forEach(url => { try { URL.revokeObjectURL(url); } catch(e){} });
+                mediaPreviewUrls = {};
+                renderEditor();
+                setStatus('');
+            } catch(e){ setStatus(e.message || String(e)); }
+        }
+        function renderEmpty(){
+            currentWorkflow = null;
+            currentConfig = {title:'', fields:[]};
+            renderEditor();
+        }
+        function normalizeFields(fields){
+            return (fields || []).filter(Boolean).map((field, i) => protectEssentialField({
+                id: field.id || makeFieldId(field.node || '', field.input || '') || `field_${i + 1}`,
+                node: String(field.node || ''),
+                input: String(field.input || ''),
+                name: String(field.name || field.input || field.id || `字段 ${i + 1}`),
+                type: cleanFieldType(field.type),
+                default: field.default ?? '',
+                min: field.min ?? null,
+                max: field.max ?? null,
+                step: field.step ?? null,
+                options: Array.isArray(field.options) ? field.options.map(String) : [],
+                random_enabled: field.random_enabled === true,
+                locked: field.locked === true,
+                nodeTitle: field.nodeTitle || field.title || '',
+                classType: field.classType || field.class_type || '',
+            }));
+        }
+        function cleanFieldType(type){
+            const t = String(type || 'text').toLowerCase();
+            if(['text','textarea','number','slider','boolean','dropdown','image','video','audio'].includes(t)) return t;
+            if(t === 'integer' || t === 'float') return 'number';
+            if(t === 'bool') return 'boolean';
+            return 'text';
+        }
+        function syncConfigFromInputs(){
+            if(!currentConfig) currentConfig = {title:'', fields:[]};
+            currentConfig.title = els.title.value.trim() || (selectedName ? selectedName.replace('.json','') : 'ComfyUI Workflow');
+            return currentConfig;
+        }
+        function updateTitle(value){
+            if(!currentConfig) return;
+            currentConfig.title = value;
+            const item = workflows.find(w => w.name === selectedName);
+            if(item) item.title = value || selectedName;
+            renderList();
+        }
+
+        function renderEditor(){
+            els.title.value = currentConfig?.title || '';
+            els.name.value = selectedName || '';
+            els.deleteBtn.style.display = selectedName && !isBuiltin ? 'inline-flex' : 'none';
+            renderFieldEditor();
+            renderRunFields();
+        }
+        function renderFieldEditor(){
+            const fields = currentConfig?.fields || [];
+            if(!fields.length){
+                updateFieldFilterCount(0, 0);
+                els.fieldEditor.innerHTML = `<div class="empty">${selectedName ? '暂无字段。可以提取全部字段，或手动添加 node + input。' : '请先选择或上传工作流'}</div>`;
+                refreshIcons();
+                return;
+            }
+            const visible = filteredFieldEntries(fields);
+            updateFieldFilterCount(fields.length, visible.length);
+            if(!visible.length){
+                els.fieldEditor.innerHTML = '<div class="empty">没有匹配字段</div>';
+                refreshIcons();
+                return;
+            }
+            els.fieldEditor.innerHTML = visible.map(({field, index:i}) => `
+                <div class="field-row ${isFieldLocked(field) ? 'locked' : ''}">
+                    <label class="field">
+                        <span class="label">标签</span>
+                        <input class="input" value="${escapeAttr(field.name || '')}" oninput="updateField(${i}, 'name', this.value)">
+                        <span class="small">${escapeHtml([field.nodeTitle || '', field.classType || ''].filter(Boolean).join(' · ') || '无节点名')}</span>
+                    </label>
+                    <label class="field">
+                        <span class="label">node</span>
+                        <input class="input" value="${escapeAttr(field.node || '')}" oninput="updateField(${i}, 'node', this.value)">
+                    </label>
+                    <label class="field">
+                        <span class="label">input</span>
+                        <input class="input" value="${escapeAttr(field.input || '')}" oninput="updateField(${i}, 'input', this.value)">
+                    </label>
+                    <label class="field">
+                        <span class="label">类型</span>
+                        <select class="select" onchange="updateField(${i}, 'type', this.value)">
+                            ${['text','textarea','number','slider','boolean','dropdown','image','video','audio'].map(t => `<option value="${t}" ${field.type === t ? 'selected' : ''}>${t}</option>`).join('')}
+                        </select>
+                    </label>
+                    <label class="field">
+                        <span class="label">默认值</span>
+                        <input class="input" value="${escapeAttr(defaultToText(field.default))}" oninput="updateFieldDefault(${i}, this.value)">
+                    </label>
+                    <div class="field-actions">
+                        <button class="btn field-lock ${isFieldLocked(field) ? 'active' : ''}" type="button" onclick="toggleFieldLock(${i})" title="${isFieldLocked(field) ? '解除锁定' : '锁定字段'}" aria-label="${isFieldLocked(field) ? '解除锁定' : '锁定字段'}">
+                            <i data-lucide="${isFieldLocked(field) ? 'lock-keyhole' : 'unlock-keyhole'}" class="w-4 h-4"></i>
+                        </button>
+                        <button class="btn danger field-delete" type="button" onclick="removeField(${i})" ${isFieldLocked(field) ? 'disabled title="已锁定，不能删除"' : 'title="删除字段"'}><i data-lucide="x" class="w-4 h-4"></i></button>
+                    </div>
+                    ${field.type === 'slider' || field.type === 'number' || field.type === 'dropdown' ? renderFieldExtra(field, i) : ''}
+                </div>
+            `).join('');
+            refreshIcons();
+        }
+        function renderFieldExtra(field, i){
+            if(field.type === 'dropdown'){
+                return `<div class="field-extra">
+                    <label class="field"><span class="label">选项（每行一个）</span><textarea class="textarea" style="min-height:66px" oninput="updateFieldOptions(${i}, this.value)">${escapeHtml((field.options || []).join('\n'))}</textarea></label>
+                </div>`;
+            }
+            return `<div class="field-extra">
+                <label class="field"><span class="label">min</span><input class="input" type="number" value="${field.min ?? ''}" oninput="updateFieldNumber(${i}, 'min', this.value)"></label>
+                <label class="field"><span class="label">max</span><input class="input" type="number" value="${field.max ?? ''}" oninput="updateFieldNumber(${i}, 'max', this.value)"></label>
+                <label class="field"><span class="label">step</span><input class="input" type="number" value="${field.step ?? ''}" oninput="updateFieldNumber(${i}, 'step', this.value)"></label>
+                <label class="field"><span class="label">随机</span><select class="select" onchange="updateField(${i}, 'random_enabled', this.value === 'true')"><option value="false" ${!field.random_enabled ? 'selected' : ''}>关闭</option><option value="true" ${field.random_enabled ? 'selected' : ''}>开启</option></select></label>
+            </div>`;
+        }
+        function updateField(index, key, value){
+            const field = currentConfig.fields[index];
+            if(!field) return;
+            field[key] = value;
+            if(key === 'node' || key === 'input') field.id = makeFieldId(field.node, field.input);
+            if(key === 'type'){
+                field.type = cleanFieldType(value);
+                if(!['number','slider'].includes(field.type)) field.random_enabled = false;
+                if(field.type === 'slider'){
+                    field.min = field.min ?? 0;
+                    field.max = field.max ?? 10;
+                    field.step = field.step ?? 1;
+                }
+            }
+            renderFieldEditor();
+            renderRunFields();
+        }
+        function updateFieldDefault(index, value){
+            const field = currentConfig.fields[index];
+            if(!field) return;
+            field.default = coerceValue(value, field);
+            values[fieldId(field)] = field.default;
+            renderRunFields();
+        }
+        function updateFieldNumber(index, key, value){
+            const field = currentConfig.fields[index];
+            if(!field) return;
+            field[key] = value === '' ? null : Number(value);
+            renderRunFields();
+        }
+        function updateFieldOptions(index, value){
+            const field = currentConfig.fields[index];
+            if(!field) return;
+            field.options = value.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+            renderRunFields();
+        }
+        function toggleFieldLock(index){
+            const field = currentConfig.fields[index];
+            if(!field) return;
+            if(isEssentialWorkflowField(field)){
+                field.locked = true;
+                setStatus('图片、视频、音频和提示词入口字段会自动保留');
+                renderFieldEditor();
+                return;
+            }
+            field.locked = !field.locked;
+            renderFieldEditor();
+        }
+        function addField(){
+            syncConfigFromInputs();
+            currentConfig.fields.push({id:`field_${Date.now()}`, node:'', input:'', name:'新字段', type:'text', default:'', options:[], random_enabled:false, locked:false, nodeTitle:'', classType:''});
+            renderFieldEditor();
+            renderRunFields();
+        }
+        function removeField(index){
+            const field = currentConfig.fields[index];
+            if(isFieldLocked(field)){
+                setStatus('该字段已锁定，不能删除');
+                return;
+            }
+            if(field) delete values[fieldId(field)];
+            currentConfig.fields.splice(index, 1);
+            renderFieldEditor();
+            renderRunFields();
+        }
+        function pruneFields(keepMatches){
+            const query = fieldFilter.trim();
+            if(!query){ alert('请先输入过滤关键词'); return; }
+            const before = currentConfig.fields.length;
+            const shouldKeep = field => keepMatches ? fieldMatchesFilter(field, query) : !fieldMatchesFilter(field, query);
+            const lockedSaved = currentConfig.fields.filter(field => !shouldKeep(field) && isFieldLocked(field)).length;
+            const nextFields = currentConfig.fields.filter(field => shouldKeep(field) || isFieldLocked(field));
+            const matched = currentConfig.fields.filter(field => fieldMatchesFilter(field, query)).length;
+            const removed = before - nextFields.length;
+            if(!removed){
+                setStatus(lockedSaved ? `${lockedSaved} 个字段已锁定，未删除` : (keepMatches ? '没有可删除的非匹配字段' : '没有匹配字段可删除'));
+                return;
+            }
+            const action = keepMatches ? `只保留 ${matched} 个匹配字段，删除 ${removed} 个非匹配字段` : `删除 ${removed} 个匹配字段`;
+            const lockedTip = lockedSaved ? `\n\n${lockedSaved} 个已锁定字段会保留。` : '';
+            if(!confirm(`${action}？${lockedTip}`)) return;
+            currentConfig.fields = nextFields;
+            values = {};
+            currentConfig.fields.forEach(field => values[fieldId(field)] = field.default ?? '');
+            renderFieldEditor();
+            renderRunFields();
+            setStatus(`${action}${lockedSaved ? `，保留 ${lockedSaved} 个锁定字段` : ''}`);
+        }
+        function keepMatchingFields(){ pruneFields(true); }
+        function deleteMatchingFields(){ pruneFields(false); }
+        function keepNamedInputFields(){
+            if(!currentConfig?.fields?.length) return;
+            const before = currentConfig.fields.length;
+            const isNamedInput = field => /^(input_|get_|set_)/i.test(field.nodeTitle || field.name || '');
+            const isRequiredInput = field => isNamedInput(field) || isEssentialWorkflowField(field);
+            const lockedSaved = currentConfig.fields.filter(field => !isRequiredInput(field) && isFieldLocked(field)).length;
+            const kept = currentConfig.fields.filter(field => isRequiredInput(field) || isFieldLocked(field));
+            const namedCount = currentConfig.fields.filter(isRequiredInput).length;
+            const removed = before - kept.length;
+            if(!namedCount && !lockedSaved){ alert('没有找到 Input_ / Get_ / Set_ 或必要的媒体/提示词入口字段'); return; }
+            if(!removed){
+                setStatus(lockedSaved ? `${lockedSaved} 个字段已锁定，未删除` : '没有可删除字段');
+                return;
+            }
+            const lockedTip = lockedSaved ? `\n\n${lockedSaved} 个已锁定字段会保留。` : '';
+            if(!confirm(`只保留 ${namedCount} 个命名输入/必要入口字段，删除 ${removed} 个其他字段？${lockedTip}`)) return;
+            currentConfig.fields = kept;
+            values = {};
+            currentConfig.fields.forEach(field => values[fieldId(field)] = field.default ?? '');
+            renderFieldEditor();
+            renderRunFields();
+        }
+
+        function inferType(value, inputName){
+            const name = String(inputName || '').toLowerCase();
+            if(typeof value === 'boolean') return 'boolean';
+            if(typeof value === 'number') return /strength|cfg|denoise|scale|weight|ratio|rate/.test(name) ? 'slider' : 'number';
+            if(Array.isArray(value) && value.every(item => ['string','number','boolean'].includes(typeof item))) return 'dropdown';
+            if(/audio|sound|music|voice|mp3|wav|ogg|m4a|flac/.test(name)) return 'audio';
+            if(/video|movie|mp4|mov|webm/.test(name)) return 'video';
+            if(/image|img|picture|photo|mask/.test(name)) return 'image';
+            if(/prompt|text|caption|positive|negative|提示词|正向|负向/.test(name) || String(value || '').length > 120) return 'textarea';
+            return 'text';
+        }
+        function nodeTitle(nodeId, node){
+            return String((node?._meta || {}).title || node?.title || '');
+        }
+        function nodeClass(node){ return String(node?.class_type || node?.classType || ''); }
+        function labelForNodeInput(nodeId, node, input){
+            const title = nodeTitle(nodeId, node) || nodeClass(node) || `Node ${nodeId}`;
+            return `${title} / ${input}`;
+        }
+        function extractFieldsFromWorkflow(workflow){
+            if(!workflow || typeof workflow !== 'object') return [];
+            const fields = [];
+            Object.entries(workflow).forEach(([nodeId, node]) => {
+                if(!node || typeof node !== 'object') return;
+                const inputs = node.inputs && typeof node.inputs === 'object' ? node.inputs : {};
+                Object.entries(inputs).forEach(([input, value]) => {
+                    if(isConnectedInput(value)) return;
+                    const type = inferType(value, input);
+                    const options = type === 'dropdown' && Array.isArray(value) ? value.map(String) : [];
+                    const defaultValue = options.length ? options[0] : (typeof value === 'object' ? '' : value);
+                    const field = {
+                        id: makeFieldId(nodeId, input),
+                        node: String(nodeId),
+                        input: String(input),
+                        name: labelForNodeInput(nodeId, node, input),
+                        type,
+                        default: defaultValue ?? '',
+                        options,
+                        random_enabled: false,
+                        locked: false,
+                        nodeTitle: nodeTitle(nodeId, node),
+                        classType: nodeClass(node),
+                    };
+                    if(type === 'slider' || type === 'number'){
+                        const n = Number(defaultValue);
+                        field.min = 0;
+                        field.max = Number.isFinite(n) && n > 0 ? Math.max(n * 2, 10) : 10;
+                        field.step = Number.isFinite(n) && n > 0 && n < 5 ? 0.1 : 1;
+                        if(type === 'number' && /seed|noise|随机|噪/i.test(`${input} ${field.name}`)) field.random_enabled = true;
+                    }
+                    fields.push(protectEssentialField(field));
+                });
+            });
+            return fields;
+        }
+        function parseImportWorkflow(){
+            const text = els.workflowJson.value.trim();
+            if(!text) return currentWorkflow;
+            try { return JSON.parse(text); }
+            catch(e){ throw new Error('JSON 解析失败'); }
+        }
+        function extractAllFields(){
+            try {
+                const workflow = parseImportWorkflow();
+                const fields = extractFieldsFromWorkflow(workflow);
+                if(!fields.length){ alert('没有提取到可覆盖字段'); return; }
+                currentWorkflow = workflow;
+                syncConfigFromInputs();
+                currentConfig.fields = mergeExtractedFieldsWithLocked(fields);
+                values = {};
+                currentConfig.fields.forEach(field => values[fieldId(field)] = field.default ?? '');
+                renderFieldEditor();
+                renderRunFields();
+                setStatus(`已提取 ${fields.length} 个字段`);
+            } catch(e){ alert(e.message || String(e)); }
+        }
+        async function readWorkflowJsonFile(file){
+            if(!file) return;
+            try {
+                els.workflowJson.value = await file.text();
+                setStatus(`已读取 ${file.name}`);
+            } catch(e){ alert('读取文件失败'); }
+        }
+        function clearImportBox(){ els.workflowJson.value = ''; }
+
+        function defaultToText(value){
+            if(value === null || value === undefined) return '';
+            if(typeof value === 'object') return JSON.stringify(value);
+            return String(value);
+        }
+        function coerceValue(value, field){
+            if(field.type === 'boolean') return String(value).toLowerCase() === 'true';
+            if(field.type === 'number' || field.type === 'slider'){
+                const n = Number(value);
+                return Number.isFinite(n) ? n : value;
+            }
+            return value;
+        }
+        function renderRunFields(){
+            const fields = currentConfig?.fields || [];
+            if(!fields.length){
+                els.runFields.innerHTML = '<div class="empty">保存或添加字段后，可以在这里测试运行参数。</div>';
+                refreshIcons();
+                return;
+            }
+            els.runFields.innerHTML = fields.map((field, i) => {
+                const id = fieldId(field);
+                if(values[id] === undefined) values[id] = field.default ?? '';
+                const type = cleanFieldType(field.type);
+                let control = '';
+                if(type === 'textarea'){
+                    control = `<textarea class="textarea" oninput="setRunValue('${escapeAttr(id)}', this.value)">${escapeHtml(values[id])}</textarea>`;
+                } else if(type === 'boolean'){
+                    control = `<select class="select" onchange="setRunValue('${escapeAttr(id)}', this.value === 'true')"><option value="false" ${!values[id] ? 'selected' : ''}>false</option><option value="true" ${values[id] ? 'selected' : ''}>true</option></select>`;
+                } else if(type === 'dropdown'){
+                    const opts = Array.isArray(field.options) && field.options.length ? field.options : [values[id] || field.default || ''];
+                    control = `<select class="select" onchange="setRunValue('${escapeAttr(id)}', this.value)">${opts.map(opt => `<option value="${escapeAttr(opt)}" ${String(values[id]) === String(opt) ? 'selected' : ''}>${escapeHtml(opt)}</option>`).join('')}</select>`;
+                } else if(isMediaType(type)){
+                    const preview = mediaPreviewUrls[id] || values[id] || '';
+                    control = `<div class="file-control">
+                        <div class="file-chip" title="${escapeAttr(preview)}">${escapeHtml(preview || '尚未上传')}</div>
+                        <label class="btn"><input class="hidden" type="file" accept="${type === 'video' ? 'video/*' : type === 'audio' ? 'audio/*' : 'image/*'}" onchange="uploadRunFile(${i}, this.files[0])"><i data-lucide="upload" class="w-4 h-4"></i><span>上传</span></label>
+                    </div>`;
+                } else if(type === 'slider'){
+                    control = `<input class="input" type="number" min="${field.min ?? ''}" max="${field.max ?? ''}" step="${field.step ?? 1}" value="${escapeAttr(values[id])}" oninput="setRunValue('${escapeAttr(id)}', Number(this.value) || 0)">`;
+                } else {
+                    const inputType = type === 'number' ? 'number' : 'text';
+                    control = `<input class="input" type="${inputType}" value="${escapeAttr(values[id])}" oninput="setRunValue('${escapeAttr(id)}', ${inputType === 'number' ? 'Number(this.value) || 0' : 'this.value'})">`;
+                }
+                return `<div class="run-field">
+                    <div class="run-label">
+                        <strong>${escapeHtml(field.name || id)}</strong>
+                        <span>${escapeHtml(field.node || '?')}.${escapeHtml(field.input || '?')} · ${escapeHtml(type)}</span>
+                    </div>
+                    ${control}
+                </div>`;
+            }).join('');
+            refreshIcons();
+        }
+        function setRunValue(id, value){ values[id] = value; }
+        async function uploadRunFile(index, file){
+            if(!file) return;
+            const field = currentConfig.fields[index];
+            if(!field) return;
+            const id = fieldId(field);
+            try {
+                const form = new FormData();
+                form.append('files', file);
+                const data = await fetchJson('/api/upload', {method:'POST', body:form});
+                const item = data.files?.[0] || {};
+                values[id] = item.comfy_name || item.filename || file.name;
+                if(mediaPreviewUrls[id]) URL.revokeObjectURL(mediaPreviewUrls[id]);
+                mediaPreviewUrls[id] = URL.createObjectURL(file);
+                renderRunFields();
+            } catch(e){ alert(e.message || '上传失败'); }
+        }
+        async function runWorkflowTest(){
+            if(!selectedName || !currentConfig){ alert('请先选择工作流'); return; }
+            const config = syncConfigFromInputs();
+            els.runBtn.disabled = true;
+            setTaskState('提交中', selectedName);
+            els.resultGrid.innerHTML = '';
+            try {
+                const data = await fetchJson(`/api/workflows/${encodeURIComponent(selectedName)}/run`, {
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({fields: values, config, client_id:'workflow-test'})
+                });
+                if(data.error) throw new Error(data.error);
+                renderResults(data);
+                setTaskState('SUCCESS', selectedName);
+            } catch(e){
+                setTaskState('FAILED', e.message || String(e));
+                alert(e.message || String(e));
+            } finally {
+                els.runBtn.disabled = false;
+            }
+        }
+        function setTaskState(status, detail){
+            els.taskState.innerHTML = `<div class="big">${escapeHtml(status || 'Ready')}</div><div class="small">${escapeHtml(detail || '')}</div>`;
+        }
+        function renderResults(data){
+            const images = data.images || [];
+            const videos = data.videos || [];
+            els.resultGrid.innerHTML = [
+                ...images.map(url => `<a class="result-item" href="${escapeAttr(url)}" target="_blank"><img src="${escapeAttr(url)}" loading="lazy"></a>`),
+                ...videos.map(url => `<a class="result-item" href="${escapeAttr(url)}" target="_blank"><video src="${escapeAttr(url)}" controls></video></a>`),
+            ].join('') || '<div class="empty" style="grid-column:1/-1">任务完成，但没有文件结果。</div>';
+        }
+
+        async function uploadWorkflowFile(file){
+            if(!file) return;
+            document.getElementById('workflowFileInput').value = '';
+            try {
+                const text = await file.text();
+                const workflow = JSON.parse(text);
+                const baseName = file.name.replace(/\.json$/i, '');
+                const inputName = prompt('请输入工作流名称', baseName);
+                if(!inputName) return;
+                const result = await importApiWorkflowObject(inputName, workflow);
+                setStatus(`已上传并提取 ${result.fieldCount} 个字段`);
+            } catch(e){ alert(e.message || '上传失败'); }
+        }
+        async function saveWorkflowConfig(){
+            if(!selectedName || !currentConfig){ alert('请先选择工作流'); return; }
+            const config = syncConfigFromInputs();
+            for(const field of config.fields){
+                if(!field.node || !field.input){ alert(`字段 ${field.name || field.id} 缺少 node 或 input`); return; }
+                if(!field.name || !String(field.name).trim()){ alert(`字段 ${field.input} 缺少标签`); return; }
+            }
+            try {
+                const data = await fetchJson(`/api/workflows/${encodeURIComponent(selectedName)}/config`, {
+                    method:'PUT',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify(config)
+                });
+                if(data.config?.fields){
+                    currentConfig = data.config;
+                    currentConfig.fields = normalizeFields(currentConfig.fields || []);
+                    renderEditor();
+                }
+                setStatus('配置已保存，无限画布可使用');
+                await loadWorkflows();
+                new BroadcastChannel('studio-api').postMessage({type:'workflows-changed'});
+            } catch(e){ alert(e.message || '保存失败'); }
+        }
+        async function deleteWorkflow(){
+            if(!selectedName || isBuiltin) return;
+            if(!confirm(`删除 ${currentConfig.title || selectedName}？`)) return;
+            try {
+                await fetchJson(`/api/workflows/${encodeURIComponent(selectedName)}`, {method:'DELETE'});
+                selectedName = '';
+                currentWorkflow = null;
+                currentConfig = {title:'', fields:[]};
+                await loadWorkflows();
+                new BroadcastChannel('studio-api').postMessage({type:'workflows-changed'});
+            } catch(e){ alert(e.message || '删除失败'); }
+        }
+
+        window.addEventListener('message', event => {
+            if(event.data?.type === 'studio-theme' && window.StudioTheme) StudioTheme.apply(event.data.theme);
+        });
+        let booted = false;
+        async function boot(){
+            if(booted) return;
+            booted = true;
+            refreshIcons();
+            await loadComfyInstances();
+            await loadComfyExportWorkflows();
+            await loadWorkflows();
+        }
+        if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+        else boot();
+        setTimeout(boot, 0);
+    </script>
+</body>
+</html>
+

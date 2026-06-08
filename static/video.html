@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/static/logo.png" type="image/png">
+    <title>十月文化 | SD2.0 视频</title>
+    <script>
+        (function(){
+            try {
+                var theme = localStorage.getItem('studio_theme') || localStorage.getItem('canvas_theme') || 'light';
+                if(theme === 'dark') {
+                    document.documentElement.classList.add('studio-theme-dark');
+                    document.documentElement.classList.add('theme-dark');
+                }
+            } catch(e) {}
+        })();
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/static/theme.js?v=20260516-theme-sync"></script>
+    <script src="/static/i18n.js?v=20260524-seedance-params"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;800;900&display=swap');
+        :root {
+            --accent:#111827;
+            --bg:#f8fafc;
+            --card:#ffffff;
+            --line:#e8edf4;
+            --muted:#8a98ad;
+            --soft:#f3f6fa;
+            --soft-2:#edf2f7;
+            --danger:#ef4444;
+            --ok:#16a34a;
+            --shadow:0 22px 70px rgba(15,23,42,.08);
+            --easing:cubic-bezier(0.4,0,0.2,1);
+        }
+        body { min-height:100vh; background:radial-gradient(circle at 20% 0%, #fff 0, var(--bg) 36%, #eef3f9 100%); font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; color:var(--accent); -webkit-font-smoothing:antialiased; }
+        button,select,input,textarea { font:inherit; }
+        .page-shell { max-width:1360px; margin:0 auto; padding:42px 38px 72px; }
+        .page-head { display:flex; align-items:flex-end; justify-content:space-between; gap:24px; margin-bottom:30px; }
+        .eyebrow { display:inline-flex; align-items:center; gap:8px; height:28px; padding:0 10px; border:1px solid var(--line); border-radius:999px; background:rgba(255,255,255,.72); color:#64748b; font-size:10px; font-weight:900; letter-spacing:.18em; text-transform:uppercase; }
+        .title { margin-top:12px; font-size:42px; line-height:.98; font-weight:900; letter-spacing:-.06em; }
+        .subtitle { margin-top:10px; color:#64748b; font-size:13px; font-weight:700; max-width:680px; line-height:1.8; }
+        .status-pill { display:flex; align-items:center; gap:8px; min-height:34px; padding:0 12px; border-radius:999px; border:1px solid var(--line); background:#fff; color:#64748b; font-size:11px; font-weight:900; box-shadow:0 10px 28px rgba(15,23,42,.04); }
+        .layout { display:grid; grid-template-columns:minmax(0, 1fr) minmax(460px, .92fr); gap:26px; align-items:start; }
+        .stack { display:flex; flex-direction:column; gap:18px; }
+        .card { background:rgba(255,255,255,.88); border:1px solid var(--line); border-radius:30px; box-shadow:0 2px 16px rgba(15,23,42,.025); backdrop-filter:blur(18px); }
+        .card-pad { padding:20px; }
+        .section-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px; }
+        .section-title { display:flex; align-items:center; gap:8px; color:#7c8aa2; font-size:11px; font-weight:900; letter-spacing:.12em; text-transform:uppercase; }
+        .section-help { color:#9aa6b8; font-size:11px; font-weight:750; line-height:1.6; }
+        .prompt-wrap { position:relative; }
+        .prompt-input { width:100%; min-height:166px; resize:vertical; border:1px solid var(--line); border-radius:24px; background:#fff; color:#0f172a; outline:none; padding:18px 18px 42px; font-size:14px; line-height:1.75; font-weight:650; transition:all .22s var(--easing); }
+        .prompt-input:focus { border-color:#111827; box-shadow:0 0 0 3px rgba(17,24,39,.06); }
+        .prompt-footer { position:absolute; left:14px; right:14px; bottom:12px; display:flex; align-items:center; justify-content:space-between; gap:10px; pointer-events:none; }
+        .prompt-tip { color:#9aa6b8; font-size:10px; font-weight:850; }
+        .kbd { height:22px; display:inline-flex; align-items:center; padding:0 7px; border:1px solid var(--line); border-radius:7px; background:var(--soft); color:#64748b; font-size:10px; font-weight:950; }
+        .mention-popover { position:absolute; left:16px; right:16px; top:calc(100% + 8px); z-index:35; padding:10px; border:1px solid #dbe4ef; border-radius:20px; background:#fff; box-shadow:0 24px 60px rgba(15,23,42,.14); display:none; max-height:286px; overflow:auto; }
+        .mention-popover.open { display:block; }
+        .mention-option { width:100%; display:flex; align-items:center; gap:12px; padding:9px; border-radius:15px; text-align:left; color:#334155; transition:background .15s ease; }
+        .mention-option:hover,.mention-option.active { background:#f1f5f9; color:#0f172a; }
+        .mention-option img { width:48px; height:48px; object-fit:cover; border-radius:13px; background:#f8fafc; flex:0 0 auto; }
+        .upload-drop { min-height:126px; border:1px dashed #cbd5e1; border-radius:26px; background:linear-gradient(180deg,#fff,#f8fafc); display:flex; align-items:center; justify-content:center; text-align:center; transition:all .22s var(--easing); cursor:pointer; }
+        .upload-drop:hover,.upload-drop.drag-over { border-color:#111827; transform:translateY(-1px); box-shadow:0 14px 34px rgba(15,23,42,.06); }
+        .small-btn { height:30px; display:inline-flex; align-items:center; justify-content:center; gap:7px; padding:0 11px; border-radius:999px; border:1px solid var(--line); background:#fff; color:#64748b; font-size:10px; font-weight:950; transition:all .18s ease; }
+        .small-btn:hover { color:#0f172a; border-color:#cbd5e1; transform:translateY(-1px); }
+        .small-btn.dark { background:#111827; color:#fff; border-color:#111827; }
+        .ref-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin-top:14px; }
+        .ref-card { position:relative; border:1px solid #e9eef5; background:#fff; border-radius:22px; padding:8px; overflow:hidden; transition:transform .18s ease, box-shadow .18s ease; }
+        .ref-card:hover { transform:translateY(-1px); box-shadow:0 16px 34px rgba(15,23,42,.07); }
+        .ref-thumb { width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:16px; background:#f8fafc; display:block; }
+        .ref-tag { position:absolute; top:14px; left:14px; min-width:34px; height:28px; padding:0 9px; border-radius:999px; display:flex; align-items:center; justify-content:center; background:#111827; color:#fff; font-size:11px; font-weight:950; box-shadow:0 10px 24px rgba(15,23,42,.18); }
+        .ref-remove { position:absolute; top:14px; right:14px; width:28px; height:28px; border-radius:999px; background:rgba(255,255,255,.94); color:#0f172a; font-weight:950; box-shadow:0 8px 18px rgba(15,23,42,.12); }
+        .ref-name { margin-top:8px; font-size:10px; font-weight:850; color:#64748b; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .role-select { margin-top:7px; width:100%; height:33px; border:1px solid #edf2f7; border-radius:12px; background:#f8fafc; color:#334155; font-size:10px; font-weight:900; outline:none; padding:0 8px; }
+        .ref-actions { margin-top:7px; display:flex; gap:6px; }
+        .insert-ref-btn { flex:1; height:28px; border-radius:10px; background:#111827; color:#fff; font-size:10px; font-weight:950; }
+        .settings-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+        .field { display:flex; flex-direction:column; gap:7px; min-width:0; }
+        .field.full { grid-column:1 / -1; }
+        .field-label { display:flex; align-items:center; justify-content:space-between; gap:8px; color:#64748b; font-size:11px; font-weight:950; }
+        .field-help { color:#a0aec0; font-size:10px; font-weight:800; }
+        .control { width:100%; height:44px; border:1px solid #e7edf5; border-radius:16px; background:#f8fafc; color:#111827; outline:none; padding:0 13px; font-size:12px; font-weight:850; transition:all .18s ease; }
+        .control:focus { border-color:#111827; background:#fff; box-shadow:0 0 0 3px rgba(17,24,39,.06); }
+        .control:disabled { color:#94a3b8; cursor:not-allowed; background:#f1f5f9; }
+        .param-strip { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+        .toggle { min-height:42px; border:1px solid #e7edf5; border-radius:16px; background:#f8fafc; color:#64748b; padding:0 12px; display:flex; align-items:center; justify-content:center; gap:8px; font-size:11px; font-weight:950; transition:all .18s ease; }
+        .toggle.active { background:#111827; color:#fff; border-color:#111827; }
+        .empty-seedance { display:none; border:1px dashed #cbd5e1; border-radius:22px; padding:16px; background:#f8fafc; color:#64748b; font-size:12px; font-weight:800; line-height:1.75; }
+        .empty-seedance.show { display:block; }
+        .empty-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+        .generate-btn { width:100%; height:58px; border-radius:22px; background:#111827; color:#fff; font-size:12px; font-weight:950; letter-spacing:.18em; text-transform:uppercase; display:flex; align-items:center; justify-content:center; gap:10px; transition:all .22s var(--easing); }
+        .generate-btn:hover:not(:disabled) { background:#000; transform:translateY(-1px); box-shadow:0 16px 34px rgba(15,23,42,.14); }
+        .generate-btn:disabled { opacity:.55; cursor:not-allowed; transform:none; box-shadow:none; }
+        .result-frame { min-height:620px; background:#fff; border-radius:32px; border:1px solid #edf2f7; box-shadow:var(--shadow); display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; padding:20px; }
+        .result-video { width:100%; max-height:570px; border-radius:24px; background:#020617; box-shadow:0 16px 40px rgba(15,23,42,.16); }
+        .placeholder { text-align:center; color:#cbd5e1; display:flex; flex-direction:column; align-items:center; gap:15px; }
+        .download-btn { position:absolute; right:30px; bottom:30px; min-height:40px; display:inline-flex; align-items:center; justify-content:center; padding:0 16px; border-radius:999px; background:rgba(255,255,255,.92); border:1px solid #edf2f7; color:#0f172a; font-size:10px; font-weight:950; letter-spacing:.12em; text-transform:uppercase; box-shadow:0 14px 32px rgba(15,23,42,.1); }
+        .history-card { border:1px solid #edf2f7; border-radius:22px; background:#fff; overflow:hidden; }
+        .hidden { display:none !important; }
+        .studio-theme-dark body,.theme-dark body { background:#0b1020; color:#e5e7eb; }
+        .studio-theme-dark .card,.studio-theme-dark .result-frame,.studio-theme-dark .status-pill,.studio-theme-dark .small-btn,.studio-theme-dark .ref-card,.studio-theme-dark .mention-popover { background:#111827; border-color:#253047; color:#e5e7eb; }
+        .studio-theme-dark .prompt-input,.studio-theme-dark .control,.studio-theme-dark .role-select,.studio-theme-dark .upload-drop,.studio-theme-dark .toggle { background:#0f172a; border-color:#253047; color:#e5e7eb; }
+        .studio-theme-dark .toggle.active,.studio-theme-dark .small-btn.dark,.studio-theme-dark .generate-btn,.studio-theme-dark .ref-tag,.studio-theme-dark .insert-ref-btn { background:#e5e7eb; color:#0f172a; border-color:#e5e7eb; }
+        @media (max-width:1180px) { .layout{grid-template-columns:1fr}.result-frame{min-height:460px}.ref-grid{grid-template-columns:repeat(4,minmax(0,1fr))} }
+        @media (max-width:760px) { .page-shell{padding:24px 16px 54px}.page-head{display:block}.title{font-size:34px}.layout{gap:18px}.card-pad{padding:16px}.settings-grid,.param-strip{grid-template-columns:1fr}.ref-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.result-frame{min-height:360px;border-radius:24px}.prompt-input{min-height:148px} }
+    </style>
+    <link rel="stylesheet" href="/static/theme.css?v=20260510-studio-pages-blue-dark10">
+    <link rel="stylesheet" href="/static/oct-ui.css?v=20260528-brand-align">
+</head>
+<body>
+    <div class="page-shell">
+        <header class="page-head">
+            <div>
+                <div class="eyebrow"><i data-lucide="clapperboard" class="w-3.5 h-3.5"></i><span>Seedance 2.0</span></div>
+                <h1 class="title" data-i18n="video.sd2Title">SD2.0 视频</h1>
+                <p class="subtitle" data-i18n="video.sd2Subtitle">专用于 Seedance2.0 视频生成：上传多张参考图，在提示词里输入 @ 精准指定角色、场景、首帧或尾帧。</p>
+            </div>
+            <div id="providerStatus" class="status-pill"><i data-lucide="loader-2" class="w-3.5 h-3.5"></i><span data-i18n="video.loadingProviders">正在加载 Seedance 平台...</span></div>
+        </header>
+
+        <main class="layout">
+            <div class="stack">
+                <section class="card card-pad">
+                    <div class="section-head">
+                        <div class="section-title"><i data-lucide="terminal" class="w-3.5 h-3.5"></i><span data-i18n="video.promptLabel">提示词</span></div>
+                        <span class="section-help" data-i18n="video.promptAtHint">输入 @ 选择参考图</span>
+                    </div>
+                    <div class="prompt-wrap">
+                        <textarea id="promptInput" class="prompt-input" placeholder="输入画面、镜头运动；输入 @ 可选择参考图..." data-i18n-placeholder="video.sd2PromptPlaceholder"></textarea>
+                        <div id="mentionPopover" class="mention-popover"></div>
+                        <div class="prompt-footer">
+                            <span class="prompt-tip" data-i18n="video.mentionHint">例如：让 @图1 的角色走进 @图2 的森林</span>
+                            <span class="kbd">@</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card card-pad">
+                    <div class="section-head">
+                        <div>
+                            <div class="section-title"><i data-lucide="images" class="w-3.5 h-3.5"></i><span data-i18n="video.referenceImages">参考图片</span></div>
+                            <p class="section-help mt-1" data-i18n="video.maxReferenceHint">最多提交 16 张；可给单图指定首帧、尾帧或普通参考图。</p>
+                        </div>
+                        <button type="button" class="small-btn dark" onclick="document.getElementById('refFiles').click()"><i data-lucide="plus" class="w-3.5 h-3.5"></i><span data-i18n="video.addReference">添加参考图</span></button>
+                    </div>
+                    <input type="file" id="refFiles" accept="image/*" multiple class="hidden" onchange="handleFiles(this.files)">
+                    <div id="dropZone" class="upload-drop" onclick="document.getElementById('refFiles').click()">
+                        <div class="space-y-2 px-4">
+                            <i data-lucide="image-plus" class="w-8 h-8 mx-auto text-slate-300"></i>
+                            <div class="text-[12px] font-black text-slate-500" data-i18n="video.dropManyImages">点击、拖拽或粘贴多张参考图</div>
+                            <div class="text-[10px] font-bold text-slate-400" data-i18n="video.dropHintAt">上传后可点击“插入 @图N”快速写入提示词。</div>
+                        </div>
+                    </div>
+                    <div id="refGrid" class="ref-grid"></div>
+                </section>
+
+                <section class="card card-pad">
+                    <div class="section-head">
+                        <div>
+                            <div class="section-title"><i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i><span data-i18n="video.sd2Settings">SD2.0 参数设置</span></div>
+                            <p class="section-help mt-1" data-i18n="video.sd2SettingsHint">这里只显示 Seedance2.0 有效参数，避免通用视频参数混进来。</p>
+                        </div>
+                        <button type="button" class="small-btn" onclick="initModels()"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i><span data-i18n="video.refreshProviders">刷新</span></button>
+                    </div>
+                    <div id="seedanceEmpty" class="empty-seedance">
+                        <div data-i18n="video.noSeedanceProvider">暂无 Seedance2.0 平台，请到 API 设置点击“添加 SD2.0”。</div>
+                        <div class="empty-actions">
+                            <button type="button" class="small-btn dark" onclick="openApiSettings()"><i data-lucide="settings" class="w-3.5 h-3.5"></i><span data-i18n="video.goApiSettings">去 API 设置</span></button>
+                            <button type="button" class="small-btn" onclick="initModels()"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i><span data-i18n="video.refreshProviders">刷新</span></button>
+                        </div>
+                    </div>
+                    <div class="settings-grid">
+                        <label class="field full">
+                            <span class="field-label"><span data-i18n="video.provider">Seedance 平台</span><span class="field-help" data-i18n="video.providerHelp">来自 API 设置</span></span>
+                            <select id="providerSelect" class="control" onchange="setProvider(this.value)">
+                                <option value="" data-i18n="video.loadingProviders">正在加载 Seedance 平台...</option>
+                            </select>
+                        </label>
+                        <label class="field full">
+                            <span class="field-label"><span data-i18n="video.model">视频模型</span><span class="field-help">Seedance 2.0</span></span>
+                            <select id="modelSelect" class="control" onchange="setModel(this.value)">
+                                <option value="" data-i18n="video.loadingModels">正在加载模型...</option>
+                            </select>
+                        </label>
+                        <label class="field">
+                            <span class="field-label"><span data-i18n="video.duration">时长</span><span class="field-help">1-60s</span></span>
+                            <input id="durationInput" class="control" type="number" min="1" max="60" value="5">
+                        </label>
+                        <label class="field">
+                            <span class="field-label"><span data-i18n="video.ratio">比例</span><span class="field-help" data-i18n="video.ratioHelp">自适应优先</span></span>
+                            <select id="ratioSelect" class="control">
+                                <option value="adaptive">adaptive</option>
+                                <option value="16:9">16:9</option>
+                                <option value="9:16">9:16</option>
+                                <option value="1:1">1:1</option>
+                                <option value="4:3">4:3</option>
+                                <option value="3:4">3:4</option>
+                                <option value="21:9">21:9</option>
+                                <option value="9:21">9:21</option>
+                            </select>
+                        </label>
+                        <label class="field">
+                            <span class="field-label"><span data-i18n="video.resolution">分辨率</span><span class="field-help">Auto/480p/720p/1080p</span></span>
+                            <select id="resolutionSelect" class="control">
+                                <option value="">Auto</option>
+                                <option value="480p">480p</option>
+                                <option value="720p">720p</option>
+                                <option value="1080p">1080p</option>
+                            </select>
+                        </label>
+                        <label class="field">
+                            <span class="field-label"><span data-i18n="video.seed">随机种子</span><span class="field-help" data-i18n="video.seedHelp">可选</span></span>
+                            <input id="seedInput" class="control" type="number" placeholder="-1 / blank">
+                        </label>
+                    </div>
+                    <div class="param-strip mt-4">
+                        <button id="audioToggle" class="toggle active" type="button" onclick="toggleOption('audio')"><i data-lucide="volume-2" class="w-3.5 h-3.5"></i><span data-i18n="video.generateAudio">生成音频</span></button>
+                        <button id="watermarkToggle" class="toggle" type="button" onclick="toggleOption('watermark')"><i data-lucide="stamp" class="w-3.5 h-3.5"></i><span data-i18n="video.watermark">水印</span></button>
+                    </div>
+                </section>
+
+                <button id="genBtn" onclick="submitVideo()" class="generate-btn">
+                    <i data-lucide="clapperboard" class="w-4 h-4"></i><span data-i18n="video.generate">生成视频</span>
+                </button>
+            </div>
+
+            <aside class="stack">
+                <div class="result-frame">
+                    <div id="placeholder" class="placeholder">
+                        <i data-lucide="film" class="w-16 h-16 stroke-[1]"></i>
+                        <p class="text-[11px] font-black uppercase tracking-[0.34em]" data-i18n="video.awaitingVideo">等待生成视频</p>
+                        <p class="text-[12px] font-bold max-w-sm leading-7" data-i18n="video.awaitingHint">先写提示词、上传参考图，然后用 @图N 指定画面元素。</p>
+                    </div>
+                    <div id="loader" class="hidden text-center space-y-4">
+                        <div class="w-10 h-10 border-2 border-black border-t-transparent rounded-full animate-spin mx-auto"></div>
+                        <p class="text-[10px] font-bold uppercase tracking-[0.3em]" data-i18n="video.generating">视频生成中...</p>
+                    </div>
+                    <video id="outputVideo" class="result-video hidden" controls playsinline></video>
+                    <a id="downloadBtn" class="download-btn hidden" download>Download</a>
+                </div>
+                <section class="card card-pad">
+                    <div class="section-title mb-3"><i data-lucide="history" class="w-3.5 h-3.5"></i><span data-i18n="video.recent">最近生成</span></div>
+                    <div id="historyList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                </section>
+            </aside>
+        </main>
+    </div>
+
+    <script>
+        let providers = [];
+        let provider = '';
+        let selectedModel = '';
+        let refs = [];
+        let generateAudio = true;
+        let watermark = false;
+        let mentionIndex = -1;
+        const SEEDANCE_MODELS = ['doubao-seedance-2-0-260128', 'doubao-seedance-2-0-fast-260128'];
+        const MAX_REFS = 16;
+
+        function trSafe(key, fallback){ return (window.tr ? tr(key) : '') || fallback || key; }
+        function unique(values){ return [...new Set((values || []).map(v => String(v || '').trim()).filter(Boolean))]; }
+        function escapeHtml(str){ return String(str || '').replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s])); }
+        function escapeAttr(str){ return escapeHtml(str).replace(/`/g, '&#96;'); }
+        function uid(prefix='ref'){ return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,8)}`; }
+        function isSeedanceProvider(item){
+            const protocol = String(item?.protocol || '').toLowerCase();
+            const id = String(item?.id || '').toLowerCase();
+            const name = String(item?.name || '').toLowerCase();
+            const base = String(item?.base_url || '').toLowerCase();
+            return protocol === 'seedance' || id.startsWith('seedance') || ['sd2','sd20','sd2-0','sd2_0'].includes(id) || name.includes('seedance') || name.includes('sd2.0') || base.includes('ark.cn-beijing.volces.com');
+        }
+        function videoProviders(){ return providers.filter(p => p && p.enabled !== false && isSeedanceProvider(p)); }
+        function providerLabel(item){ return String(item?.name || item?.id || 'Seedance 2.0').trim() || 'Seedance 2.0'; }
+        function setStatus(message, ok=false){
+            const el = document.getElementById('providerStatus');
+            el.innerHTML = `<i data-lucide="${ok ? 'check-circle-2' : 'info'}" class="w-3.5 h-3.5"></i><span>${escapeHtml(message)}</span>`;
+            if(window.lucide) lucide.createIcons();
+        }
+        function setProvider(id){ provider = id; renderModels(); }
+        function setModel(model){ selectedModel = model; }
+        function setControlsEnabled(enabled){
+            ['providerSelect','modelSelect','durationInput','ratioSelect','resolutionSelect','seedInput'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.disabled = !enabled && ['providerSelect','modelSelect'].includes(id);
+            });
+            document.getElementById('genBtn').disabled = !enabled;
+        }
+        function renderProviders(){
+            const list = videoProviders();
+            const empty = document.getElementById('seedanceEmpty');
+            const select = document.getElementById('providerSelect');
+            provider = list.some(p => p.id === provider) ? provider : (list[0]?.id || '');
+            empty.classList.toggle('show', !list.length);
+            setControlsEnabled(Boolean(list.length));
+            select.innerHTML = list.length
+                ? list.map(p => `<option value="${escapeAttr(p.id)}" ${p.id === provider ? 'selected' : ''}>${escapeHtml(providerLabel(p))}</option>`).join('')
+                : `<option value="">${escapeHtml(trSafe('video.noSeedanceProviderShort', '未配置 Seedance2.0 平台'))}</option>`;
+            setStatus(list.length ? trSafe('video.providerReady', `已检测到 ${list.length} 个 Seedance 平台`).replace('{count}', list.length) : trSafe('video.providerMissing', '未检测到 Seedance2.0 平台'), Boolean(list.length));
+            renderModels();
+        }
+        function renderModels(){
+            const item = providers.find(p => p.id === provider);
+            const models = unique([...(isSeedanceProvider(item) ? SEEDANCE_MODELS : []), ...(item?.video_models || [])]);
+            selectedModel = models.includes(selectedModel) ? selectedModel : (models[0] || '');
+            document.getElementById('modelSelect').innerHTML = models.length
+                ? models.map(m => `<option value="${escapeAttr(m)}" ${m === selectedModel ? 'selected' : ''}>${escapeHtml(m)}</option>`).join('')
+                : `<option value="">${escapeHtml(trSafe('video.noSeedanceModel', '暂无 Seedance 视频模型'))}</option>`;
+        }
+        async function initModels(){
+            setStatus(trSafe('video.loadingProviders', '正在加载 Seedance 平台...'));
+            document.getElementById('providerSelect').innerHTML = `<option value="">${escapeHtml(trSafe('video.loadingProviders', '正在加载 Seedance 平台...'))}</option>`;
+            document.getElementById('modelSelect').innerHTML = `<option value="">${escapeHtml(trSafe('video.loadingModels', '正在加载模型...'))}</option>`;
+            try {
+                const response = await fetch('/api/providers', {cache:'no-store'});
+                if(!response.ok) throw new Error('HTTP ' + response.status);
+                const data = await response.json();
+                providers = Array.isArray(data.providers) ? data.providers : [];
+            } catch(e) {
+                providers = [];
+                setStatus(trSafe('video.providerLoadFailed', '平台加载失败，请检查服务是否运行'));
+            }
+            renderProviders();
+        }
+        function openApiSettings(){
+            try {
+                const parentDoc = window.parent?.document;
+                const trigger = parentDoc?.querySelector(`[onclick*="'api-settings'"],[onclick*='"api-settings"']`);
+                if(window.parent?.switchUI) window.parent.switchUI(trigger, 'api-settings');
+                else window.location.href = '/static/api-settings.html';
+            } catch(e) {
+                window.location.href = '/static/api-settings.html';
+            }
+        }
+        function refTag(index){ return `图${index + 1}`; }
+        function refRoleLabel(role){
+            if(role === 'first_frame') return trSafe('video.firstFrame', '首帧');
+            if(role === 'last_frame') return trSafe('video.lastFrame', '尾帧');
+            return trSafe('video.referenceImage', '参考图');
+        }
+        function insertTextAtCursor(text){
+            const ta = document.getElementById('promptInput');
+            const pos = ta.selectionStart ?? ta.value.length;
+            const prefix = pos > 0 && !/\s$/.test(ta.value.slice(0, pos)) ? ' ' : '';
+            const token = prefix + text + ' ';
+            ta.value = ta.value.slice(0, pos) + token + ta.value.slice(pos);
+            ta.focus();
+            ta.setSelectionRange(pos + token.length, pos + token.length);
+            renderMentionPopover();
+        }
+        function renderRefs(){
+            refs.forEach((ref, index) => { ref.tag = refTag(index); });
+            const grid = document.getElementById('refGrid');
+            grid.innerHTML = refs.map((ref, index) => `
+                <div class="ref-card" data-ref-id="${escapeAttr(ref.refId)}">
+                    <span class="ref-tag">@${escapeHtml(ref.tag)}</span>
+                    <button class="ref-remove" type="button" onclick="removeRef('${escapeAttr(ref.refId)}')" aria-label="删除参考图">×</button>
+                    <img class="ref-thumb" src="${escapeAttr(ref.preview || ref.url)}" alt="${escapeAttr(ref.name || ref.tag)}">
+                    <div class="ref-name" title="${escapeAttr(ref.name || ref.tag)}">${escapeHtml(ref.name || ref.tag)}</div>
+                    <select class="role-select" onchange="setRefRole('${escapeAttr(ref.refId)}', this.value)" aria-label="参考图角色">
+                        <option value="reference_image" ${ref.role === 'reference_image' || !ref.role ? 'selected' : ''}>${trSafe('video.referenceImage', '参考图')}</option>
+                        <option value="first_frame" ${ref.role === 'first_frame' ? 'selected' : ''}>${trSafe('video.firstFrame', '首帧')}</option>
+                        <option value="last_frame" ${ref.role === 'last_frame' ? 'selected' : ''}>${trSafe('video.lastFrame', '尾帧')}</option>
+                    </select>
+                    <div class="ref-actions"><button type="button" class="insert-ref-btn" onclick="insertTextAtCursor('@${escapeAttr(ref.tag)}')">${escapeHtml(trSafe('video.insertReference', '插入'))} @${escapeHtml(ref.tag)}</button></div>
+                </div>
+            `).join('');
+            renderMentionPopover();
+            if(window.lucide) lucide.createIcons();
+        }
+        function setRefRole(refId, role){ const ref = refs.find(item => item.refId === refId); if(ref) ref.role = role || 'reference_image'; }
+        function removeRef(refId){ refs = refs.filter(item => item.refId !== refId); renderRefs(); }
+        async function handleFiles(fileList){
+            const files = [...(fileList || [])].filter(file => file && file.type.startsWith('image/')).slice(0, Math.max(0, MAX_REFS - refs.length));
+            for(const file of files) await handleFile(file);
+            document.getElementById('refFiles').value = '';
+        }
+        async function handleFile(file){
+            if(!file || refs.length >= MAX_REFS) return;
+            const refId = uid();
+            const preview = await new Promise(resolve => {
+                const reader = new FileReader();
+                reader.onload = e => resolve(e.target.result);
+                reader.readAsDataURL(file);
+            });
+            const draft = {refId, name:file.name || 'image.png', preview, url:preview, role:'reference_image', tag:refTag(refs.length)};
+            refs.push(draft);
+            renderRefs();
+            try {
+                const form = new FormData();
+                form.append('files', file);
+                const data = await fetch('/api/ai/upload', {method:'POST', body:form}).then(r => r.json());
+                const uploaded = data.files?.[0] || {};
+                Object.assign(draft, uploaded, {refId, preview, name:uploaded.name || draft.name, role:draft.role, tag:draft.tag});
+                renderRefs();
+            } catch(e) {
+                draft.uploadError = true;
+                renderRefs();
+            }
+        }
+        const dropZone = document.getElementById('dropZone');
+        dropZone.ondragover = e => { e.preventDefault(); dropZone.classList.add('drag-over'); };
+        dropZone.ondragleave = () => dropZone.classList.remove('drag-over');
+        dropZone.ondrop = e => { e.preventDefault(); dropZone.classList.remove('drag-over'); handleFiles(e.dataTransfer.files); };
+        window.addEventListener('paste', e => {
+            const files = [...(e.clipboardData?.items || [])].filter(x => x.kind === 'file' && x.type.startsWith('image/')).map(x => x.getAsFile()).filter(Boolean);
+            if(files.length) handleFiles(files);
+        });
+        function mentionMatch(){
+            const ta = document.getElementById('promptInput');
+            const pos = ta.selectionStart || 0;
+            const before = ta.value.slice(0, pos);
+            const match = before.match(/@([^@\s，。；;]*)$/);
+            if(!match) return null;
+            return {start:pos - match[0].length, end:pos, query:match[1] || ''};
+        }
+        function mentionCandidates(query=''){
+            const q = String(query || '').toLowerCase();
+            return refs.filter((ref, index) => !q || refTag(index).toLowerCase().includes(q) || String(ref.name || '').toLowerCase().includes(q));
+        }
+        function renderMentionPopover(){
+            const pop = document.getElementById('mentionPopover');
+            const match = mentionMatch();
+            if(!match || !refs.length){ pop.classList.remove('open'); pop.innerHTML = ''; mentionIndex = -1; return; }
+            const items = mentionCandidates(match.query);
+            if(!items.length){ pop.classList.remove('open'); pop.innerHTML = ''; mentionIndex = -1; return; }
+            if(mentionIndex < 0 || mentionIndex >= items.length) mentionIndex = 0;
+            pop.innerHTML = items.map((ref, i) => {
+                const index = refs.indexOf(ref);
+                return `<button type="button" class="mention-option ${i === mentionIndex ? 'active' : ''}" onmousedown="event.preventDefault(); insertMention('${escapeAttr(ref.refId)}')"><img src="${escapeAttr(ref.preview || ref.url)}" alt=""><span><b>@${escapeHtml(refTag(index))}</b><br><small>${escapeHtml(ref.name || refRoleLabel(ref.role))} · ${escapeHtml(refRoleLabel(ref.role))}</small></span></button>`;
+            }).join('');
+            pop.classList.add('open');
+        }
+        function insertMention(refId){
+            const ref = refs.find(item => item.refId === refId);
+            const index = refs.indexOf(ref);
+            const match = mentionMatch();
+            if(!ref || !match) return;
+            const ta = document.getElementById('promptInput');
+            const token = `@${refTag(index)} `;
+            ta.value = ta.value.slice(0, match.start) + token + ta.value.slice(match.end);
+            const next = match.start + token.length;
+            ta.focus();
+            ta.setSelectionRange(next, next);
+            document.getElementById('mentionPopover').classList.remove('open');
+        }
+        function orderedRefsForPrompt(prompt){
+            refs.forEach((ref, index) => { ref.tag = refTag(index); });
+            const tags = [...String(prompt || '').matchAll(/@图(\d+)/g)].map(m => `图${Number(m[1])}`).filter(Boolean);
+            const picked = [];
+            tags.forEach(tag => { const ref = refs.find(item => item.tag === tag); if(ref && !picked.includes(ref)) picked.push(ref); });
+            refs.forEach(ref => { if(!picked.includes(ref)) picked.push(ref); });
+            return picked.map(ref => ({...ref, tag:ref.tag, role:ref.role || 'reference_image'}));
+        }
+        function promptWithReferenceNote(prompt){
+            const used = orderedRefsForPrompt(prompt).filter(ref => String(prompt || '').includes(`@${ref.tag}`));
+            if(!used.length) return prompt;
+            const note = used.map(ref => `@${ref.tag}=${refRoleLabel(ref.role)}:${ref.name || ref.tag}`).join('；');
+            return `${prompt}\n\n参考图说明：${note}`;
+        }
+        const promptInput = document.getElementById('promptInput');
+        promptInput.addEventListener('input', () => { mentionIndex = -1; renderMentionPopover(); });
+        promptInput.addEventListener('click', () => { mentionIndex = -1; renderMentionPopover(); });
+        promptInput.addEventListener('keyup', e => { if(!['ArrowDown','ArrowUp','Enter','Escape'].includes(e.key)) renderMentionPopover(); });
+        promptInput.addEventListener('keydown', e => {
+            const pop = document.getElementById('mentionPopover');
+            if(!pop.classList.contains('open')) return;
+            const items = mentionCandidates(mentionMatch()?.query || '');
+            if(e.key === 'ArrowDown'){ e.preventDefault(); mentionIndex = Math.min(items.length - 1, mentionIndex + 1); renderMentionPopover(); }
+            if(e.key === 'ArrowUp'){ e.preventDefault(); mentionIndex = Math.max(0, mentionIndex - 1); renderMentionPopover(); }
+            if(e.key === 'Enter' && items[mentionIndex]){ e.preventDefault(); insertMention(items[mentionIndex].refId); }
+            if(e.key === 'Escape'){ pop.classList.remove('open'); }
+        });
+        function toggleOption(kind){
+            if(kind === 'audio') generateAudio = !generateAudio;
+            if(kind === 'watermark') watermark = !watermark;
+            document.getElementById('audioToggle').classList.toggle('active', generateAudio);
+            document.getElementById('watermarkToggle').classList.toggle('active', watermark);
+        }
+        async function submitVideo(){
+            const rawPrompt = document.getElementById('promptInput').value.trim();
+            if(!rawPrompt){ alert(trSafe('video.promptRequired', '请输入提示词')); return; }
+            if(!provider || !selectedModel){ alert(trSafe('video.noSeedanceProvider', '请先到 API 设置添加 Seedance2.0 平台')); return; }
+            const btn = document.getElementById('genBtn');
+            const loader = document.getElementById('loader');
+            const placeholder = document.getElementById('placeholder');
+            const out = document.getElementById('outputVideo');
+            const dl = document.getElementById('downloadBtn');
+            const seedText = document.getElementById('seedInput').value.trim();
+            btn.disabled = true; placeholder.classList.add('hidden'); out.classList.add('hidden'); dl.classList.add('hidden'); loader.classList.remove('hidden');
+            const payload = {
+                prompt:promptWithReferenceNote(rawPrompt),
+                provider_id:provider,
+                model:selectedModel,
+                duration:Number(document.getElementById('durationInput').value || 5),
+                aspect_ratio:document.getElementById('ratioSelect').value || 'adaptive',
+                resolution:document.getElementById('resolutionSelect').value || '',
+                images:orderedRefsForPrompt(rawPrompt),
+                generate_audio:generateAudio,
+                watermark
+            };
+            if(seedText !== '' && Number.isFinite(Number(seedText)) && Number(seedText) >= 0) payload.seed = Number(seedText);
+            try {
+                const result = await fetch('/api/canvas-video', {
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify(payload)
+                }).then(async r => { if(!r.ok) throw new Error((await r.json()).detail || trSafe('video.failed', '视频生成失败')); return r.json(); });
+                const url = result.videos?.[0];
+                if(!url) throw new Error('没有返回视频');
+                out.src = url; out.classList.remove('hidden'); dl.href = url; dl.classList.remove('hidden');
+                renderHistoryCard({url, prompt:rawPrompt, model:selectedModel, provider, timestamp:Date.now()});
+            } catch(err) {
+                alert(err.message || trSafe('video.failed', '视频生成失败'));
+                placeholder.classList.remove('hidden');
+            } finally {
+                loader.classList.add('hidden'); btn.disabled = !provider || !selectedModel;
+            }
+        }
+        function renderHistoryCard(item){
+            const card = document.createElement('div');
+            card.className = 'history-card p-3 space-y-3';
+            card.innerHTML = `<video src="${escapeAttr(item.url)}" class="w-full rounded-2xl bg-black" controls playsinline preload="metadata"></video><div class="text-[10px] font-bold text-gray-500 line-clamp-2">${escapeHtml(item.prompt)}</div>`;
+            document.getElementById('historyList').prepend(card);
+        }
+        window.addEventListener('message', event => {
+            if(event.data?.type === 'providers-changed') initModels();
+        });
+        window.onload = async () => { applyLanguage(); await initModels(); renderRefs(); if(window.lucide) lucide.createIcons(); };
+    </script>
+</body>
+</html>
+

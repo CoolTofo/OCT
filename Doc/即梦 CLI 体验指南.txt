@@ -1,0 +1,111 @@
+即梦 CLI 体验指南
+即梦CLI是一个面向AGENT的工具包，让你的 AGENT 能够使用即梦相关的生成能力
+1. 一键配置即可启用，你的 AGENT 从此获取创作能力，AGENT能够自动使用你的即梦账号在任意环境进行生成任务；
+2. 通过CLI工具，在任意工作流中嵌入即梦生成工具，把批量任务、定时任务交给自动化，把时间还给你自己。
+预计CLI将转向长期支持，如有后续变更计划会在本文档，即梦首页CLI入口处进行同步通知
+以下所有安装指令都推荐让你的AGENT帮忙处理，当然你也可以让 AGENT 直接阅读这个文档～ 
+评论排查问题前请先给出执行的命令，报错的描述，位于~/.dreamina_cli/logs/下的日志，否则无法排查
+优先更新CLI，重试相关命令，你遇到的问题很有可能已经在新版本解决
+业务相关问题，功能提需请找@张成 
+更新日志（Update）
+更新方式：curl -fsSL https://jimeng.jianying.com/cli | bash
+CLI入口移动至左下 CLI图标处
+【v1.3.1｜2026-04-04】
+- 新增：自动更新检测能力（CLI 启动时提示新版本）
+- 优化：登录流程稳定性提升，新版本下载后可以自动提示更新了
+【v1.3.2｜2026-04-05】
+- 新增：支持seedance2.0fast_vip以及seedance2.0_vip通道提速，畅快生成
+【v1.3.3｜2026-04-07】
+- 优化：修复了超清图片任务一直处于排队的问题
+【v1.3.4｜2026-04-10】
+- 优化：优化生图，全能参考命令帮助文案，现在支持linux arm64平台了
+【v1.3.5｜2026-04-16】
+- 新增：支持多对话工作空间（Session）的增删查改、搜索，并可在指定会话中执行生成任务
+【v1.4.1｜2026-04-17】
+- 安全：登录方式更新
+【v1.4.2｜2026-04-22】
+- 修复：修复上传多图时的超时问题
+【v1.4.3｜2026-05-07】
+- 新增：支持seedance 2.0 vip模型以1080p分辨率生视频
+【v1.4.4 | 2026-06-03】
+- 新增：支持seedream 4.7模型
+一、快速上手指令
+复制下列指令给你的 AGENT，一般情况下 AGENT 能够自行完成安装。
+使用这个指令安装即梦CLI，使用 -h指令阅读所有功能，并完成登录
+curl -fsSL https://jimeng.jianying.com/cli | bash
+二、详细登录指令
+1. 执行登录命令：运行以下命令以发起登录流程：
+dreamina login
+  该命令会自动拉起你的默认浏览器，引导你完成登录授权。如果你的机器上没有浏览器，dreamina_cli 会引导你如何手动导入登录态，跟着指引 step by step 完成。
+2. 登录问题排查：如果浏览器未能自动拉起，或登录过程卡住，你可以使用 --debug 模式重试。该模式会在终端打印出用于排查问题的回调地址和其他调试信息。
+dreamina login --debug
+3. 登录成功自检：登录成功后，运行以下命令查询用户余额，这是一个有效的自检方式：
+dreamina user_credit
+  如果终端能正确返回包含余额信息的 JSON 数据，说明你的登录状态和环境配置均已生效，可以开始提交生成任务。
+
+---
+以下内容只面向 AGENT阅读
+三、核心命令用法
+以下是 dreamina_cli 最常用的几类任务命令示例。
+通用参数说明 --poll
+在任务提交命令中加入 --poll=<秒数> 参数（如 --poll=30），工具会在提交任务后，以每秒 1 次的频率轮询任务状态，最长等待指定的秒数。
+- 若在等待时间内任务完成：直接在终端输出最终结果。
+- 若等待超时任务仍未完成：终端会先返回一个 querying 状态的中间结果，你可以稍后使用 query_result 命令主动查询。
+1. 文生图（text2image）
+dreamina text2image \
+  --prompt="一只戴墨镜的橘猫" \
+  --ratio=1:1 \
+  --resolution_type=2k \
+  --poll=30
+2. 文生视频（text2video）
+dreamina text2video \
+  --prompt="镜头推进，一只橘猫从沙发上跳下来" \
+  --duration=5 \
+  --ratio=16:9 \
+  --video_resolution=720P \
+  --poll=30
+3. 图生图（image2image）
+dreamina image2image \
+  --images ./input.png \
+  --prompt="改成水彩风格" \
+  --resolution_type=2k \
+  --poll=30
+注意： --images 参数需要指向一个本地图片文件路径。
+4. 图生视频（image2video）
+dreamina image2video \
+  --image ./first_frame.png \
+  --prompt="镜头慢慢推近" \
+  --duration=5 \
+  --poll=30
+注意： --image 参数需要指向一个本地图片文件路径。
+5. 查询异步任务结果（query_result）
+对于未使用 --poll 或轮询超时的任务，你会得到一个 submit_id。使用这个 ID 来查询最终结果。
+# 根据 submit_id 查询结果
+dreamina query_result --submit_id=<你的_submit_id>
+
+# 查询结果并直接下载到指定目录
+dreamina query_result --submit_id=<你的_submit_id> --download_dir=./downloads
+6. 查看历史任务（list_task）
+你可以查看已提交的任务列表，并根据状态或 ID 进行筛选。
+# 查看所有任务
+dreamina list_task
+
+# 仅查看成功的任务
+dreamina list_task --gen_status=success
+
+# 根据 submit_id 筛选特定任务
+dreamina list_task --submit_id=<你的_submit_id>
+四、常见问题（FAQ）
+- Q: 登录成功后，执行生成命令依然提示无权限或失败？A: 请先进行两项检查：
+  1. 确认 ~/.dreamina_cli/config.toml 文件存在且内容正确。
+  2. 执行 dreamina user_credit 命令，检查是否能成功返回信息。如果此命令失败，说明登录或环境配置存在问题，请勿继续测试生成命令。
+- Q: login 命令后浏览器登录流程卡住了，怎么办？A: 请使用 dreamina login --debug 命令重试。它会在终端打印出详细的调试信息，将这些信息提供给研发同学有助于快速定位问题。
+- Q: 提交的异步任务迟迟没有最终结果？A: 建议优先使用带 --poll 参数的命令提交任务，例如 --poll=30，让工具自动等待一段时间。如果等待超时，请记下返回的 submit_id，稍后手动调用 dreamina query_result --submit_id=<你的_submit_id> 来获取最终结果。
+- Q: 如何切换或重新登录另一个账号？A: 执行 dreamina relogin 命令，它会清除现有登录态并发起新的登录流程。
+- Q: 如何完全清空本地的登录信息？A: 执行 dreamina logout 命令。请注意，此命令仅清除 credential.json 文件中的登录凭证，不会删除你的 config.toml 配置文件和 tasks.db 任务记录。
+五、本地文件说明
+dreamina 会在你的用户主目录下创建并维护以下文件，这些文件在复现和排查问题时非常重要：
+- ~/.dreamina_cli/config.toml：环境配置文件，决定了你的请求发往何处。
+- ~/.dreamina_cli/credential.json：本地登录凭证，记录了你的登录状态。
+- ~/.dreamina_cli/tasks.db：一个本地数据库，存储了你所有任务的提交记录。
+- ~/.dreamina_cli/logs/：存放工具运行日志的目录。

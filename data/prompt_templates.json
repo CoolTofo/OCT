@@ -1,0 +1,48 @@
+{
+  "templates": [
+    {
+      "id": "tpl_659ed8b79470",
+      "name": "超高质量 3D 动画电影感提示词",
+      "category": "custom",
+      "scene": "",
+      "positive": "超高质量 3D 动画电影画面，高端 CGI 动画长片质感，写实与风格化结合，电影级角色建模，细腻皮肤材质，真实毛发、睫毛、皮肤毛孔与绒毛，SSS 次表面散射，PBR 物理渲染，全局光照，光线追踪，真实反射，服装布料细节丰富。\n虚拟摄影机模拟 ARRI Alexa 65，85mm 变形宽银幕镜头，f/1.8，大光圈浅景深，电影级轮廓光，Kodak Portra 400 胶片色彩，美丽柔和的胶片颗粒，强烈电影感调色，超高清 4K，动画电影剧照，电影海报级画质。",
+      "negative": "low quality, low resolution, cheap 3D render, plastic skin, wax figure, doll-like face, uncanny valley, stiff pose, bad anatomy, distorted face, deformed hands, blurry, flat lighting, overexposed, underexposed, noisy image, low-poly model, cartoonish proportions, game screenshot, amateur render, bad composition, text, watermark, logo, oversaturated colors",
+      "params": {},
+      "tags": [],
+      "builtin": false
+    },
+    {
+      "id": "tpl_fd613e3c35c3",
+      "name": "角色设定图生成",
+      "category": "custom",
+      "scene": "",
+      "positive": "根据用户上传的角色参考图，保持核心特征（发型、瞳色、服装结构、配色方案）高度一致，生成一张包含以下模块的综合设定图：\n\n角色三视图 (Character 3-View): 正面、侧面、背面。\n\n表情集 (Expression Sheet): 包含 3-4 个典型神态（如：冷静、愤怒、微笑、战斗状态）。\n\n近景特写 (Close-up): 高精细度的上半身/面部肖像。\n\n材质与光照设定 (Material & Lighting): 标注关键材质（如金属、皮革、发光体）并设定环境光。\n\n\n\n# Technical Guidelines / 技术准则\n构图布局: 使用比例协调的多宫格或横向展开布局。背景必须是整洁的纯色（灰色或白色），以突出角色细节。\n\n一致性控制: 严格提取参考图的色码（Palette）和设计元素，确保特写与三视图中的服饰细节完全对应。\n\n画质要求: 极高精细度，8k 分辨率，大师级线条，平涂或半厚涂风格（取决于原图）。\n\n角色名称与排版 (Naming & Layout): 在图面上方或侧面展示角色名称：",
+      "negative": "",
+      "params": {},
+      "tags": [],
+      "builtin": false
+    },
+    {
+      "id": "tpl_aa1159115ac2",
+      "name": "单角色动作迁移通用提示词",
+      "category": "custom",
+      "scene": "",
+      "positive": "请基于我上传的参考图进行单角色动作迁移生成。\n\n【动作与构图参考】\n使用参考图1作为动作、姿态、镜头角度和画面构图参考。请保留参考图1中主体角色的整体动作轮廓、身体重心、肢体角度、武器/道具持握方式、人物朝向、景别比例和画面构图关系。\n\n【角色外观参考】\n使用参考图2作为角色设计参考。请将参考图1中的人物替换为参考图2中的角色形象，保留参考图2角色的脸部特征、发型、服装结构、材质、配色、装饰细节、武器/道具风格和整体气质。\n\n【场景替换】\n将原始参考图1中的环境完全替换为：【这里填写新场景，例如：世界树上、云海之中、巨大的树枝平台、远处漂浮仙山、云雾缭绕】。\n\n【生成要求】\n保持参考图1的动作和构图逻辑不变，但不要保留原始场景和原始人物身份。新画面应看起来像参考图2中的角色自然出现在新场景中，而不是简单换脸或贴图。\n\n角色需要全身完整可见，姿态清晰，动作准确，比例自然，服装和发丝受到环境风力影响。画面风格为高质量电影级幻想写实 / 3D动画电影质感，细节丰富，光影真实，氛围统一。\n\n【画面质量】\ncinematic composition, high-end 3D animated film quality, fantasy realism, physically based rendering, global illumination, detailed costume materials, realistic fabric, dramatic lighting, volumetric clouds, atmospheric depth, soft god rays, epic mythological atmosphere, ultra detailed, 4K, clean render.\n\n【避免问题】\n不要改变核心动作。\n不要改变角色身份。\n不要把原始场景元素带入新画面。\n不要让角色比例变形。\n不要让武器/道具断裂、错位或数量错误。\n不要出现多余人物。\n不要出现文字、水印、UI界面、参考图排版元素。",
+      "negative": "",
+      "params": {},
+      "tags": [],
+      "builtin": false
+    },
+    {
+      "id": "tpl_1b0cbae11cf7",
+      "name": "多角色动作迁移通用提示词",
+      "category": "custom",
+      "scene": "",
+      "positive": "请基于我上传的多张参考图进行多角色动作迁移生成。\n\n【动作与构图参考】\n使用参考图1作为整体动作、人物站位、镜头角度和画面构图参考。请保留参考图1中所有角色之间的相对位置、距离关系、身体朝向、动作姿态、武器/道具持握方式、画面透视、景别比例和构图节奏。\n\n【角色替换规则】\n将参考图1中的角色1替换为参考图2中的角色形象。\n将参考图1中的角色2替换为参考图3中的角色形象。\n如果有更多角色，请依次按照参考图4、参考图5等进行替换。\n\n每个角色都要严格参考对应角色设定图的外观，包括脸部特征、发型、服装结构、材质、配色、装饰细节、武器/道具、身份气质和角色体态。\n\n【角色关系】\n保持参考图1中的人物互动关系。例如：对峙、攻击、防御、交谈、压迫、逃跑、追逐、保护等。不要让角色之间的空间关系混乱，不要把原本面对面的关系改成背对背或无互动状态。\n\n【场景替换】\n将参考图1中的原始环境完全替换为：【这里填写新场景，例如：世界树上、云海之中、巨大的古树枝干作为战斗平台，远处漂浮仙山、神殿、云海、霞光和高空雾气】。\n\n【生成要求】\n画面必须以参考图1的构图和动作为基础，但角色外观必须来自参考图2、参考图3等角色设定图。新场景需要与角色气质统一，形成完整的电影画面，而不是简单拼贴。\n\n所有角色需要全身或主要身体结构清晰可见，动作准确，重心合理，比例自然，角色之间的视线和情绪有互动。服装、飘带、头发、毛发、武器和环境风向要统一。\n\n【画面质量】\ncinematic wide shot, high-end 3D animated film quality, mythological fantasy realism, xianxia atmosphere, physically based rendering, global illumination, detailed armor and fabric materials, realistic hair and fur, volumetric clouds, sea of clouds, giant world tree, atmospheric depth, soft god rays, epic scale, dramatic but natural lighting, ultra detailed, 4K, clean render.\n\n【避免问题】\n不要改变参考图1的核心动作和站位。\n不要混淆角色A和角色B的外观。\n不要让角色服装细节互相串位。\n不要保留原始场景中的现代元素、室内元素或无关物品。\n不要出现多余人物。\n不要让武器/道具变形、断裂或数量错误。\n不要出现文字、水印、UI界面、角色设定图排版元素。\n不要生成成角色设定表，必须生成完整电影画面。",
+      "negative": "",
+      "params": {},
+      "tags": [],
+      "builtin": false
+    }
+  ]
+}

@@ -1,0 +1,747 @@
+{
+  "1": {
+    "inputs": {
+      "model": [
+        "8",
+        0
+      ],
+      "lora_name": "Qwen-Image-Edit-2509-Lightning-8steps-V1.0-bf16.safetensors",
+      "strength_model": 1
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "LoraLoaderModelOnly"
+    }
+  },
+  "2": {
+    "inputs": {
+      "images": [
+        "70",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "PreviewImage"
+    }
+  },
+  "3": {
+    "inputs": {
+      "control_net_name": "Qwen-Image-InstantX-ControlNet-Union.safetensors"
+    },
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "ControlNetLoader"
+    }
+  },
+  "6": {
+    "inputs": {
+      "image": [
+        "7",
+        0
+      ],
+      "preprocessor": "DepthAnythingV2Preprocessor",
+      "resolution": 1024
+    },
+    "class_type": "AIO_Preprocessor",
+    "_meta": {
+      "title": "AIO_Preprocessor"
+    }
+  },
+  "7": {
+    "inputs": {
+      "image": [
+        "64",
+        0
+      ],
+      "upscale_method": "lanczos",
+      "megapixels": 1,
+      "resolution_steps": 1
+    },
+    "class_type": "ImageScaleToTotalPixels",
+    "_meta": {
+      "title": "ImageScaleToTotalPixels"
+    }
+  },
+  "8": {
+    "inputs": {
+      "unet_name": "Qwen-Image-Edit-2509_fp8_e4m3fn.safetensors",
+      "weight_dtype": "fp8_e4m3fn"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "UNETLoader"
+    }
+  },
+  "9": {
+    "inputs": {
+      "image": [
+        "52",
+        0
+      ],
+      "aspect_ratio": "original",
+      "proportional_width": 1,
+      "proportional_height": 1,
+      "fit": "letterbox",
+      "method": "lanczos",
+      "round_to_multiple": "8",
+      "scale_to_side": "longest",
+      "scale_to_length": [
+        "40",
+        0
+      ],
+      "background_color": "#000000"
+    },
+    "class_type": "LayerUtility: ImageScaleByAspectRatio V2",
+    "_meta": {
+      "title": "LayerUtility: ImageScaleByAspectRatio V2"
+    }
+  },
+  "10": {
+    "inputs": {
+      "version": "BiRefNet-General"
+    },
+    "class_type": "LayerMask: LoadBiRefNetModelV2",
+    "_meta": {
+      "title": "LayerMask: LoadBiRefNetModelV2"
+    }
+  },
+  "11": {
+    "inputs": {
+      "image": [
+        "9",
+        0
+      ],
+      "birefnet_model": [
+        "154",
+        0
+      ],
+      "detail_method": "VITMatte",
+      "detail_erode": 4,
+      "detail_dilate": 2,
+      "black_point": 0.01,
+      "white_point": 0.99,
+      "process_detail": false,
+      "device": "cuda",
+      "max_megapixels": 2
+    },
+    "class_type": "LayerMask: BiRefNetUltraV2",
+    "_meta": {
+      "title": "LayerMask: BiRefNetUltraV2"
+    }
+  },
+  "12": {
+    "inputs": {
+      "size_as": [
+        "11",
+        0
+      ],
+      "size": "custom",
+      "custom_width": 512,
+      "custom_height": 512,
+      "color": "#FFFFFF"
+    },
+    "class_type": "LayerUtility: ColorImage V2",
+    "_meta": {
+      "title": "LayerUtility: ColorImage V2"
+    }
+  },
+  "17": {
+    "inputs": {
+      "clip": [
+        "22",
+        0
+      ],
+      "vae": [
+        "24",
+        0
+      ],
+      "configs": [
+        "41",
+        0
+      ],
+      "prompt": [
+        "53",
+        0
+      ],
+      "return_full_refs_cond": true,
+      "instruction": "Describe the key features of the input image (color, shape, size, texture, objects, background), then explain how the user's text instruction should alter or modify the image. Generate a new image that meets the user's requirements while maintaining consistency with the original input where appropriate."
+    },
+    "class_type": "TextEncodeQwenImageEditPlusCustom_lrzjason",
+    "_meta": {
+      "title": "TextEncodeQwenImageEditPlusCustom_lrzjason"
+    }
+  },
+  "18": {
+    "inputs": {
+      "conditioning": [
+        "66",
+        1
+      ]
+    },
+    "class_type": "ConditioningZeroOut",
+    "_meta": {
+      "title": "ConditioningZeroOut"
+    }
+  },
+  "19": {
+    "inputs": {
+      "model": [
+        "33",
+        0
+      ],
+      "positive": [
+        "66",
+        0
+      ],
+      "negative": [
+        "18",
+        0
+      ],
+      "latent_image": [
+        "17",
+        1
+      ],
+      "seed": 833990270008537,
+      "steps": 8,
+      "cfg": 1,
+      "sampler_name": "euler",
+      "scheduler": "beta57",
+      "denoise": 1
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  },
+  "20": {
+    "inputs": {
+      "samples": [
+        "19",
+        0
+      ],
+      "vae": [
+        "24",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAEDecode"
+    }
+  },
+  "21": {
+    "inputs": {
+      "reel_1": [
+        "42",
+        0
+      ],
+      "font_file": "Alibaba-PuHuiTi-Heavy.ttf",
+      "font_size": 40,
+      "border": 60,
+      "color_theme": "light"
+    },
+    "class_type": "LayerUtility: ImageReelComposit",
+    "_meta": {
+      "title": "LayerUtility: ImageReelComposit"
+    }
+  },
+  "22": {
+    "inputs": {
+      "clip_name": "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+      "type": "qwen_image",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "CLIPLoader"
+    }
+  },
+  "24": {
+    "inputs": {
+      "vae_name": "qwen_image_vae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "VAELoader"
+    }
+  },
+  "33": {
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "lora_name": "角色置景_RoleScene Blend.safetensors",
+      "strength_model": 0.9
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "LoraLoaderModelOnly"
+    }
+  },
+  "36": {
+    "inputs": {
+      "background_image": [
+        "12",
+        0
+      ],
+      "layer_image": [
+        "11",
+        0
+      ],
+      "invert_mask": true,
+      "blend_mode": "normal",
+      "opacity": 100,
+      "x_percent": 50,
+      "y_percent": 50,
+      "mirror": "None",
+      "scale": 1,
+      "aspect_ratio": 1,
+      "rotate": 0,
+      "transform_method": "lanczos",
+      "anti_aliasing": 0
+    },
+    "class_type": "LayerUtility: ImageBlendAdvance",
+    "_meta": {
+      "title": "LayerUtility: ImageBlendAdvance"
+    }
+  },
+  "37": {
+    "inputs": {
+      "image": [
+        "36",
+        0
+      ],
+      "max_size": [
+        "40",
+        0
+      ]
+    },
+    "class_type": "QwenEditAdaptiveLongestEdge",
+    "_meta": {
+      "title": "QwenEditAdaptiveLongestEdge"
+    }
+  },
+  "40": {
+    "inputs": {
+      "value": 2048
+    },
+    "class_type": "Int",
+    "_meta": {
+      "title": "Int"
+    }
+  },
+  "41": {
+    "inputs": {
+      "image": [
+        "59",
+        0
+      ],
+      "configs": [
+        "54",
+        0
+      ],
+      "mask": [
+        "57",
+        0
+      ],
+      "to_ref": true,
+      "ref_main_image": true,
+      "ref_longest_edge": [
+        "55",
+        0
+      ],
+      "ref_crop": "center",
+      "ref_upscale": "lanczos",
+      "to_vl": true,
+      "vl_resize": true,
+      "vl_target_size": 384,
+      "vl_crop": "center",
+      "vl_upscale": "bicubic"
+    },
+    "class_type": "QwenEditConfigPreparer",
+    "_meta": {
+      "title": "QwenEditConfigPreparer"
+    }
+  },
+  "42": {
+    "inputs": {
+      "image1": [
+        "52",
+        0
+      ],
+      "image2": [
+        "64",
+        0
+      ],
+      "image3": [
+        "151",
+        0
+      ],
+      "image1_text": "角色图",
+      "image2_text": "场景图",
+      "image3_text": "替换图",
+      "image4_text": "image4",
+      "reel_height": 1024,
+      "border": 32
+    },
+    "class_type": "LayerUtility: ImageReel",
+    "_meta": {
+      "title": "LayerUtility: ImageReel"
+    }
+  },
+  "49": {
+    "inputs": {
+      "control_net": [
+        "155",
+        0
+      ],
+      "type": "auto"
+    },
+    "class_type": "SetUnionControlNetType",
+    "_meta": {
+      "title": "SetUnionControlNetType"
+    }
+  },
+  "52": {
+    "inputs": {
+      "image": "ComfyUI_00190_.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "OCTInput_图1"
+    }
+  },
+  "53": {
+    "inputs": {
+      "text1": "把图1的人物融入图2白色区域内，并补全场景和光影",
+      "text2": "",
+      "separator": ",",
+      "text3": ""
+    },
+    "class_type": "ConcatTextOfUtils",
+    "_meta": {
+      "title": "OCTInput_Concat Text"
+    }
+  },
+  "54": {
+    "inputs": {
+      "image": [
+        "36",
+        0
+      ],
+      "to_ref": true,
+      "ref_main_image": false,
+      "ref_longest_edge": [
+        "37",
+        0
+      ],
+      "ref_crop": "pad",
+      "ref_upscale": "lanczos",
+      "to_vl": true,
+      "vl_resize": true,
+      "vl_target_size": 384,
+      "vl_crop": "center",
+      "vl_upscale": "bicubic"
+    },
+    "class_type": "QwenEditConfigPreparer",
+    "_meta": {
+      "title": "QwenEditConfigPreparer"
+    }
+  },
+  "55": {
+    "inputs": {
+      "image": [
+        "59",
+        0
+      ],
+      "max_size": [
+        "40",
+        0
+      ]
+    },
+    "class_type": "QwenEditAdaptiveLongestEdge",
+    "_meta": {
+      "title": "QwenEditAdaptiveLongestEdge"
+    }
+  },
+  "57": {
+    "inputs": {
+      "mask": [
+        "60",
+        1
+      ],
+      "invert_mask": false,
+      "grow": 18,
+      "blur": 0,
+      "low_limit": 0,
+      "high_limit": 1,
+      "enabled": true
+    },
+    "class_type": "MaskFastGrow",
+    "_meta": {
+      "title": "MaskFastGrow"
+    }
+  },
+  "59": {
+    "inputs": {
+      "source": [
+        "61",
+        0
+      ],
+      "destination": [
+        "60",
+        0
+      ],
+      "mask": [
+        "60",
+        1
+      ],
+      "x": 0,
+      "y": 0,
+      "resize_source": false
+    },
+    "class_type": "ImageCompositeMasked",
+    "_meta": {
+      "title": "ImageCompositeMasked"
+    }
+  },
+  "60": {
+    "inputs": {
+      "image": [
+        "64",
+        0
+      ],
+      "mask": [
+        "73",
+        0
+      ],
+      "aspect_ratio": "original",
+      "proportional_width": 1,
+      "proportional_height": 1,
+      "fit": "letterbox",
+      "method": "lanczos",
+      "round_to_multiple": "8",
+      "scale_to_side": "longest",
+      "scale_to_length": 1536,
+      "background_color": "#000000"
+    },
+    "class_type": "LayerUtility: ImageScaleByAspectRatio V2",
+    "_meta": {
+      "title": "LayerUtility: ImageScaleByAspectRatio V2"
+    }
+  },
+  "61": {
+    "inputs": {
+      "mask": [
+        "72",
+        0
+      ]
+    },
+    "class_type": "MaskToImage",
+    "_meta": {
+      "title": "MaskToImage"
+    }
+  },
+  "62": {
+    "inputs": {
+      "images": [
+        "61",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "PreviewImage"
+    }
+  },
+  "63": {
+    "inputs": {
+      "images": [
+        "21",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "PreviewImage"
+    }
+  },
+  "64": {
+    "inputs": {
+      "image": "5月14日.jpg",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "OCTInput_图2"
+    }
+  },
+  "65": {
+    "inputs": {
+      "images": [
+        "151",
+        0
+      ],
+      "filename_prefix": "ComfyUI"
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "SaveImage"
+    }
+  },
+  "66": {
+    "inputs": {
+      "positive": [
+        "17",
+        0
+      ],
+      "negative": [
+        "17",
+        0
+      ],
+      "control_net": [
+        "49",
+        0
+      ],
+      "vae": [
+        "24",
+        0
+      ],
+      "image": [
+        "70",
+        0
+      ],
+      "strength": 2,
+      "start_percent": 0,
+      "end_percent": 0.7
+    },
+    "class_type": "ControlNetApplySD3",
+    "_meta": {
+      "title": "ControlNetApplySD3"
+    }
+  },
+  "70": {
+    "inputs": {
+      "image": [
+        "7",
+        0
+      ],
+      "preprocessor": "DWPreprocessor",
+      "resolution": 1024
+    },
+    "class_type": "AIO_Preprocessor",
+    "_meta": {
+      "title": "AIO_Preprocessor"
+    }
+  },
+  "72": {
+    "inputs": {
+      "mask": [
+        "60",
+        1
+      ],
+      "invert_mask": false,
+      "grow": 6,
+      "blur": 4
+    },
+    "class_type": "LayerMask: MaskGrow",
+    "_meta": {
+      "title": "LayerMask: MaskGrow"
+    }
+  },
+  "73": {
+    "inputs": {
+      "masks": [
+        "163",
+        0
+      ]
+    },
+    "class_type": "Mask Fill Holes",
+    "_meta": {
+      "title": "Mask Fill Holes"
+    }
+  },
+  "150": {
+    "inputs": {
+      "anything": [
+        "20",
+        0
+      ],
+      "clean_file_cache": true,
+      "clean_processes": true,
+      "clean_dlls": true,
+      "retry_times": 3
+    },
+    "class_type": "RAMCleanup",
+    "_meta": {
+      "title": "RAMCleanup"
+    }
+  },
+  "151": {
+    "inputs": {
+      "anything": [
+        "150",
+        0
+      ],
+      "offload_model": true,
+      "offload_cache": true
+    },
+    "class_type": "VRAMCleanup",
+    "_meta": {
+      "title": "VRAMCleanup"
+    }
+  },
+  "154": {
+    "inputs": {
+      "anything": [
+        "10",
+        0
+      ]
+    },
+    "class_type": "easy cleanGpuUsed",
+    "_meta": {
+      "title": "easy cleanGpuUsed"
+    }
+  },
+  "155": {
+    "inputs": {
+      "anything": [
+        "3",
+        0
+      ]
+    },
+    "class_type": "easy cleanGpuUsed",
+    "_meta": {
+      "title": "easy cleanGpuUsed"
+    }
+  },
+  "161": {
+    "inputs": {
+      "image": "4月15日 (1)(1).mp4_20260420_150927.840.jpg",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "OCTInput_图3"
+    }
+  },
+  "163": {
+    "inputs": {
+      "image": [
+        "161",
+        0
+      ],
+      "red": 255,
+      "green": 255,
+      "blue": 255,
+      "threshold": 0
+    },
+    "class_type": "MaskFromColor+",
+    "_meta": {
+      "title": "MaskFromColor+"
+    }
+  }
+}

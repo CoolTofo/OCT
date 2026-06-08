@@ -1,0 +1,850 @@
+{
+  "workflows": [
+    {
+      "id": "rh_23f2a42289f3",
+      "title": "保持一致性高清放大",
+      "workflowId": "2063837021713559553",
+      "accessPassword": "",
+      "defaultRetainSeconds": 0,
+      "fields": [
+        {
+          "id": "49.image",
+          "label": "OCT_Load Image / image",
+          "nodeId": "49",
+          "nodeTitle": "OCT_Load Image",
+          "classType": "LoadImage",
+          "fieldName": "image",
+          "type": "image",
+          "default": "6fae03177d1d764b418ac2e5ab6ab34df0af52048848bb99b4c3308abca7dde0.jpg",
+          "required": false,
+          "accept": "image/*",
+          "options": []
+        },
+        {
+          "id": "59.value",
+          "label": "OCT_修改尺寸 / value",
+          "nodeId": "59",
+          "nodeTitle": "OCT_修改尺寸",
+          "classType": "INTConstant",
+          "fieldName": "value",
+          "type": "number",
+          "default": 3840,
+          "required": false,
+          "accept": "",
+          "options": []
+        },
+        {
+          "id": "70.text",
+          "label": "OCT_String / text",
+          "nodeId": "70",
+          "nodeTitle": "OCT_String",
+          "classType": "JWString",
+          "fieldName": "text",
+          "type": "textarea",
+          "default": "High definition, 4K, Add realistic details to the corrupted image, Restore high frequence details from the corrupted image, ",
+          "required": false,
+          "accept": "",
+          "options": []
+        }
+      ],
+      "options": {},
+      "created_at": 1780892183497,
+      "updated_at": 1780892952219
+    },
+    {
+      "id": "rh_9eefa5405293",
+      "title": "动作迁移V02",
+      "workflowId": "2062067628721659905",
+      "accessPassword": "",
+      "defaultRetainSeconds": 0,
+      "fields": [
+        {
+          "id": "1066.value",
+          "label": "OCTInput多人检测开关",
+          "nodeId": "1066",
+          "nodeTitle": "OCTInput多人检测开关",
+          "classType": "Fast Groups Bypasser (rgthree)",
+          "fieldName": "value",
+          "type": "dropdown",
+          "default": "yes",
+          "required": false,
+          "accept": "",
+          "options": [
+            "yes",
+            "no"
+          ]
+        },
+        {
+          "id": "1065.value",
+          "label": "OCTInput表情检测开关",
+          "nodeId": "1065",
+          "nodeTitle": "OCTInput表情检测开关",
+          "classType": "Fast Groups Bypasser (rgthree)",
+          "fieldName": "value",
+          "type": "dropdown",
+          "default": "yes",
+          "required": false,
+          "accept": "",
+          "options": [
+            "yes",
+            "no"
+          ]
+        },
+        {
+          "id": "1071.video",
+          "label": "OCTInput_Load Video (Upload) 🎥🅥🅗🅢 / video",
+          "nodeId": "1071",
+          "nodeTitle": "OCTInput_Load Video (Upload) 🎥🅥🅗🅢",
+          "classType": "VHS_LoadVideo",
+          "fieldName": "video",
+          "type": "video",
+          "default": "",
+          "required": false,
+          "accept": "video/*",
+          "options": []
+        },
+        {
+          "id": "1131.value",
+          "label": "OCTInput_Width / value",
+          "nodeId": "1131",
+          "nodeTitle": "OCTInput_Width",
+          "classType": "Int",
+          "fieldName": "value",
+          "type": "number",
+          "default": 1280,
+          "required": false,
+          "accept": "",
+          "options": []
+        },
+        {
+          "id": "1132.value",
+          "label": "OCTInput_Hight / value",
+          "nodeId": "1132",
+          "nodeTitle": "OCTInput_Hight",
+          "classType": "Int",
+          "fieldName": "value",
+          "type": "number",
+          "default": 720,
+          "required": false,
+          "accept": "",
+          "options": []
+        },
+        {
+          "id": "1137.boolean",
+          "label": "OCTInput_ZT / boolean",
+          "nodeId": "1137",
+          "nodeTitle": "OCTInput_ZT",
+          "classType": "Logic Boolean Primitive",
+          "fieldName": "boolean",
+          "type": "boolean",
+          "default": false,
+          "required": false,
+          "accept": "",
+          "options": []
+        },
+        {
+          "id": "1138.number",
+          "label": "OCTInput_KS / number",
+          "nodeId": "1138",
+          "nodeTitle": "OCTInput_KS",
+          "classType": "LogicUtil_StaticNumberInt",
+          "fieldName": "number",
+          "type": "number",
+          "default": 30,
+          "required": false,
+          "accept": "",
+          "options": []
+        },
+        {
+          "id": "1139.f_string",
+          "label": "OCTInput_Text / f_string",
+          "nodeId": "1139",
+          "nodeTitle": "OCTInput_Text",
+          "classType": "StringFormat",
+          "fieldName": "f_string",
+          "type": "text",
+          "default": "{a}",
+          "required": false,
+          "accept": "",
+          "options": []
+        },
+        {
+          "id": "1140.value",
+          "label": "OCTInput_Step / value",
+          "nodeId": "1140",
+          "nodeTitle": "OCTInput_Step",
+          "classType": "PrimitiveInt",
+          "fieldName": "value",
+          "type": "number",
+          "default": 6,
+          "required": false,
+          "accept": "",
+          "options": []
+        }
+      ],
+      "options": {},
+      "created_at": 1780540297478,
+      "updated_at": 1780541699129
+    },
+    {
+      "id": "rh_9989dfbf2c1a",
+      "title": "动作迁移1",
+      "workflowId": "2062067628721659905",
+      "accessPassword": "",
+      "defaultRetainSeconds": 0,
+      "fields": [
+        {
+          "id": "1066.value",
+          "label": "OCTInput多人检测开关",
+          "nodeId": "1066",
+          "nodeTitle": "OCTInput多人检测开关",
+          "classType": "Fast Groups Bypasser (rgthree)",
+          "fieldName": "value",
+          "type": "dropdown",
+          "default": "yes",
+          "required": false,
+          "accept": "",
+          "options": [
+            "yes",
+            "no"
+          ]
+        },
+        {
+          "id": "1065.value",
+          "label": "OCTInput表情检测开关",
+          "nodeId": "1065",
+          "nodeTitle": "OCTInput表情检测开关",
+          "classType": "Fast Groups Bypasser (rgthree)",
+          "fieldName": "value",
+          "type": "dropdown",
+          "default": "yes",
+          "required": false,
+          "accept": "",
+          "options": [
+            "yes",
+            "no"
+          ]
+        },
+        {
+          "id": "1071.video",
+          "label": "OCTInput_Load Video (Upload) 🎥🅥🅗🅢 / video",
+          "nodeId": "1071",
+          "nodeTitle": "OCTInput_Load Video (Upload) 🎥🅥🅗🅢",
+          "classType": "VHS_LoadVideo",
+          "fieldName": "video",
+          "type": "video",
+          "default": "",
+          "required": false,
+          "accept": "video/*",
+          "options": []
+        },
+        {
+          "id": "1131.value",
+          "label": "OCTInput_Width / value",
+          "nodeId": "1131",
+          "nodeTitle": "OCTInput_Width",
+          "classType": "Int",
+          "fieldName": "value",
+          "type": "number",
+          "default": 1280,
+          "required": false,
+          "accept": "",
+          "options": []
+        },
+        {
+          "id": "1132.value",
+          "label": "OCTInput_Hight / value",
+          "nodeId": "1132",
+          "nodeTitle": "OCTInput_Hight",
+          "classType": "Int",
+          "fieldName": "value",
+          "type": "number",
+          "default": 720,
+          "required": false,
+          "accept": "",
+          "options": []
+        },
+        {
+          "id": "1137.boolean",
+          "label": "OCTInput_ZT / boolean",
+          "nodeId": "1137",
+          "nodeTitle": "OCTInput_ZT",
+          "classType": "Logic Boolean Primitive",
+          "fieldName": "boolean",
+          "type": "boolean",
+          "default": false,
+          "required": false,
+          "accept": "",
+          "options": []
+        },
+        {
+          "id": "1138.number",
+          "label": "OCTInput_KS / number",
+          "nodeId": "1138",
+          "nodeTitle": "OCTInput_KS",
+          "classType": "LogicUtil_StaticNumberInt",
+          "fieldName": "number",
+          "type": "number",
+          "default": 30,
+          "required": false,
+          "accept": "",
+          "options": []
+        },
+        {
+          "id": "1139.f_string",
+          "label": "OCTInput_Text / f_string",
+          "nodeId": "1139",
+          "nodeTitle": "OCTInput_Text",
+          "classType": "StringFormat",
+          "fieldName": "f_string",
+          "type": "text",
+          "default": "{a}",
+          "required": false,
+          "accept": "",
+          "options": []
+        },
+        {
+          "id": "1140.value",
+          "label": "OCTInput_Step / value",
+          "nodeId": "1140",
+          "nodeTitle": "OCTInput_Step",
+          "classType": "PrimitiveInt",
+          "fieldName": "value",
+          "type": "number",
+          "default": 6,
+          "required": false,
+          "accept": "",
+          "options": []
+        }
+      ],
+      "options": {},
+      "created_at": 1780372720067,
+      "updated_at": 1780539603653
+    },
+    {
+      "id": "rh_e55d165f543f",
+      "title": "8K高清放大",
+      "workflowId": "2061703496893816833",
+      "accessPassword": "",
+      "defaultRetainSeconds": 0,
+      "fields": [
+        {
+          "id": "160.value",
+          "label": "OCTInput_Denoise (Upscale) / value",
+          "nodeId": "160",
+          "nodeTitle": "OCTInput_Denoise (Upscale)",
+          "classType": "Float",
+          "fieldName": "value",
+          "type": "number",
+          "default": 0.25000000000000006,
+          "required": false,
+          "accept": "",
+          "options": []
+        },
+        {
+          "id": "161.value",
+          "label": "OCTInput_Denoise (Control Net) / value",
+          "nodeId": "161",
+          "nodeTitle": "OCTInput_Denoise (Control Net)",
+          "classType": "Float",
+          "fieldName": "value",
+          "type": "number",
+          "default": 1.0000000000000002,
+          "required": false,
+          "accept": "",
+          "options": []
+        },
+        {
+          "id": "2.image",
+          "label": "OCTInput_Load Image / image",
+          "nodeId": "2",
+          "nodeTitle": "OCTInput_Load Image",
+          "classType": "LoadImage",
+          "fieldName": "image",
+          "type": "image",
+          "default": "5a77a8bd0fed9d32e0f885bfca0ed042e6aa9e6d30030f9c6d4776acc20fbfe1.png",
+          "required": false,
+          "accept": "",
+          "options": []
+        },
+        {
+          "id": "20.text",
+          "label": "OCTInput_Prompt extra / text",
+          "nodeId": "20",
+          "nodeTitle": "OCTInput_Prompt extra",
+          "classType": "TextBox",
+          "fieldName": "text",
+          "type": "textarea",
+          "default": "“ultra-realistic details, high-resolution textures, sharp focus, realistic lighting and shadows, natural materials, photographic depth of field, skin pores and surface imperfections preserved, color-accurate rendering, subtle reflections and ambient occlusion, 8K clarity, professional photography look”",
+          "required": false,
+          "accept": "",
+          "options": []
+        }
+      ],
+      "options": {},
+      "created_at": 1780051771435,
+      "updated_at": 1780384893954
+    },
+    {
+      "id": "rh_wan22_animate",
+      "title": "局部内容通过文字替换",
+      "workflowId": "2060224668388388865",
+      "accessPassword": "",
+      "defaultRetainSeconds": 0,
+      "fields": [
+        {
+          "id": "454.text",
+          "label": "OCTInput_替换内容 / text",
+          "nodeId": "454",
+          "nodeTitle": "OCTInput_替换内容",
+          "classType": "Text",
+          "fieldName": "text",
+          "type": "textarea",
+          "default": "黄瓜",
+          "required": false,
+          "accept": "",
+          "options": []
+        },
+        {
+          "id": "455.text",
+          "label": "OCTInput_源图内容 / text",
+          "nodeId": "455",
+          "nodeTitle": "OCTInput_源图内容",
+          "classType": "Text",
+          "fieldName": "text",
+          "type": "textarea",
+          "default": "话筒",
+          "required": false,
+          "accept": "",
+          "options": []
+        },
+        {
+          "id": "459.filename_prefix",
+          "label": "OCTInput_Save Image / filename_prefix",
+          "nodeId": "459",
+          "nodeTitle": "OCTInput_Save Image",
+          "classType": "SaveImage",
+          "fieldName": "filename_prefix",
+          "type": "text",
+          "default": "ComfyUI",
+          "required": false,
+          "accept": "",
+          "options": []
+        },
+        {
+          "id": "263.image",
+          "label": "OCTInput_Load Image / image",
+          "nodeId": "263",
+          "nodeTitle": "OCTInput_Load Image",
+          "classType": "LoadImage",
+          "fieldName": "image",
+          "type": "image",
+          "default": "example.png",
+          "required": false,
+          "accept": "",
+          "options": []
+        }
+      ],
+      "options": {
+        "addMetadata": true,
+        "instanceType": "default",
+        "usePersonalQueue": false
+      },
+      "created_at": 1779840000000,
+      "updated_at": 1780030979792
+    },
+    {
+      "id": "rh_2058824859437850625",
+      "title": "SeedVR2 高清放大",
+      "workflowId": "2058824859437850625",
+      "accessPassword": "",
+      "defaultRetainSeconds": 0,
+      "fields": [
+        {
+          "id": "187.image",
+          "label": "image",
+          "nodeId": "187",
+          "nodeTitle": "",
+          "classType": "",
+          "fieldName": "image",
+          "type": "image",
+          "default": "pasted/75f38df8f7fd6f254c3b8d2fd1c43519a311e8eaa325dc8859dedfee26cb663a.png",
+          "required": true,
+          "accept": "image/*",
+          "options": []
+        },
+        {
+          "id": "163.resolution",
+          "label": "resolution",
+          "nodeId": "163",
+          "nodeTitle": "",
+          "classType": "",
+          "fieldName": "resolution",
+          "type": "dropdown",
+          "default": "2048",
+          "required": false,
+          "accept": "",
+          "options": [
+            "2048",
+            "4096"
+          ]
+        }
+      ],
+      "options": {
+        "addMetadata": true,
+        "instanceType": "default",
+        "usePersonalQueue": false
+      },
+      "created_at": 1779864831407,
+      "updated_at": 1779864831407
+    },
+    {
+      "id": "rh_2058818588181622785",
+      "title": "Flux.2 Klein 细节增强",
+      "workflowId": "2058818588181622785",
+      "accessPassword": "",
+      "defaultRetainSeconds": 0,
+      "fields": [
+        {
+          "id": "278.image",
+          "label": "image",
+          "nodeId": "278",
+          "nodeTitle": "",
+          "classType": "",
+          "fieldName": "image",
+          "type": "image",
+          "default": "b63d0162b66d893452f50e6fb62b07a8bbfab9d5f65773f25bfce914e4bd012f.png",
+          "required": true,
+          "accept": "image/*",
+          "options": []
+        },
+        {
+          "id": "352.text",
+          "label": "text",
+          "nodeId": "352",
+          "nodeTitle": "",
+          "classType": "",
+          "fieldName": "text",
+          "type": "text",
+          "default": "realistic，将画面变为真实的照片",
+          "required": false,
+          "accept": "",
+          "options": []
+        }
+      ],
+      "options": {
+        "addMetadata": true,
+        "instanceType": "default",
+        "usePersonalQueue": false
+      },
+      "created_at": 1779864831407,
+      "updated_at": 1779864831407
+    },
+    {
+      "id": "rh_2058554058318897153",
+      "title": "GPT-Image-2-图片编辑",
+      "workflowId": "2058554058318897153",
+      "accessPassword": "",
+      "defaultRetainSeconds": 0,
+      "fields": [
+        {
+          "id": "3.image",
+          "label": "image",
+          "nodeId": "3",
+          "nodeTitle": "",
+          "classType": "",
+          "fieldName": "image",
+          "type": "image",
+          "default": "pasted/13839fc6bad36400c5fdb0e595b56a8518ca1dea00e552455bd23fe2e47f3f49.png",
+          "required": true,
+          "accept": "image/*",
+          "options": []
+        },
+        {
+          "id": "5.image",
+          "label": "image",
+          "nodeId": "5",
+          "nodeTitle": "",
+          "classType": "",
+          "fieldName": "image",
+          "type": "image",
+          "default": "pasted/1aa2f479aade662c1820b780dbc397860ef133c1345ccce75bc4d2f089e71eb2.png",
+          "required": false,
+          "accept": "image/*",
+          "options": []
+        },
+        {
+          "id": "6.image",
+          "label": "image",
+          "nodeId": "6",
+          "nodeTitle": "",
+          "classType": "",
+          "fieldName": "image",
+          "type": "image",
+          "default": "pasted/9f196a9affbce26eff7dcb65abb067a498e392e8d6f210b73521d126c09505fd.png",
+          "required": false,
+          "accept": "image/*",
+          "options": []
+        },
+        {
+          "id": "7.image",
+          "label": "image",
+          "nodeId": "7",
+          "nodeTitle": "",
+          "classType": "",
+          "fieldName": "image",
+          "type": "image",
+          "default": "pasted/46948afdef9592cbf0ec98f2976eb8743c516a4eb4539474c4307044ae56fa88.png",
+          "required": false,
+          "accept": "image/*",
+          "options": []
+        },
+        {
+          "id": "8.image",
+          "label": "image",
+          "nodeId": "8",
+          "nodeTitle": "",
+          "classType": "",
+          "fieldName": "image",
+          "type": "image",
+          "default": "pasted/be53aea7278c58fa7f48ab8eae1d772099e4900ceda7e88157ab97cf3f5e64aa.png",
+          "required": false,
+          "accept": "image/*",
+          "options": []
+        },
+        {
+          "id": "4.aspectRatio",
+          "label": "aspectRatio",
+          "nodeId": "4",
+          "nodeTitle": "",
+          "classType": "",
+          "fieldName": "aspectRatio",
+          "type": "dropdown",
+          "default": "9:16",
+          "required": false,
+          "accept": "",
+          "options": [
+            "1:1",
+            "16:9",
+            "9:16",
+            "4:3",
+            "3:4",
+            "4:5",
+            "5:4",
+            "3:2",
+            "2:3"
+          ]
+        },
+        {
+          "id": "4.prompt",
+          "label": "prompt",
+          "nodeId": "4",
+          "nodeTitle": "",
+          "classType": "",
+          "fieldName": "prompt",
+          "type": "text",
+          "default": "图1的模特戴上图2的眼镜/图3的上衣/图4的裤子/图5的背包",
+          "required": false,
+          "accept": "",
+          "options": []
+        },
+        {
+          "id": "4.resolution",
+          "label": "resolution",
+          "nodeId": "4",
+          "nodeTitle": "",
+          "classType": "",
+          "fieldName": "resolution",
+          "type": "dropdown",
+          "default": "1k",
+          "required": false,
+          "accept": "",
+          "options": [
+            "512",
+            "768",
+            "1024",
+            "1280",
+            "1536",
+            "2048",
+            "1k",
+            "2k",
+            "4k"
+          ]
+        },
+        {
+          "id": "4.seed",
+          "label": "seed",
+          "nodeId": "4",
+          "nodeTitle": "",
+          "classType": "",
+          "fieldName": "seed",
+          "type": "number",
+          "default": "1420337323",
+          "required": false,
+          "accept": "",
+          "options": []
+        }
+      ],
+      "options": {
+        "addMetadata": true,
+        "instanceType": "default",
+        "usePersonalQueue": false
+      },
+      "created_at": 1779864831407,
+      "updated_at": 1779864831407
+    },
+    {
+      "id": "rh_2058541134623891458",
+      "title": "GPT-Image-2-图片编辑",
+      "workflowId": "2058541134623891458",
+      "accessPassword": "",
+      "defaultRetainSeconds": 0,
+      "fields": [
+        {
+          "id": "12.image",
+          "label": "image",
+          "nodeId": "12",
+          "nodeTitle": "",
+          "classType": "",
+          "fieldName": "image",
+          "type": "image",
+          "default": "pasted/46948afdef9592cbf0ec98f2976eb8743c516a4eb4539474c4307044ae56fa88.png",
+          "required": false,
+          "accept": "image/*",
+          "options": []
+        },
+        {
+          "id": "2.image",
+          "label": "image",
+          "nodeId": "2",
+          "nodeTitle": "",
+          "classType": "",
+          "fieldName": "image",
+          "type": "image",
+          "default": "pasted/13839fc6bad36400c5fdb0e595b56a8518ca1dea00e552455bd23fe2e47f3f49.png",
+          "required": true,
+          "accept": "image/*",
+          "options": []
+        },
+        {
+          "id": "13.image",
+          "label": "image",
+          "nodeId": "13",
+          "nodeTitle": "",
+          "classType": "",
+          "fieldName": "image",
+          "type": "image",
+          "default": "pasted/be53aea7278c58fa7f48ab8eae1d772099e4900ceda7e88157ab97cf3f5e64aa.png",
+          "required": false,
+          "accept": "image/*",
+          "options": []
+        },
+        {
+          "id": "3.image",
+          "label": "image",
+          "nodeId": "3",
+          "nodeTitle": "",
+          "classType": "",
+          "fieldName": "image",
+          "type": "image",
+          "default": "pasted/1aa2f479aade662c1820b780dbc397860ef133c1345ccce75bc4d2f089e71eb2.png",
+          "required": false,
+          "accept": "image/*",
+          "options": []
+        },
+        {
+          "id": "4.image",
+          "label": "image",
+          "nodeId": "4",
+          "nodeTitle": "",
+          "classType": "",
+          "fieldName": "image",
+          "type": "image",
+          "default": "pasted/9f196a9affbce26eff7dcb65abb067a498e392e8d6f210b73521d126c09505fd.png",
+          "required": false,
+          "accept": "image/*",
+          "options": []
+        },
+        {
+          "id": "1.aspectRatio",
+          "label": "aspectRatio",
+          "nodeId": "1",
+          "nodeTitle": "",
+          "classType": "",
+          "fieldName": "aspectRatio",
+          "type": "dropdown",
+          "default": "9:16",
+          "required": false,
+          "accept": "",
+          "options": [
+            "1:1",
+            "16:9",
+            "9:16",
+            "4:3",
+            "3:4",
+            "4:5",
+            "5:4",
+            "3:2",
+            "2:3"
+          ]
+        },
+        {
+          "id": "1.prompt",
+          "label": "prompt",
+          "nodeId": "1",
+          "nodeTitle": "",
+          "classType": "",
+          "fieldName": "prompt",
+          "type": "text",
+          "default": "图1的模特戴上图2的眼镜/图3的上衣/图4的裤子/图5的背包",
+          "required": false,
+          "accept": "",
+          "options": []
+        },
+        {
+          "id": "1.resolution",
+          "label": "resolution",
+          "nodeId": "1",
+          "nodeTitle": "",
+          "classType": "",
+          "fieldName": "resolution",
+          "type": "dropdown",
+          "default": "1k",
+          "required": false,
+          "accept": "",
+          "options": [
+            "512",
+            "768",
+            "1024",
+            "1280",
+            "1536",
+            "2048",
+            "1k",
+            "2k",
+            "4k"
+          ]
+        },
+        {
+          "id": "1.seed",
+          "label": "seed",
+          "nodeId": "1",
+          "nodeTitle": "",
+          "classType": "",
+          "fieldName": "seed",
+          "type": "number",
+          "default": "1074325503",
+          "required": false,
+          "accept": "",
+          "options": []
+        }
+      ],
+      "options": {
+        "addMetadata": true,
+        "instanceType": "default",
+        "usePersonalQueue": false
+      },
+      "created_at": 1779864831407,
+      "updated_at": 1779864831407
+    }
+  ]
+}
