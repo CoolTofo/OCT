@@ -54,6 +54,10 @@ def _clean_cli_path(cli_path: str) -> str:
     return value or "dreamina"
 
 
+def _cli_poll_seconds(payload: DreaminaRunRequest) -> int:
+    return DREAMINA_CLI_POLL_SECONDS if payload.wait_for_result else DREAMINA_INITIAL_QUERY_SECONDS
+
+
 def _local_path_from_ref(ref: Any) -> Tuple[str, str]:
     url = ref.url if hasattr(ref, "url") else ""
     path = media_store.output_file_from_url(url)
@@ -103,7 +107,8 @@ def _build_command(payload: DreaminaRunRequest) -> Tuple[str, List[str], List[st
         raise HTTPException(status_code=400, detail="image2video needs a connected image. Use multimodal2video for video inputs.")
 
     cli = _clean_cli_path(payload.cli_path)
-    args = [cli, mode, f"--prompt={prompt}", f"--poll={DREAMINA_CLI_POLL_SECONDS}"]
+    cli_poll = _cli_poll_seconds(payload)
+    args = [cli, mode, f"--prompt={prompt}", f"--poll={cli_poll}"]
     if mode in {"text2image", "image2image"}:
         args.extend([f"--ratio={payload.ratio or '1:1'}", f"--resolution_type={payload.resolution_type or '2k'}"])
     if mode in {"text2video", "image2video"}:
@@ -123,7 +128,7 @@ def _build_command(payload: DreaminaRunRequest) -> Tuple[str, List[str], List[st
         args.extend(["--image", first_image])
     elif mode == "multimodal2video":
         duration = max(4, min(15, int(payload.duration or 5)))
-        args = [cli, mode, f"--prompt={prompt}", f"--duration={duration}", f"--ratio={payload.ratio or '16:9'}", f"--video_resolution={(payload.video_resolution or '720P').lower()}", f"--model_version={payload.model_version or 'seedance2.0fast'}", f"--poll={DREAMINA_CLI_POLL_SECONDS}"]
+        args = [cli, mode, f"--prompt={prompt}", f"--duration={duration}", f"--ratio={payload.ratio or '16:9'}", f"--video_resolution={(payload.video_resolution or '720P').lower()}", f"--model_version={payload.model_version or 'seedance2.0fast'}", f"--poll={cli_poll}"]
         for path, kind in local_inputs:
             if kind == "image":
                 args.extend(["--image", path])

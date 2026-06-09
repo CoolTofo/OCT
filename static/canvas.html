@@ -108,8 +108,12 @@
         .node::before { content:""; position:absolute; inset:0; border-radius:inherit; background:var(--card); pointer-events:none; z-index:-1; overflow:hidden; }
         .node.sized { display:flex; flex-direction:column; }
         .node.selected { outline:2px solid var(--strong); outline-offset:2px; }
+        .node.linked-clone { box-shadow:0 0 0 2px rgba(245,158,11,.95), 0 0 0 6px rgba(245,158,11,.18), 0 16px 42px var(--shadow); }
+        .node.linked-clone.selected { box-shadow:0 0 0 2px rgba(245,158,11,.95), 0 0 0 7px rgba(245,158,11,.22), 0 16px 42px var(--shadow); }
         .node-head { height:42px; flex:0 0 42px; display:flex; align-items:center; justify-content:space-between; gap:10px; padding:0 12px; border-bottom:1px solid var(--line); border-radius:21px 21px 0 0; overflow:hidden; cursor:move; }
         .node-title { font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+        .linked-clone-badge { height:22px; padding:0 7px; border-radius:999px; display:inline-flex; align-items:center; gap:4px; background:rgba(245,158,11,.14); color:#b45309; border:1px solid rgba(245,158,11,.36); font-size:10px; font-weight:900; letter-spacing:.06em; }
+        .linked-clone-badge i { width:12px; height:12px; }
         /* 一键运行级联状态徽章 */
         .node-run-status { display:inline-flex; align-items:center; gap:4px; padding:2px 7px; border-radius:6px; font-size:10px; font-weight:800; letter-spacing:.04em; }
         .node-run-status.queued { background:#e5e7eb; color:#6b7280; }
@@ -158,7 +162,9 @@
         .resize-handle:hover { color:#111827; border-color:#cbd5e1; background:#fff; }
         .resize-handle::before { content:""; width:8px; height:8px; border-right:2px solid currentColor; border-bottom:2px solid currentColor; }
         .organize-resize-handle { position:absolute; z-index:8; background:transparent; opacity:0; transition:opacity .14s var(--ease); }
-        .organizeFrame-node:hover .organize-resize-handle,.organizeFrame-node.selected .organize-resize-handle { opacity:1; }
+        .organizeFrame-node:hover .organize-resize-handle,.organizeFrame-node.selected .organize-resize-handle,
+        .group-node:hover .organize-resize-handle,.group-node.selected .organize-resize-handle,
+        .promptGroup-node:hover .organize-resize-handle,.promptGroup-node.selected .organize-resize-handle { opacity:1; }
         .organize-resize-handle::after { content:""; position:absolute; border-radius:999px; background:rgba(100,116,139,.44); }
         .organize-resize-n,.organize-resize-s { left:14px; right:14px; height:10px; }
         .organize-resize-e,.organize-resize-w { top:14px; bottom:14px; width:10px; }
@@ -462,7 +468,7 @@
         .organizeFrame-node::before { background:transparent; }
         .organizeFrame-node .node-head { background:transparent; border-bottom:1px dashed rgba(100,116,139,.18); border-radius:0; cursor:move; }
         .organizeFrame-node .node-title { flex:1; min-width:0; }
-        .organize-frame-title-input { width:100%; border:0; outline:none; background:transparent; color:#64748b; font-size:12px; font-weight:850; letter-spacing:.02em; }
+        .organize-frame-title-input,.group-title-input { width:100%; border:0; outline:none; background:transparent; color:#64748b; font-size:12px; font-weight:850; letter-spacing:.02em; }
         .organize-frame-body { height:100%; display:flex; align-items:flex-start; justify-content:flex-end; padding:10px; color:rgba(100,116,139,.22); font-size:10px; font-weight:850; pointer-events:none; background:transparent; }
         .llm-node { width:420px; }
         .llm-body { display:flex; flex-direction:column; gap:10px; min-height:0; }
@@ -546,6 +552,7 @@
         .output-node-menu .menu-btn { white-space:nowrap; }
         .output-node-menu .menu-btn i { flex:0 0 auto; }
         .output-node-menu .menu-btn span { white-space:nowrap; }
+        .node-action-menu { width:184px; }
         .menu-section-title { padding:7px 10px 4px; color:var(--faint); font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.08em; }
         .menu-divider { height:1px; margin:6px 0; background:var(--line); }
         .node-port-menu { width:auto; min-width:136px; padding:7px; border-radius:16px; }
@@ -814,7 +821,8 @@
         .theme-dark .menu-btn:hover { background:var(--soft); color:var(--text); }
         .theme-dark .organizeFrame-node { background:transparent; border-color:rgba(148,163,184,.32); }
         .theme-dark .organizeFrame-node .node-head { background:transparent; border-bottom-color:rgba(148,163,184,.18); }
-        .theme-dark .organize-frame-title-input { color:#94a3b8; }
+        .theme-dark .organize-frame-title-input,
+        .theme-dark .group-title-input { color:#94a3b8; }
         .theme-dark .gen-btn,
         .theme-dark .llm-run,
         .theme-dark .primary-btn,
@@ -1031,6 +1039,8 @@
             <div id="selectionBox" class="selection-box"></div>
             <div id="selectionHub" class="selection-hub"></div>
             <div id="createMenu" class="create-menu">
+                <button class="menu-btn" data-menu-paste-nodes onclick="menuPasteNodes()" style="display:none"><i data-lucide="clipboard-paste" class="w-4 h-4"></i><span>粘贴节点</span></button>
+                <div class="menu-divider" data-menu-paste-divider style="display:none"></div>
                 <button class="menu-btn" onclick="menuAdd('image')"><i data-lucide="image-plus" class="w-4 h-4"></i><span data-i18n="canvas.imageCard">图片卡片</span></button>
                 <button class="menu-btn" onclick="menuAdd('prompt')"><i data-lucide="text-cursor-input" class="w-4 h-4"></i><span data-i18n="canvas.prompt">提示词</span></button>
                 <button class="menu-btn" onclick="menuAdd('loop')"><i data-lucide="repeat-2" class="w-4 h-4"></i><span data-i18n="canvas.loopNode">循环节点</span></button>
@@ -1051,6 +1061,7 @@
             <div id="linkCreateMenu" class="create-menu"></div>
             <div id="nodeInputMenu" class="create-menu"></div>
             <div id="nodeOutputMenu" class="create-menu"></div>
+            <div id="nodeActionMenu" class="create-menu node-action-menu"></div>
             <div id="imageNodeMenu" class="create-menu"></div>
             <div id="world" class="world">
                 <svg id="links" class="links"></svg>
@@ -1232,6 +1243,7 @@
     <script src="/static/canvas-node-registry.js?v=20260608-node-registry"></script>
     <script src="/static/canvas-organize-frames.js?v=20260609-organize-frame-members"></script>
     <script src="/static/canvas-group-order.js?v=20260609-group-visual-order"></script>
+    <script src="/static/canvas-linked-clones.js?v=20260609-linked-clones"></script>
     <script>
         function refreshIcons(){ if(window.lucide) lucide.createIcons(); }
         refreshIcons();
@@ -1289,6 +1301,7 @@
         const linkCreateMenu = document.getElementById('linkCreateMenu');
         const nodeInputMenu = document.getElementById('nodeInputMenu');
         const nodeOutputMenu = document.getElementById('nodeOutputMenu');
+        const nodeActionMenu = document.getElementById('nodeActionMenu');
         const imageNodeMenu = document.getElementById('imageNodeMenu');
         const selectionBox = document.getElementById('selectionBox');
         const selectionHub = document.getElementById('selectionHub');
@@ -1409,6 +1422,7 @@
         let outputTimer = null;
         let loopContext = null;
         let clipboard = null;
+        let linkedCloneSnapshots = new Map();
         let lastImagePasteAt = 0;
         const activeCanvasTaskPolls = new Set();
         const activeDreaminaTaskPolls = new Set();
@@ -2149,8 +2163,78 @@
                 requestAnimationFrame(refreshGeometry);
             });
         }
+        function linkedCloneGroups(){
+            const groups = new Map();
+            nodes.forEach(node => {
+                const id = String(node.linkedCloneId || '').trim();
+                if(!id) return;
+                if(!groups.has(id)) groups.set(id, []);
+                groups.get(id).push(node);
+            });
+            return groups;
+        }
+        function isActiveLinkedClone(node){
+            const id = String(node?.linkedCloneId || '').trim();
+            if(!id) return false;
+            return nodes.some(other => other.id !== node.id && other.linkedCloneId === id);
+        }
+        function linkedCloneBadgeHtml(node){
+            if(!isActiveLinkedClone(node)) return '';
+            return `<span class="linked-clone-badge" title="高级复制联动节点"><i data-lucide="link-2"></i><span>联动</span></span>`;
+        }
+        function cleanupLinkedCloneIds(){
+            let changed = false;
+            const groups = linkedCloneGroups();
+            groups.forEach((groupNodes, groupId) => {
+                if(groupNodes.length > 1) return;
+                groupNodes.forEach(node => {
+                    delete node.linkedCloneId;
+                    changed = true;
+                });
+                linkedCloneSnapshots.delete(groupId);
+            });
+            return changed;
+        }
+        function primeLinkedCloneSnapshots(){
+            linkedCloneSnapshots = new Map();
+            linkedCloneGroups().forEach((groupNodes, groupId) => {
+                if(groupNodes.length > 1 && window.CanvasLinkedClones)
+                    linkedCloneSnapshots.set(groupId, window.CanvasLinkedClones.payloadJson(groupNodes[0]));
+            });
+        }
+        function syncLinkedClonesBeforeSave(){
+            if(!window.CanvasLinkedClones) return [];
+            const changedIds = [];
+            cleanupLinkedCloneIds();
+            linkedCloneGroups().forEach((groupNodes, groupId) => {
+                if(groupNodes.length < 2) return;
+                const baseline = linkedCloneSnapshots.get(groupId);
+                if(!baseline){
+                    linkedCloneSnapshots.set(groupId, window.CanvasLinkedClones.payloadJson(groupNodes[0]));
+                    return;
+                }
+                const source = groupNodes.find(node => window.CanvasLinkedClones.payloadJson(node) !== baseline);
+                if(!source) return;
+                const payload = window.CanvasLinkedClones.syncPayload(source);
+                groupNodes.forEach(node => {
+                    if(node.id === source.id) return;
+                    if(window.CanvasLinkedClones.applyPayload(node, payload)) changedIds.push(node.id);
+                });
+                linkedCloneSnapshots.set(groupId, window.CanvasLinkedClones.payloadJson(source));
+            });
+            return changedIds;
+        }
+        function refreshLinkedClonePeers(ids){
+            if(!ids?.length) return;
+            const activeNodeId = document.activeElement?.closest?.('.node')?.dataset?.id || '';
+            const targets = [...new Set(ids)].filter(id => id && id !== activeNodeId);
+            if(targets.length) refreshNodes(targets);
+            syncGeneratorInputs();
+            refreshGeneratorInputViews();
+        }
         function scheduleSave(){
             if(!canvas || applyingRemoteCanvas) return;
+            refreshLinkedClonePeers(syncLinkedClonesBeforeSave());
             localCanvasDirty = true;
             setStatus('Saving...');
             clearTimeout(saveTimer);
@@ -2488,6 +2572,7 @@
                 viewport = canvas.viewport || {x:0, y:0, scale:1};
                 syncLinkVisibilityFromCanvas();
                 sanitizeConnections();
+                primeLinkedCloneSnapshots();
                 selected.clear();
                 setCanvasMode(true);
                 render();
@@ -2653,6 +2738,7 @@
                 sanitizeConnections();
                 pruneMissingComfyWorkflows();
                 await refreshMissingCanvasAssets();
+                primeLinkedCloneSnapshots();
                 selected.clear();
                 setCanvasMode(true);
                 renderCanvasList();
@@ -2683,6 +2769,7 @@
                 const prunedPending = pruneUnresumableRunningHubPending();
                 sanitizeConnections();
                 pruneMissingComfyWorkflows();
+                primeLinkedCloneSnapshots();
                 refreshMissingCanvasAssets().then(() => render());
                 selected.clear();
                 renderCanvasList();
@@ -3157,6 +3244,7 @@
                 resolutionType:'2k',
                 videoResolution:'720P',
                 modelVersion:'seedance2.0fast',
+                count:1,
                 cliPath:'',
                 inputs:[],
                 running:false
@@ -3716,6 +3804,12 @@
         function openCreateMenu(clientX, clientY){
             menuPoint = screenToWorld(clientX, clientY);
             closeLinkCreateMenu();
+            closeNodeActionMenu();
+            closeImageNodeMenu();
+            const canPasteNodes = Boolean(clipboardNodes().length);
+            createMenu.querySelectorAll('[data-menu-paste-nodes], [data-menu-paste-divider]').forEach(el => {
+                el.style.display = canPasteNodes ? '' : 'none';
+            });
             createMenu.style.left = `${clientX}px`;
             createMenu.style.top = `${clientY}px`;
             createMenu.classList.add('open');
@@ -3724,6 +3818,7 @@
         function closeCreateMenu(){
             createMenu.classList.remove('open');
             closeLinkCreateMenu();
+            closeNodeActionMenu();
             closeImageNodeMenu();
         }
         function linkCreateOptions(state){
@@ -3800,6 +3895,57 @@
             refreshIcons();
             return true;
         }
+        function nodeActionMenuHtml(){
+            const multi = selected.size > 1;
+            return `
+                <div class="menu-section-title">节点操作</div>
+                <button class="menu-btn" data-node-copy><i data-lucide="copy" class="w-4 h-4"></i><span>${multi ? '复制选中节点' : '复制节点'}</span></button>
+                <button class="menu-btn" data-node-duplicate><i data-lucide="copy-plus" class="w-4 h-4"></i><span>${multi ? '复制选中到旁边' : '复制一份'}</span></button>
+                <button class="menu-btn" data-node-linked-duplicate><i data-lucide="link-2" class="w-4 h-4"></i><span>${multi ? '高级复制选中' : '高级复制一份'}</span></button>
+                <button class="menu-btn" data-node-paste ${clipboardNodes().length ? '' : 'disabled'}><i data-lucide="clipboard-paste" class="w-4 h-4"></i><span>粘贴节点</span></button>
+            `;
+        }
+        function bindNodeActionMenu(menu, point=null){
+            const copyBtn = menu.querySelector('[data-node-copy]');
+            const duplicateBtn = menu.querySelector('[data-node-duplicate]');
+            const linkedDuplicateBtn = menu.querySelector('[data-node-linked-duplicate]');
+            const pasteBtn = menu.querySelector('[data-node-paste]');
+            if(copyBtn) copyBtn.onclick = e => {
+                e.stopPropagation();
+                copySelectedNodes();
+                closeCreateMenu();
+            };
+            if(duplicateBtn) duplicateBtn.onclick = e => {
+                e.stopPropagation();
+                duplicateSelectedNodes();
+                closeCreateMenu();
+            };
+            if(linkedDuplicateBtn) linkedDuplicateBtn.onclick = e => {
+                e.stopPropagation();
+                duplicateSelectedNodesLinked();
+                closeCreateMenu();
+            };
+            if(pasteBtn) pasteBtn.onclick = e => {
+                e.stopPropagation();
+                pasteNodes(point || menuPoint || lastMouseBoard);
+                closeCreateMenu();
+            };
+        }
+        function openNodeActionMenu(nodeId, clientX, clientY){
+            if(!nodes.some(n => n.id === nodeId)) return false;
+            nodeActionMenu.innerHTML = nodeActionMenuHtml();
+            const menuWidth = 184;
+            nodeActionMenu.style.left = `${Math.max(10, Math.min(window.innerWidth - menuWidth - 10, clientX))}px`;
+            nodeActionMenu.style.top = `${Math.max(10, Math.min(window.innerHeight - 150, clientY))}px`;
+            nodeActionMenu.classList.add('open');
+            bindNodeActionMenu(nodeActionMenu, screenToWorld(clientX, clientY));
+            refreshIcons();
+            return true;
+        }
+        function closeNodeActionMenu(){
+            nodeActionMenu.classList.remove('open');
+            nodeActionMenu.innerHTML = '';
+        }
         function closeLinkCreateMenu(){
             linkCreateMenu.classList.remove('open');
             linkCreateMenu.innerHTML = '';
@@ -3815,7 +3961,11 @@
             const node = nodes.find(n => n.id === nodeId);
             if(!node || node.type !== 'image') return;
             closeCreateMenu();
-            imageNodeMenu.innerHTML = `<button class="menu-btn" data-image-replace="${escapeAttr(nodeId)}"><i data-lucide="image-plus" class="w-4 h-4"></i><span>替换</span></button>`;
+            imageNodeMenu.innerHTML = `
+                <button class="menu-btn" data-image-replace="${escapeAttr(nodeId)}"><i data-lucide="image-plus" class="w-4 h-4"></i><span>替换</span></button>
+                <div class="menu-divider"></div>
+                ${nodeActionMenuHtml()}
+            `;
             imageNodeMenu.style.left = `${clientX}px`;
             imageNodeMenu.style.top = `${clientY}px`;
             imageNodeMenu.classList.add('open');
@@ -3824,6 +3974,7 @@
                 closeImageNodeMenu();
                 pickImageForNode(nodeId);
             };
+            bindNodeActionMenu(imageNodeMenu, screenToWorld(clientX, clientY));
             refreshIcons();
         }
         function openOutputNodeMenu(nodeId, clientX, clientY){
@@ -3834,6 +3985,8 @@
             const downloadableCount = outputDownloadableImageUrls(node).length;
             imageNodeMenu.classList.add('output-node-menu');
             imageNodeMenu.innerHTML = `
+                ${nodeActionMenuHtml()}
+                <div class="menu-divider"></div>
                 <div class="menu-section-title">${tr('canvas.outputGroupActions')}</div>
                 <button class="menu-btn" data-output-convert="${escapeAttr(nodeId)}" ${imageCount ? '' : 'disabled'}><i data-lucide="replace" class="w-4 h-4"></i><span>${tr('canvas.outputConvertToInputGroup')}</span></button>
                 <button class="menu-btn" data-output-copy="${escapeAttr(nodeId)}" ${imageCount ? '' : 'disabled'}><i data-lucide="copy-plus" class="w-4 h-4"></i><span>${tr('canvas.outputCopyToInputGroup')}</span></button>
@@ -3845,6 +3998,7 @@
             imageNodeMenu.style.left = `${Math.max(10, Math.min(window.innerWidth - menuWidth - 10, clientX))}px`;
             imageNodeMenu.style.top = `${clientY}px`;
             imageNodeMenu.classList.add('open');
+            bindNodeActionMenu(imageNodeMenu, screenToWorld(clientX, clientY));
             const convertBtn = imageNodeMenu.querySelector('[data-output-convert]');
             if(convertBtn){
                 convertBtn.onclick = e => {
@@ -4036,6 +4190,10 @@
             if(type === 'rh') addRhNode(menuPoint);
             if(type === 'output') addOutputNode(menuPoint);
         }
+        function menuPasteNodes(){
+            pasteNodes(menuPoint || lastMouseBoard);
+            closeCreateMenu();
+        }
         const IMAGE_JPG_AUTO_THRESHOLD = 5 * 1024 * 1024;
         function formatFileSize(bytes){
             const size = Number(bytes || 0);
@@ -4043,6 +4201,11 @@
             if(size >= 1024 * 1024) return `${(size / 1024 / 1024).toFixed(size >= 10 * 1024 * 1024 ? 1 : 2)} MB`;
             if(size >= 1024) return `${Math.round(size / 1024)} KB`;
             return `${size} B`;
+        }
+        function formatMediaDuration(seconds){
+            const duration = Number(seconds || 0);
+            if(!Number.isFinite(duration) || duration <= 0) return '';
+            return `${duration.toFixed(1)}s`;
         }
         function imageNodeMetaSnapshot(node){
             return {
@@ -4056,6 +4219,7 @@
                 format: node.format || '',
                 mimeType: node.mimeType || node.type || '',
                 mediaKind: node.mediaKind || 'image',
+                mediaDuration: Number(node.mediaDuration || 0),
             };
         }
         function restoreImageNodeMeta(node, meta){
@@ -4070,6 +4234,7 @@
             node.format = meta.format || '';
             node.mimeType = meta.mimeType || '';
             node.mediaKind = meta.mediaKind || 'image';
+            node.mediaDuration = Number(meta.mediaDuration || 0);
         }
         function fileLooksLikeImage(file){
             const kind = String(file?.media_kind || '').toLowerCase();
@@ -4088,6 +4253,7 @@
             node.format = file.format || (node.url.split('?')[0].split('.').pop() || '').toLowerCase();
             node.mimeType = file.type || file.source_type || '';
             node.mediaKind = file.media_kind || (fileLooksLikeImage(file) ? 'image' : '');
+            node.mediaDuration = Number(file.duration || file.duration_seconds || file.media_duration || 0);
             node.originalImageUrl = node.url;
             node.originalImageMeta = imageNodeMetaSnapshot(node);
             node.jpgUrl = '';
@@ -4123,6 +4289,7 @@
             if(size) parts.push(size);
             const format = String(node.format || '').toUpperCase();
             if(format) parts.push(format);
+            if((node.mediaKind === 'video' || isVideoUrl(node.url)) && Number(node.mediaDuration || 0)) parts.push(formatMediaDuration(Number(node.mediaDuration || 0)));
             return parts.join(' / ');
         }
         function imageNodeReferenceUrl(node){
@@ -4146,6 +4313,7 @@
                 node.format = file.format || node.format || '';
                 node.mimeType = file.type || node.mimeType || '';
                 node.mediaKind = file.media_kind || node.mediaKind || 'image';
+                node.mediaDuration = Number(file.duration || file.duration_seconds || file.media_duration || node.mediaDuration || 0);
                 if(wasMissingMeta){
                     node.originalImageUrl = node.url;
                     node.originalImageMeta = imageNodeMetaSnapshot(node);
@@ -4269,6 +4437,8 @@
             if(!ensureCanvas() || !url) return;
             const p = point || defaultPoint(0, 0);
             const node = {id:uid('img'), type:'image', x:p.x, y:p.y, url, sourceUrl:url, previewUrl:url, name:name || outputImageName(url), compressJpg:null};
+            node.mediaKind = isVideoUrl(url) ? 'video' : isAudioUrl(url) ? 'audio' : 'image';
+            node.mediaDuration = 0;
             node.originalImageUrl = url;
             node.originalImageMeta = imageNodeMetaSnapshot(node);
             nodes.push(node);
@@ -4308,6 +4478,8 @@
             node.sourceUrl = url;
             node.previewUrl = url;
             node.name = outputImageName(url);
+            node.mediaKind = isVideoUrl(url) ? 'video' : isAudioUrl(url) ? 'audio' : 'image';
+            node.mediaDuration = 0;
             node.originalImageUrl = url;
             node.originalImageMeta = imageNodeMetaSnapshot(node);
             node.jpgUrl = '';
@@ -4342,6 +4514,8 @@
             node.height = 0;
             node.format = '';
             node.mimeType = '';
+            node.mediaKind = 'image';
+            node.mediaDuration = 0;
             render();
             scheduleSave();
         }
@@ -5761,7 +5935,7 @@
             const el = document.createElement('div');
             const size = defaultNodeSize(node.type);
             const hasFixedSize = Boolean(node.h || size.h);
-            el.className = `node ${node.type}-node ${node.generatorKind === 'storyboard' ? 'storyboard-node' : ''} ${node.url ? 'has-image' : ''} ${hasFixedSize ? 'sized' : ''} ${selected.has(node.id) ? 'selected' : ''}`;
+            el.className = `node ${node.type}-node ${node.generatorKind === 'storyboard' ? 'storyboard-node' : ''} ${node.url ? 'has-image' : ''} ${hasFixedSize ? 'sized' : ''} ${isActiveLinkedClone(node) ? 'linked-clone' : ''} ${selected.has(node.id) ? 'selected' : ''}`;
             el.style.left = `${node.x}px`;
             el.style.top = `${node.y}px`;
             el.style.width = `${node.w || size.w}px`;
@@ -5775,14 +5949,26 @@
                 refreshSelectionVisuals();
             };
             el.oncontextmenu = e => {
-                if(!CANVAS_GENERATOR_TYPES.includes(node.type) && node.type !== 'output') return;
                 e.preventDefault();
                 e.stopPropagation();
+                if(!selected.has(node.id)){
+                    selected.clear();
+                    selected.add(node.id);
+                    refreshSelectionVisuals();
+                }
+                closeCreateMenu();
                 if(node.type === 'output') openOutputNodeMenu(node.id, e.clientX, e.clientY);
-                else openGeneratorNodeMenu(node.id, e.clientX, e.clientY);
+                else if(CANVAS_GENERATOR_TYPES.includes(node.type)){
+                    openGeneratorNodeMenu(node.id, e.clientX, e.clientY);
+                    openNodeActionMenu(node.id, e.clientX, e.clientY);
+                } else if(node.type === 'image') {
+                    openImageNodeMenu(node.id, e.clientX, e.clientY);
+                } else {
+                    openNodeActionMenu(node.id, e.clientX, e.clientY);
+                }
             };
             const registryTitle = window.CanvasNodeRegistry.titleFor(node.type, tr);
-            const title = node.type === 'organizeFrame' ? (node.title || node.name || '整理框') : node.generatorKind === 'storyboard' ? '分镜图工坊' : node.type === 'promptGroup' ? 'Prompts' : node.type === 'dreamina' ? (node.outputType === 'video' ? 'Dreamina Video' : 'Dreamina Image') : node.type === 'imageExtend' ? '扩展图片' : node.type === 'video' ? (node.videoKind === 'seedance' ? tr('canvas.sd2VideoGenerate') : registryTitle) : registryTitle || tr('canvas.apiGenerate');
+            const title = node.type === 'organizeFrame' ? (node.title || node.name || '整理框') : node.type === 'group' ? (node.title || node.name || 'GROUP') : node.type === 'promptGroup' ? (node.title || node.name || 'PROMPTS') : node.generatorKind === 'storyboard' ? '分镜图工坊' : node.type === 'dreamina' ? (node.outputType === 'video' ? 'Dreamina Video' : 'Dreamina Image') : node.type === 'imageExtend' ? '扩展图片' : node.type === 'video' ? (node.videoKind === 'seedance' ? tr('canvas.sd2VideoGenerate') : registryTitle) : registryTitle || tr('canvas.apiGenerate');
             // 失败徽章只在一键运行模式中显示，单节点失败已通过 alert 提示
             const showStatus = ['generator','msgen','comfy','rh','llm','png','dreamina'].includes(node.type) && node.runStatus
                 && (node.runStatus !== 'failed' || node._cascadeFailed);
@@ -5790,11 +5976,14 @@
                 const label = { queued:'排队中', running:'运行中', done:'完成', failed:'失败' }[node.runStatus] || '';
                 return `<span class="node-run-status ${node.runStatus}"><span class="dot"></span>${escapeHtml(label)}${node._cascadeIdx?' '+node._cascadeIdx:''}</span>`;
             })() : '';
+            const linkedBadge = linkedCloneBadgeHtml(node);
             if(node.type === 'organizeFrame'){
                 el.ondblclick = e => { if(!isNodeControl(e.target)) renameOrganizeFrame(node.id, e); };
-                el.innerHTML = `<div class="node-head"><span class="node-title"><input class="organize-frame-title-input" value="${escapeAttr(title)}" title="重命名整理框"></span><div style="display:flex;align-items:center;gap:8px"><button onclick="renameOrganizeFrame('${node.id}', event)" class="text-gray-300 hover:text-blue-500" title="重命名整理框"><i data-lucide="pencil" class="w-4 h-4"></i></button><button onclick="deleteNode('${node.id}', event)" class="text-gray-300 hover:text-red-500"><i data-lucide="x" class="w-4 h-4"></i></button></div></div>`;
+                el.innerHTML = `<div class="node-head"><span class="node-title"><input class="organize-frame-title-input" value="${escapeAttr(title)}" title="重命名整理框"></span><div style="display:flex;align-items:center;gap:8px">${linkedBadge}<button onclick="renameOrganizeFrame('${node.id}', event)" class="text-gray-300 hover:text-blue-500" title="重命名整理框"><i data-lucide="pencil" class="w-4 h-4"></i></button><button onclick="deleteNode('${node.id}', event)" class="text-gray-300 hover:text-red-500"><i data-lucide="x" class="w-4 h-4"></i></button></div></div>`;
+            } else if(node.type === 'group' || node.type === 'promptGroup'){
+                el.innerHTML = `<div class="node-head"><span class="node-title" style="flex:1;min-width:0"><input class="group-title-input" value="${escapeAttr(title)}" title="重命名分组"></span><div style="display:flex;align-items:center;gap:8px">${linkedBadge}${statusHtml}<button onclick="deleteNode('${node.id}', event)" class="text-gray-300 hover:text-red-500"><i data-lucide="x" class="w-4 h-4"></i></button></div></div>`;
             } else {
-                el.innerHTML = `<div class="node-head"><span class="node-title">${title}</span><div style="display:flex;align-items:center;gap:8px">${statusHtml}<button onclick="deleteNode('${node.id}', event)" class="text-gray-300 hover:text-red-500"><i data-lucide="x" class="w-4 h-4"></i></button></div></div>`;
+                el.innerHTML = `<div class="node-head"><span class="node-title">${title}</span><div style="display:flex;align-items:center;gap:8px">${linkedBadge}${statusHtml}<button onclick="deleteNode('${node.id}', event)" class="text-gray-300 hover:text-red-500"><i data-lucide="x" class="w-4 h-4"></i></button></div></div>`;
             }
             const body = document.createElement('div');
             body.className = 'node-body';
@@ -5805,6 +5994,18 @@
                 titleInput.onmousedown = e => e.stopPropagation();
                 titleInput.onclick = e => { e.stopPropagation(); titleInput.select(); };
                 titleInput.onchange = e => { node.title = String(e.target.value || '').trim() || '整理框'; scheduleSave(); render(); };
+            }
+            if(node.type === 'group' || node.type === 'promptGroup'){
+                const titleInput = el.querySelector('.group-title-input');
+                if(titleInput){
+                    titleInput.onmousedown = e => e.stopPropagation();
+                    titleInput.onclick = e => { e.stopPropagation(); titleInput.select(); };
+                    titleInput.onchange = e => {
+                        node.title = String(e.target.value || '').trim() || (node.type === 'promptGroup' ? 'PROMPTS' : 'GROUP');
+                        scheduleSave();
+                        render();
+                    };
+                }
             }
             if(node.type === 'image') {
                 if(node.url) {
@@ -5935,6 +6136,8 @@
                                 node.sourceUrl = droppedUrl;
                                 node.previewUrl = droppedUrl;
                                 node.name = outputImageName(droppedUrl);
+                                node.mediaKind = isVideoUrl(droppedUrl) ? 'video' : isAudioUrl(droppedUrl) ? 'audio' : 'image';
+                                node.mediaDuration = 0;
                                 node.originalImageUrl = droppedUrl;
                                 node.originalImageMeta = imageNodeMetaSnapshot(node);
                                 node.jpgUrl = '';
@@ -5949,6 +6152,11 @@
                     body.oncontextmenu = e => {
                         e.preventDefault();
                         e.stopPropagation();
+                        if(!selected.has(node.id)){
+                            selected.clear();
+                            selected.add(node.id);
+                            refreshSelectionVisuals();
+                        }
                         openImageNodeMenu(node.id, e.clientX, e.clientY);
                     };
                     if(loadedImg){
@@ -5968,7 +6176,29 @@
                         };
                     }
                     const loadedVideo = body.querySelector('video');
-                    if(loadedVideo) loadedVideo.onloadedmetadata = () => refreshGeometryAfterLayout();
+                    if(loadedVideo) loadedVideo.onloadedmetadata = () => {
+                        const nextDuration = Number.isFinite(loadedVideo.duration) && loadedVideo.duration > 0
+                            ? Number(loadedVideo.duration.toFixed(1))
+                            : 0;
+                        let changed = false;
+                        if(nextDuration && Math.abs(Number(node.mediaDuration || 0) - nextDuration) >= 0.05){
+                            node.mediaDuration = nextDuration;
+                            changed = true;
+                        }
+                        if(loadedVideo.videoWidth && !Number(node.width || 0)){
+                            node.width = loadedVideo.videoWidth;
+                            changed = true;
+                        }
+                        if(loadedVideo.videoHeight && !Number(node.height || 0)){
+                            node.height = loadedVideo.videoHeight;
+                            changed = true;
+                        }
+                        if(changed){
+                            scheduleSave();
+                            refreshNodes([node.id]);
+                        }
+                        refreshGeometryAfterLayout();
+                    };
                     const mediaEl = body.querySelector('video, audio');
                     if(mediaEl){
                         mediaEl.onerror = () => {
@@ -6006,6 +6236,8 @@
                                 node.sourceUrl = droppedUrl;
                                 node.previewUrl = droppedUrl;
                                 node.name = outputImageName(droppedUrl);
+                                node.mediaKind = isVideoUrl(droppedUrl) ? 'video' : isAudioUrl(droppedUrl) ? 'audio' : 'image';
+                                node.mediaDuration = 0;
                                 node.originalImageUrl = droppedUrl;
                                 node.originalImageMeta = imageNodeMetaSnapshot(node);
                                 node.jpgUrl = '';
@@ -6084,6 +6316,10 @@
             });
             el.onmousedown = e => {
                 if(e.button !== 0 || !isNodeDragSurface(e.target)) return;
+                if((e.ctrlKey || e.metaKey) && isFrameContainerNode(node)){
+                    startSelection(e);
+                    return;
+                }
                 startNodeDrag(e, node);
             };
             const canInput = ['generator','comfy','rh','output','llm','msgen','video','png','dreamina'].includes(node.type) || (node.type === 'loop' && (node.imageInput || node.showPrompt));
@@ -6091,7 +6327,7 @@
             if(canInput) el.insertAdjacentHTML('beforeend', `<div class="port in" title="${tr('canvas.connectHere')}"></div>`);
             if(canOutput) el.insertAdjacentHTML('beforeend', `<div class="port out" title="${tr('canvas.dragConnect')}"></div>`);
             el.querySelector('.node-head').onmousedown = e => { if(e.button === 0) startNodeDrag(e, node); };
-            if(isOrganizeFrame(node)){
+            if(isFrameContainerNode(node)){
                 el.insertAdjacentHTML('beforeend', organizeFrameResizeHandlesHtml());
                 el.querySelectorAll('.organize-resize-handle').forEach(handle => {
                     handle.onmousedown = e => { if(e.button === 0 && !e.shiftKey) startNodeResize(e, node, handle.dataset.resizeDir); };
@@ -7480,6 +7716,9 @@
             node.resolutionType = node.resolutionType || '2k';
             node.videoResolution = node.videoResolution || '720P';
             node.modelVersion = node.modelVersion || 'seedance2.0fast';
+            node.count = videoOutput ? 1 : Math.max(1, Math.min(8, Number(node.count || 1)));
+            const runDisabled = videoOutput && node.running;
+            const runLabel = runDisabled ? tr('canvas.generating') : (videoOutput ? 'Run Dreamina Video' : 'Run Dreamina Image');
             const modeLabels = {
                 auto:'Auto',
                 text2image:'Text -> Image',
@@ -7534,7 +7773,14 @@
                                 <option value="2k">2k</option>
                                 <option value="4k">4k</option>
                             </select>
-                        </label>`}
+                        </label>
+                        <div class="gen-count-row dreamina-count-row">
+                            <div class="gen-stepper">
+                                <button class="gen-step-btn" data-dreamina-step="-1" type="button" title="${tr('canvas.decrease')}" aria-label="${tr('canvas.decreaseCount')}"><i data-lucide="chevron-left" class="w-3.5 h-3.5"></i></button>
+                                <input class="gen-count-input dreamina-count-input" type="text" inputmode="numeric" pattern="[0-9]*" value="${node.count}">
+                                <button class="gen-step-btn" data-dreamina-step="1" type="button" title="${tr('canvas.increase')}" aria-label="${tr('canvas.increaseCount')}"><i data-lucide="chevron-right" class="w-3.5 h-3.5"></i></button>
+                            </div>
+                        </div>`}
                         ${videoOutput ? `<label class="field" style="flex:1">
                             <div class="setting-title">Video res</div>
                             <select class="select-lite dreamina-video-res compact-select">
@@ -7555,7 +7801,7 @@
                     </div>
                 </div>
                 <div class="gen-run-row">
-                    <button class="gen-btn ${node.running ? 'running' : ''}" ${node.running ? 'disabled' : ''}><i data-lucide="${videoOutput ? 'terminal' : 'image-plus'}" class="w-4 h-4"></i>${node.running ? tr('canvas.generating') : (videoOutput ? 'Run Dreamina Video' : 'Run Dreamina Image')}</button>
+                    <button class="gen-btn ${node.running ? 'running' : ''}" ${runDisabled ? 'disabled' : ''}><i data-lucide="${videoOutput ? 'terminal' : 'image-plus'}" class="w-4 h-4"></i>${runLabel}</button>
                     ${cascadeBtnHtml(node)}
                 </div>
                 ${retryBarHtml(node)}
@@ -7564,6 +7810,7 @@
             const modeSelect = wrap.querySelector('.dreamina-mode');
             const ratioSelect = wrap.querySelector('.dreamina-ratio');
             const durationInput = wrap.querySelector('.dreamina-duration');
+            const countInput = wrap.querySelector('.dreamina-count-input');
             const imageResSelect = wrap.querySelector('.dreamina-image-res');
             const videoResSelect = wrap.querySelector('.dreamina-video-res');
             const modelVersionSelect = wrap.querySelector('.dreamina-model-version');
@@ -7572,7 +7819,7 @@
             if(imageResSelect) imageResSelect.value = node.resolutionType || '2k';
             if(videoResSelect) videoResSelect.value = node.videoResolution || '720P';
             if(modelVersionSelect) modelVersionSelect.value = node.modelVersion || 'seedance2.0fast';
-            [promptInput, modeSelect, ratioSelect, durationInput, imageResSelect, videoResSelect, modelVersionSelect].filter(Boolean).forEach(input => {
+            [promptInput, modeSelect, ratioSelect, durationInput, countInput, imageResSelect, videoResSelect, modelVersionSelect].filter(Boolean).forEach(input => {
                 input.onmousedown = e => e.stopPropagation();
                 input.onclick = e => e.stopPropagation();
             });
@@ -7581,6 +7828,22 @@
             modeSelect.onchange = e => { node.mode = e.target.value; scheduleSave(); };
             ratioSelect.onchange = e => { node.ratio = e.target.value; scheduleSave(); };
             if(durationInput) durationInput.oninput = e => { node.duration = Math.max(1, Math.min(30, Number(e.target.value || 5))); scheduleSave(); };
+            if(countInput){
+                countInput.oninput = e => {
+                    node.count = Math.max(1, Math.min(8, Number(e.target.value) || 1));
+                    scheduleSave();
+                };
+                countInput.onblur = e => { e.target.value = String(Math.max(1, Math.min(8, Number(node.count || 1)))); };
+                wrap.querySelectorAll('[data-dreamina-step]').forEach(btn => {
+                    btn.onclick = e => {
+                        e.stopPropagation();
+                        const next = Math.max(1, Math.min(8, Number(node.count || 1) + Number(btn.dataset.dreaminaStep || 0)));
+                        node.count = next;
+                        countInput.value = String(next);
+                        scheduleSave();
+                    };
+                });
+            }
             if(imageResSelect) imageResSelect.onchange = e => { node.resolutionType = e.target.value; scheduleSave(); };
             if(videoResSelect) videoResSelect.onchange = e => { node.videoResolution = e.target.value; scheduleSave(); };
             if(modelVersionSelect) modelVersionSelect.onchange = e => { node.modelVersion = e.target.value; scheduleSave(); };
@@ -10387,11 +10650,13 @@ ${referenceNote}
         }
         async function runDreaminaNode(nodeId, opts={}){
             const node = nodes.find(n => n.id === nodeId);
-            if(!node || (node.running && !opts.cascade)) return;
+            if(!node) return;
+            const outputType = node.outputType === 'video' ? 'video' : 'image';
+            const allowConcurrent = outputType === 'image' && !opts.cascade;
+            if(node.running && !opts.cascade && !allowConcurrent) return;
             const sources = orderedSources(node, generatorSources(node));
             const upstreamPrompt = sources.map(s => s.prompt).filter(Boolean).join('\n\n');
             const prompt = [upstreamPrompt, node.promptText || ''].filter(Boolean).join('\n\n').trim();
-            const outputType = node.outputType === 'video' ? 'video' : 'image';
             const refs = sources
                 .flatMap(s => s.refs || [])
                 .filter(ref => ref?.url && (outputType === 'video' || (!isVideoUrl(ref.url) && !isAudioUrl(ref.url))));
@@ -10404,81 +10669,106 @@ ${referenceNote}
                 alert(message);
                 return;
             }
+            const count = outputType === 'image' ? Math.max(1, Math.min(8, Number(node.count || 1))) : 1;
+            node.count = count;
             let out = outputForNode(node, 460);
-            const pendingId = uid('p');
-            const run = runSnapshot(node, prompt, refs);
-            run.taskLabel = outputType === 'video' ? 'Dreamina video' : 'Dreamina image';
-            if(out) out._pending = [...(out._pending || []), makePending(pendingId, run)];
-            if(!opts.cascade){ node.running = true; refreshRunNodes(node, out); }
-            else refreshRunNodes(node, out);
-            let keepRunning = false;
-            try {
-                const result = await fetch('/api/dreamina/run', {
-                    method:'POST',
-                    headers:{'Content-Type':'application/json'},
-                    body:JSON.stringify({
-                        mode:node.mode || 'auto',
-                        prompt,
-                        images:refs.filter(ref => !isVideoUrl(ref.url) && !isAudioUrl(ref.url)),
-                        media:refs,
-                        ratio:node.ratio || (outputType === 'video' ? '16:9' : '1:1'),
-                        duration:Number(node.duration || 5),
-                        resolution_type:node.resolutionType || '2k',
-                        video_resolution:node.videoResolution || '720P',
-                        model_version:node.modelVersion || 'seedance2.0fast',
-                        output_type:outputType,
-                        wait_for_result:false,
-                        cli_path:node.cliPath || ''
-                    })
-                }).then(async r => { if(!r.ok) throw new Error(await responseErrorMessage(r, 'Dreamina CLI failed.')); return r.json(); });
-                run.request = requestMetaFromResult(result);
-                if(result.status === 'pending' && result.submit_id){
-                    const pending = pendingById(out, pendingId);
-                    if(pending){
-                        pending.canvasTaskType = 'dreamina';
-                        pending.dreaminaSubmitId = result.submit_id;
-                        pending.dreaminaKind = outputType;
-                        pending.dreaminaCliPath = node.cliPath || '';
-                        pending.appendGenerated = Boolean(opts.cascade);
-                        pending.run = run;
+            const pendingItems = Array.from({length:count}, (_, index) => {
+                const pendingId = uid('p');
+                const run = runSnapshot(node, prompt, refs);
+                run.taskLabel = outputType === 'video'
+                    ? 'Dreamina video'
+                    : (count > 1 ? `Dreamina image ${index + 1}/${count}` : 'Dreamina image');
+                return {pendingId, run};
+            });
+            if(out) out._pending = [
+                ...(out._pending || []),
+                ...pendingItems.map(item => makePending(item.pendingId, item.run))
+            ];
+            node.runStatus = 'running';
+            node.runError = '';
+            node.running = outputType === 'video' && !opts.cascade;
+            refreshRunNodes(node, out);
+            const submitDreaminaItem = async item => {
+                const {pendingId, run} = item;
+                try {
+                    const result = await fetch('/api/dreamina/run', {
+                        method:'POST',
+                        headers:{'Content-Type':'application/json'},
+                        body:JSON.stringify({
+                            mode:node.mode || 'auto',
+                            prompt,
+                            images:refs.filter(ref => !isVideoUrl(ref.url) && !isAudioUrl(ref.url)),
+                            media:refs,
+                            ratio:node.ratio || (outputType === 'video' ? '16:9' : '1:1'),
+                            duration:Number(node.duration || 5),
+                            resolution_type:node.resolutionType || '2k',
+                            video_resolution:node.videoResolution || '720P',
+                            model_version:node.modelVersion || 'seedance2.0fast',
+                            output_type:outputType,
+                            wait_for_result:false,
+                            cli_path:node.cliPath || ''
+                        })
+                    }).then(async r => { if(!r.ok) throw new Error(await responseErrorMessage(r, 'Dreamina CLI failed.')); return r.json(); });
+                    run.request = requestMetaFromResult(result);
+                    if(result.status === 'pending' && result.submit_id){
+                        const pending = pendingById(out, pendingId);
+                        if(pending){
+                            pending.canvasTaskType = 'dreamina';
+                            pending.dreaminaSubmitId = result.submit_id;
+                            pending.dreaminaKind = outputType;
+                            pending.dreaminaCliPath = node.cliPath || '';
+                            pending.appendGenerated = outputType === 'image' || Boolean(opts.cascade);
+                            pending.run = run;
+                        }
+                        node.runStatus = 'running';
+                        node.runError = result.message || `Dreamina task queued. submit_id=${result.submit_id}`;
+                        refreshRunNodes(node, out);
+                        scheduleSave();
+                        await saveCanvas();
+                        if(!opts.cascade){
+                            pollDreaminaTask(result.submit_id);
+                            return {status:'pending', submitId:result.submit_id};
+                        }
+                        const status = await pollDreaminaTask(result.submit_id);
+                        if(status === 'failed') throw new Error(node.runError || 'Dreamina task failed.');
+                        return {status, submitId:result.submit_id};
                     }
-                    node.runStatus = 'running';
-                    node.runError = result.message || `Dreamina task queued. submit_id=${result.submit_id}`;
-                    keepRunning = true;
+                    const meta = collectRunMeta(out, pendingId);
+                    if(out) out._pending = (out._pending || []).filter(p => p.id !== pendingId);
+                    const outputs = dreaminaResultOutputs(result);
+                    if(!outputs.length) throw new Error(result.message || 'Dreamina CLI returned no media output.');
+                    appendOutputImages(out, outputs, refs[0], [meta]);
+                    mergeGeneratedOutputs(node, outputs, outputType === 'image' || Boolean(opts.cascade));
+                    addGenerationLog({run, outputs, runMs:meta.runMs || 0});
                     refreshRunNodes(node, out);
                     scheduleSave();
-                    await saveCanvas();
-                    if(!opts.cascade){
-                        pollDreaminaTask(result.submit_id);
-                        return;
-                    }
-                    const status = await pollDreaminaTask(result.submit_id);
-                    if(status === 'failed') throw new Error(node.runError || 'Dreamina task failed.');
-                    return;
+                    return {status:'succeeded', outputs};
+                } catch(err) {
+                    const meta = collectRunMeta(out, pendingId);
+                    addGenerationLog({run, outputs:[], runMs:meta.runMs || 0, error:err.message || String(err)});
+                    if(out) out._pending = (out._pending || []).filter(p => p.id !== pendingId);
+                    throw err;
                 }
-                const meta = collectRunMeta(out, pendingId);
-                if(out) out._pending = (out._pending || []).filter(p => p.id !== pendingId);
-                const outputs = [...(result.images || []), ...(result.videos || [])].filter(Boolean);
-                if(!outputs.length) throw new Error(result.message || 'Dreamina CLI returned no media output.');
-                appendOutputImages(out, outputs, refs[0], [meta]);
-                mergeGeneratedOutputs(node, outputs, Boolean(opts.cascade));
-                addGenerationLog({run, outputs, runMs:meta.runMs || 0});
-                node.runStatus = 'done';
-                node.runError = '';
-                refreshRunNodes(node, out);
-                scheduleSave();
+            };
+            try {
+                const results = await Promise.allSettled(pendingItems.map(item => submitDreaminaItem(item)));
+                const failed = results.find(result => result.status === 'rejected');
+                if(failed) throw failed.reason;
+                if(!hasPendingRunForNode(node.id, 'dreamina')){
+                    node.runStatus = 'done';
+                    node.runError = '';
+                }
             } catch(err) {
-                const meta = collectRunMeta(out, pendingId);
-                addGenerationLog({run, outputs:[], runMs:meta.runMs || 0, error:err.message || String(err)});
-                if(out) out._pending = (out._pending || []).filter(p => p.id !== pendingId);
-                node.runStatus = 'failed';
+                const hasDreaminaPending = hasPendingRunForNode(node.id, 'dreamina');
+                node.runStatus = hasDreaminaPending ? 'running' : 'failed';
                 node.runError = err.message || String(err);
                 refreshRunNodes(node, out);
                 if(opts.cascade) throw err;
                 alert(node.runError);
             } finally {
-                if(!keepRunning) node.running = false;
+                node.running = outputType === 'video' && hasPendingRunForNode(node.id, 'dreamina');
                 refreshRunNodes(node, out);
+                scheduleSave();
             }
         }
         async function uploadCanvasUrlToComfy(url){
@@ -11534,6 +11824,13 @@ ${referenceNote}
         function pendingById(out, id){
             return (out?._pending || []).find(p => p.id === id) || null;
         }
+        function hasPendingRunForNode(nodeId, taskType=null){
+            if(!nodeId) return false;
+            return nodes.some(out => out.type === 'output' && (out._pending || []).some(p => {
+                if(p?.run?.node?.id !== nodeId) return false;
+                return !taskType || p.canvasTaskType === taskType;
+            }));
+        }
         function collectRunMetas(out, ids){
             return (ids || []).map(id => pendingById(out, id)).filter(Boolean).map(p => ({
                 runMs: nowMs() - Number(p.startedAt || nowMs()),
@@ -11649,9 +11946,10 @@ ${referenceNote}
             const gen = nodes.find(n => n.id === meta.run?.node?.id);
             if(gen){
                 mergeGeneratedOutputs(gen, outputs, Boolean(pending.appendGenerated));
-                gen.runStatus = 'done';
+                const hasMore = hasPendingRunForNode(gen.id, 'dreamina');
+                gen.runStatus = hasMore ? 'running' : 'done';
                 gen.runError = '';
-                gen.running = false;
+                gen.running = gen.outputType === 'video' && hasMore;
             }
             addGenerationLog({run:meta.run, outputs, runMs:meta.runMs || 0});
             refreshRunNodes(gen, out);
@@ -11666,9 +11964,10 @@ ${referenceNote}
             out._pending = (out._pending || []).filter(p => p.id !== pending.id);
             const gen = nodes.find(n => n.id === run?.node?.id);
             if(gen){
-                gen.runStatus = 'failed';
+                const hasMore = hasPendingRunForNode(gen.id, 'dreamina');
+                gen.runStatus = hasMore ? 'running' : 'failed';
                 gen.runError = message || 'Dreamina task failed.';
-                gen.running = false;
+                gen.running = gen.outputType === 'video' && hasMore;
             }
             addGenerationLog({run, outputs:[], runMs, error:message || 'Dreamina task failed.'});
             refreshRunNodes(gen, out);
@@ -12297,17 +12596,67 @@ ${referenceNote}
             const state = undoStack.pop();
             nodes = state.nodes;
             connections = state.connections;
+            primeLinkedCloneSnapshots();
             selected.clear();
             render();
             scheduleSave();
         }
-        function cloneNode(n, dx, dy){
+        function cloneNode(n, dx, dy, opts={}){
             const copy = JSON.parse(JSON.stringify(n));
             copy.id = uid(n.type);
             copy.x = n.x + dx;
             copy.y = n.y + dy;
             copy.running = false;
+            if(!opts.preserveLinked) delete copy.linkedCloneId;
+            delete copy._pending;
+            delete copy.runStatus;
+            delete copy.runError;
+            delete copy._cascadeFailed;
+            delete copy._cascadeIdx;
+            delete copy.jpgBusy;
             return copy;
+        }
+        function expandNodesForCopy(sourceNodes){
+            const ids = new Set();
+            const collect = n => {
+                if(!n || ids.has(n.id)) return;
+                ids.add(n.id);
+                if(isFrameContainerNode(n)){
+                    (n.items || []).map(id => nodes.find(item => item.id === id)).forEach(collect);
+                }
+            };
+            (sourceNodes || []).forEach(collect);
+            return nodes.filter(n => ids.has(n.id));
+        }
+        function nodeClipboardPayload(sourceNodes){
+            const copyNodes = expandNodesForCopy(sourceNodes);
+            const ids = new Set(copyNodes.map(n => n.id));
+            return {
+                nodes:JSON.parse(JSON.stringify(copyNodes)),
+                connections:JSON.parse(JSON.stringify(connections.filter(c => ids.has(c.from) && ids.has(c.to))))
+            };
+        }
+        function clipboardNodes(){
+            return Array.isArray(clipboard) ? clipboard : (clipboard?.nodes || []);
+        }
+        function clipboardConnections(){
+            return Array.isArray(clipboard) ? [] : (clipboard?.connections || []);
+        }
+        function cloneNodePayload(sourceNodes, sourceConnections, dx, dy, opts={}){
+            const idMap = new Map();
+            const copies = (sourceNodes || []).map(n => {
+                const c = cloneNode(n, dx, dy, opts);
+                idMap.set(n.id, c.id);
+                return c;
+            });
+            copies.forEach(c => {
+                if(isFrameContainerNode(c) && c.items)
+                    c.items = c.items.map(id => idMap.get(id) || id).filter(id => nodes.some(n => n.id === id) || copies.some(n => n.id === id));
+            });
+            const copiedConnections = (sourceConnections || [])
+                .filter(c => idMap.has(c.from) && idMap.has(c.to))
+                .map(c => ({...JSON.parse(JSON.stringify(c)), id:uid('c'), from:idMap.get(c.from), to:idMap.get(c.to)}));
+            return {copies, copiedConnections};
         }
         function copySelectedNodes(){
             if(!canvas || !selected.size) return;
@@ -12315,25 +12664,61 @@ ${referenceNote}
             if(el && (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT')) return;
             const toCopy = [...selected].map(id => nodes.find(n => n.id === id)).filter(Boolean);
             if(!toCopy.length) return;
-            clipboard = JSON.parse(JSON.stringify(toCopy));
+            clipboard = nodeClipboardPayload(toCopy);
         }
-        function pasteNodes(){
-            if(!canvas || !clipboard?.length) return;
+        function pasteNodes(point=null){
+            const sourceNodes = clipboardNodes();
+            if(!canvas || !sourceNodes.length) return;
             pushUndo();
-            const xs = clipboard.map(n => n.x), ys = clipboard.map(n => n.y);
+            const xs = sourceNodes.map(n => n.x), ys = sourceNodes.map(n => n.y);
             const cx = (Math.min(...xs) + Math.max(...xs)) / 2;
             const cy = (Math.min(...ys) + Math.max(...ys)) / 2;
-            const dx = lastMouseBoard.x - cx;
-            const dy = lastMouseBoard.y - cy;
-            const idMap = new Map();
-            const copies = clipboard.map(n => { const c = cloneNode(n, dx, dy); idMap.set(n.id, c.id); return c; });
-            copies.forEach(c => {
-                if(isFrameContainerNode(c) && c.items)
-                    c.items = c.items.map(id => idMap.get(id) || id);
-            });
+            const target = point || lastMouseBoard;
+            const dx = target.x - cx;
+            const dy = target.y - cy;
+            const {copies, copiedConnections} = cloneNodePayload(sourceNodes, clipboardConnections(), dx, dy);
             nodes.push(...copies);
+            connections.push(...copiedConnections);
             selected.clear();
             copies.forEach(c => selected.add(c.id));
+            syncGeneratorInputs();
+            refreshGeneratorInputViews();
+            render();
+            scheduleSave();
+        }
+        function duplicateSelectedNodes(){
+            if(!canvas || !selected.size) return;
+            const sourceNodes = expandNodesForCopy([...selected].map(id => nodes.find(n => n.id === id)).filter(Boolean));
+            if(!sourceNodes.length) return;
+            pushUndo();
+            const ids = new Set(sourceNodes.map(n => n.id));
+            const sourceConnections = connections.filter(c => ids.has(c.from) && ids.has(c.to));
+            const {copies, copiedConnections} = cloneNodePayload(sourceNodes, sourceConnections, 48, 48);
+            nodes.push(...copies);
+            connections.push(...copiedConnections);
+            selected.clear();
+            copies.forEach(c => selected.add(c.id));
+            syncGeneratorInputs();
+            refreshGeneratorInputViews();
+            render();
+            scheduleSave();
+        }
+        function duplicateSelectedNodesLinked(){
+            if(!canvas || !selected.size || !window.CanvasLinkedClones) return;
+            const sourceNodes = expandNodesForCopy([...selected].map(id => nodes.find(n => n.id === id)).filter(Boolean));
+            if(!sourceNodes.length) return;
+            pushUndo();
+            sourceNodes.forEach(node => window.CanvasLinkedClones.ensureGroupId(node, uid));
+            const ids = new Set(sourceNodes.map(n => n.id));
+            const sourceConnections = connections.filter(c => ids.has(c.from) && ids.has(c.to));
+            const {copies, copiedConnections} = cloneNodePayload(sourceNodes, sourceConnections, 56, 56, {preserveLinked:true});
+            nodes.push(...copies);
+            connections.push(...copiedConnections);
+            selected.clear();
+            copies.forEach(c => selected.add(c.id));
+            syncGeneratorInputs();
+            refreshGeneratorInputViews();
+            primeLinkedCloneSnapshots();
             render();
             scheduleSave();
         }
@@ -12419,7 +12804,7 @@ ${referenceNote}
             document.body.classList.remove(...dirs.map(resizeDirectionClass));
         }
         function resizeMinimumSize(node){
-            if(isOrganizeFrame(node)) return {w:120, h:80};
+            if(isFrameContainerNode(node)) return {w:120, h:80};
             const min = defaultNodeSize(node.type);
             return {w:Math.min(min.w, 220), h:96};
         }
@@ -13014,7 +13399,7 @@ ${referenceNote}
         });
         function startBoardPan(e){
             if(!canvas) return false;
-            if(isEditableTarget(e.target) || e.target.closest?.('#createMenu, #linkCreateMenu, #nodeInputMenu, #nodeOutputMenu, #imageNodeMenu, .minimap')) return false;
+            if(isEditableTarget(e.target) || e.target.closest?.('#createMenu, #linkCreateMenu, #nodeInputMenu, #nodeOutputMenu, #nodeActionMenu, #imageNodeMenu, .minimap')) return false;
             e.preventDefault();
             e.stopPropagation();
             closeCreateMenu();
@@ -13073,7 +13458,7 @@ ${referenceNote}
             openCreateMenu(e.clientX, e.clientY);
         };
         board.addEventListener('mousedown', e => {
-            if(e.target.closest?.('#createMenu, #linkCreateMenu, #nodeInputMenu, #nodeOutputMenu, #imageNodeMenu')) return;
+            if(e.target.closest?.('#createMenu, #linkCreateMenu, #nodeInputMenu, #nodeOutputMenu, #nodeActionMenu, #imageNodeMenu')) return;
             closeCreateMenu();
         });
         board.onwheel = e => {
@@ -13186,7 +13571,7 @@ ${referenceNote}
             if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'v') {
                 const tag = document.activeElement?.tagName;
                 if(tag === 'INPUT' || tag === 'TEXTAREA' || document.activeElement?.isContentEditable) return;
-                if(clipboard?.length) {
+                if(clipboardNodes().length) {
                     const pasteRequestedAt = Date.now();
                     setTimeout(() => {
                         if(!canvas) return;
