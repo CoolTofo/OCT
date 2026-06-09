@@ -33,24 +33,7 @@ if errorlevel 1 (
 
 echo.
 echo [2/5] 正在暂存本地代码改动...
-git add -A -- . ^
-    ":(exclude)API/.env" ^
-    ":(exclude)history.json" ^
-    ":(exclude)global_config.json" ^
-    ":(exclude)assets/input/**" ^
-    ":(exclude)assets/output/**" ^
-    ":(exclude)output/**" ^
-    ":(exclude)data/canvases/**" ^
-    ":(exclude)data/conversations/**" ^
-    ":(exclude)data/update_backups/**" ^
-    ":(exclude)__pycache__/**" ^
-    ":(exclude)dist/**" ^
-    ":(exclude)dist_clean/**" ^
-    ":(exclude)dist_migration/**" ^
-    ":(exclude)packages/**" ^
-    ":(exclude)python/**" ^
-    ":(exclude)*.zip" ^
-    ":(exclude)*.log"
+git add -A -- .
 if errorlevel 1 goto :fail
 
 call :unstage_local_data || goto :fail
