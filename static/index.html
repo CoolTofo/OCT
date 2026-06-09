@@ -699,6 +699,149 @@
             display: none !important;
         }
 
+
+        /* === Update Modal === */
+        .update-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 260;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(15, 23, 42, 0.38);
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.24s var(--smooth);
+        }
+
+        .update-modal.is-open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .update-panel {
+            width: min(520px, 100%);
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            background: var(--sidebar-bg);
+            color: var(--text);
+            box-shadow: 0 24px 70px rgba(15, 23, 42, 0.24);
+            padding: 22px;
+            transform: translateY(12px) scale(0.98);
+            transition: transform 0.24s var(--spring);
+        }
+
+        .update-modal.is-open .update-panel {
+            transform: translateY(0) scale(1);
+        }
+
+        .update-head, .update-actions, .update-row {
+            display: flex;
+            align-items: center;
+        }
+
+        .update-head {
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .update-title {
+            font-size: 18px;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+        }
+
+        .update-subtitle {
+            margin-top: 3px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 650;
+        }
+
+        .update-close {
+            width: 34px;
+            height: 34px;
+            border: 0;
+            border-radius: 12px;
+            background: var(--nav-hover-bg);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 20px;
+            line-height: 1;
+        }
+
+        .update-status {
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 14px;
+            background: var(--glass-bg);
+            display: grid;
+            gap: 10px;
+        }
+
+        .update-row {
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .update-row strong {
+            color: var(--text);
+            font-weight: 850;
+            text-align: right;
+            word-break: break-word;
+        }
+
+        .update-message {
+            margin: 14px 0;
+            min-height: 20px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 650;
+            line-height: 1.6;
+        }
+
+        .update-options {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 14px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .update-actions {
+            justify-content: flex-end;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .update-btn {
+            border: 0;
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-size: 12px;
+            font-weight: 850;
+            cursor: pointer;
+            background: var(--nav-hover-bg);
+            color: var(--text);
+        }
+
+        .update-btn.primary {
+            background: var(--nav-active-bg);
+            color: var(--nav-active-text);
+        }
+
+        .update-btn:disabled {
+            opacity: 0.55;
+            cursor: wait;
+        }
+
         /* =========================================================
            MOBILE / TABLET ADAPTIVE
            ========================================================= */
@@ -1253,6 +1396,14 @@
                     </svg>
                     <span class="side-pill-text">RunningHub</span>
                 </button>
+                <button class="side-pill" onclick="openUpdateModal()" type="button" title="软件更新">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12a9 9 0 1 1-2.64-6.36"/>
+                        <path d="M21 3v6h-6"/>
+                        <path d="M12 7v5l3 2"/>
+                    </svg>
+                    <span class="side-pill-text">软件更新</span>
+                </button>
             </div>
         </aside>
 
@@ -1288,6 +1439,34 @@
                 </div>
             </div>
         </main>
+
+        <!-- === UPDATE MODAL === -->
+        <div class="update-modal" id="update-modal" onclick="if(event.target === this) closeUpdateModal()">
+            <div class="update-panel" role="dialog" aria-modal="true" aria-labelledby="update-title">
+                <div class="update-head">
+                    <div>
+                        <div class="update-title" id="update-title">软件更新</div>
+                        <div class="update-subtitle">从 GitHub 拉取最新版本，并在更新前自动备份当前文件。</div>
+                    </div>
+                    <button class="update-close" type="button" onclick="closeUpdateModal()" aria-label="关闭">×</button>
+                </div>
+                <div class="update-status" id="update-status-box">
+                    <div class="update-row"><span>当前版本</span><strong id="update-local-version">--</strong></div>
+                    <div class="update-row"><span>GitHub 版本</span><strong id="update-remote-version">--</strong></div>
+                    <div class="update-row"><span>更新源</span><strong id="update-repo">--</strong></div>
+                    <div class="update-row"><span>状态</span><strong id="update-available">等待检查</strong></div>
+                </div>
+                <div class="update-message" id="update-message">点击“检查更新”查看 GitHub 上是否有新版本。</div>
+                <label class="update-options">
+                    <input type="checkbox" id="update-auto-restart" checked>
+                    更新完成后自动重启本地服务（推荐）
+                </label>
+                <div class="update-actions">
+                    <button class="update-btn" type="button" onclick="checkGithubUpdate()" id="update-check-btn">检查更新</button>
+                    <button class="update-btn primary" type="button" onclick="runGithubUpdate()" id="update-run-btn">立即更新</button>
+                </div>
+            </div>
+        </div>
 
         <!-- === MOBILE BOTTOM NAV === -->
         <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
@@ -1393,6 +1572,14 @@
                 </svg>
                 <span data-i18n="common.language">中文</span>
             </button>
+            <button class="drawer-item" onclick="openUpdateModal();closeMobileDrawer()">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path d="M21 12a9 9 0 1 1-2.64-6.36"/>
+                    <path d="M21 3v6h-6"/>
+                    <path d="M12 7v5l3 2"/>
+                </svg>
+                <span>软件更新</span>
+            </button>
             <button class="drawer-item" onclick="switchUI(document.querySelector('#mobile-more-btn'), 'api-settings');closeMobileDrawer()">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                     <path d="M15 7h3a5 5 0 0 1 0 10h-3"/>
@@ -1497,6 +1684,90 @@
 
         function closeMobileDrawer() {
             document.getElementById('mobile-more-drawer').classList.remove('is-open');
+        }
+
+        function updateModalEls() {
+            return {
+                modal: document.getElementById('update-modal'),
+                local: document.getElementById('update-local-version'),
+                remote: document.getElementById('update-remote-version'),
+                repo: document.getElementById('update-repo'),
+                available: document.getElementById('update-available'),
+                message: document.getElementById('update-message'),
+                checkBtn: document.getElementById('update-check-btn'),
+                runBtn: document.getElementById('update-run-btn'),
+                autoRestart: document.getElementById('update-auto-restart')
+            };
+        }
+
+        function setUpdateBusy(isBusy, message) {
+            const els = updateModalEls();
+            els.checkBtn.disabled = isBusy;
+            els.runBtn.disabled = isBusy;
+            if (message) els.message.textContent = message;
+        }
+
+        function updateErrorMessage(error, fallback) {
+            return (error && (error.detail || error.message)) || fallback || '操作失败';
+        }
+
+        function renderUpdateStatus(data) {
+            const els = updateModalEls();
+            els.local.textContent = data.local_version || '未知';
+            els.remote.textContent = data.remote_version || '未知';
+            els.repo.textContent = data.repo_url ? data.repo_url.replace('https://github.com/', '') + '@' + (data.branch || 'main') : '--';
+            els.available.textContent = data.update_available ? '发现新版本' : '已是最新';
+            els.message.textContent = data.update_available
+                ? 'GitHub 上有新版本。点击“立即更新”会先备份当前文件，再拉取最新代码。'
+                : '当前版本与 GitHub VERSION 一致。如需强制同步，也可以点击“立即更新”。';
+        }
+
+        async function checkGithubUpdate() {
+            setUpdateBusy(true, '正在连接 GitHub 检查版本...');
+            try {
+                const res = await fetch('/api/update-status');
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) throw data;
+                renderUpdateStatus(data);
+            } catch (error) {
+                updateModalEls().message.textContent = updateErrorMessage(error, '检查更新失败，请确认网络可访问 GitHub。');
+            } finally {
+                setUpdateBusy(false);
+            }
+        }
+
+        async function runGithubUpdate() {
+            const els = updateModalEls();
+            const ok = confirm('确定要从 GitHub 拉取最新版本吗？更新前会自动备份当前文件。');
+            if (!ok) return;
+            setUpdateBusy(true, '正在下载并更新文件，请不要关闭软件...');
+            try {
+                const res = await fetch('/api/update-from-github', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({auto_restart: Boolean(els.autoRestart.checked), restart_delay: 3})
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) throw data;
+                els.local.textContent = data.local_version || els.local.textContent;
+                els.remote.textContent = data.remote_version || els.remote.textContent;
+                els.available.textContent = '更新完成';
+                els.message.textContent = `更新完成：已同步 ${data.count || 0} 个文件。${data.restart_scheduled ? '本地服务将自动重启，请稍等后刷新页面。' : '请手动重启本地服务后刷新页面。'}`;
+            } catch (error) {
+                els.message.textContent = updateErrorMessage(error, '更新失败，请稍后重试。');
+            } finally {
+                setUpdateBusy(false);
+            }
+        }
+
+        function openUpdateModal() {
+            const els = updateModalEls();
+            els.modal.classList.add('is-open');
+            checkGithubUpdate();
+        }
+
+        function closeUpdateModal() {
+            updateModalEls().modal.classList.remove('is-open');
         }
 
         // ============================================================

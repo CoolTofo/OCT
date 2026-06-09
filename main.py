@@ -673,7 +673,13 @@ app.include_router(comfy_instance_routes.create_router({
 }))
 app.include_router(comfy_workflow_routes.create_router(local_generate_routes.generate))
 if __name__ == "__main__":
+    import argparse
     import uvicorn
-    app_port = int(os.getenv("APP_PORT", "3010"))
+
+    parser = argparse.ArgumentParser(description="Start OCT Studio local server")
+    parser.add_argument("--port", type=int, default=None, help="HTTP port to listen on")
+    args = parser.parse_args()
+    app_port = int(args.port or os.getenv("APP_PORT", "3010"))
+    os.environ["APP_PORT"] = str(app_port)
     bootstrap.schedule_open_local_browser(app_port)
     uvicorn.run(app, host="0.0.0.0", port=app_port)

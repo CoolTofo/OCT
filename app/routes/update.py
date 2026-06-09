@@ -10,6 +10,18 @@ from app.schemas import RollbackRequest, UpdateRequest
 router = APIRouter()
 
 
+@router.get("/api/update-status")
+def update_status():
+    try:
+        return updater.update_status(BASE_DIR)
+    except urllib.error.HTTPError as exc:
+        raise HTTPException(status_code=502, detail=f"GitHub version check failed: HTTP {exc.code}") from exc
+    except urllib.error.URLError as exc:
+        raise HTTPException(status_code=502, detail=f"Cannot connect to GitHub: {exc.reason}") from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Update check failed: {exc}") from exc
+
+
 @router.post("/api/update-from-github")
 def update_from_github(req: UpdateRequest = UpdateRequest()):
     try:
