@@ -15,6 +15,7 @@ data/canvases/*
 data/conversations/*
 !data/conversations/.gitkeep
 data/update_backups/
+*.update_tmp
 
 # Caches and logs
 __pycache__/

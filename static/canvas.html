@@ -157,6 +157,23 @@
         .node:hover .resize-handle,.node.selected .resize-handle { opacity:1; }
         .resize-handle:hover { color:#111827; border-color:#cbd5e1; background:#fff; }
         .resize-handle::before { content:""; width:8px; height:8px; border-right:2px solid currentColor; border-bottom:2px solid currentColor; }
+        .organize-resize-handle { position:absolute; z-index:8; background:transparent; opacity:0; transition:opacity .14s var(--ease); }
+        .organizeFrame-node:hover .organize-resize-handle,.organizeFrame-node.selected .organize-resize-handle { opacity:1; }
+        .organize-resize-handle::after { content:""; position:absolute; border-radius:999px; background:rgba(100,116,139,.44); }
+        .organize-resize-n,.organize-resize-s { left:14px; right:14px; height:10px; }
+        .organize-resize-e,.organize-resize-w { top:14px; bottom:14px; width:10px; }
+        .organize-resize-n { top:-5px; cursor:n-resize; }
+        .organize-resize-s { bottom:-5px; cursor:s-resize; }
+        .organize-resize-e { right:-5px; cursor:e-resize; }
+        .organize-resize-w { left:-5px; cursor:w-resize; }
+        .organize-resize-n::after,.organize-resize-s::after { left:0; right:0; top:4px; height:2px; }
+        .organize-resize-e::after,.organize-resize-w::after { top:0; bottom:0; left:4px; width:2px; }
+        .organize-resize-ne,.organize-resize-nw,.organize-resize-se,.organize-resize-sw { width:16px; height:16px; }
+        .organize-resize-ne { right:-8px; top:-8px; cursor:nesw-resize; }
+        .organize-resize-nw { left:-8px; top:-8px; cursor:nwse-resize; }
+        .organize-resize-se { right:-8px; bottom:-8px; cursor:nwse-resize; }
+        .organize-resize-sw { left:-8px; bottom:-8px; cursor:nesw-resize; }
+        .organize-resize-ne::after,.organize-resize-nw::after,.organize-resize-se::after,.organize-resize-sw::after { inset:4px; border-radius:4px; background:var(--card-solid); border:1px solid rgba(100,116,139,.5); }
         /* 拖拽/缩放过程中禁止节点内部文本框抢占鼠标事件和文字选中 */
         body.canvas-node-drag * { user-select:none !important; }
         body.canvas-node-drag .node textarea,
@@ -171,6 +188,14 @@
         body.canvas-node-resize .node select,
         body.canvas-node-resize .node .node-body,
         body.canvas-node-resize .node .llm-chat-log { pointer-events:none !important; }
+        body.canvas-node-resize-n, body.canvas-node-resize-n * { cursor:n-resize !important; }
+        body.canvas-node-resize-e, body.canvas-node-resize-e * { cursor:e-resize !important; }
+        body.canvas-node-resize-s, body.canvas-node-resize-s * { cursor:s-resize !important; }
+        body.canvas-node-resize-w, body.canvas-node-resize-w * { cursor:w-resize !important; }
+        body.canvas-node-resize-ne, body.canvas-node-resize-ne * { cursor:nesw-resize !important; }
+        body.canvas-node-resize-nw, body.canvas-node-resize-nw * { cursor:nwse-resize !important; }
+        body.canvas-node-resize-se, body.canvas-node-resize-se * { cursor:nwse-resize !important; }
+        body.canvas-node-resize-sw, body.canvas-node-resize-sw * { cursor:nesw-resize !important; }
         body.canvas-selecting,
         body.canvas-selecting * { user-select:none !important; }
         body.canvas-selecting .node textarea,
@@ -433,7 +458,7 @@
         .node > .port { top:50%; }
         .group-node,.promptGroup-node { min-width:260px; background:rgba(255,255,255,.96); border:1px solid #e8edf3; box-shadow:0 16px 42px rgba(15,23,42,.08); z-index:1; }
         .group-node .node-head,.promptGroup-node .node-head { background:#fff; border-bottom:1px solid #f1f5f9; }
-        .organizeFrame-node { min-width:240px; background:transparent; border:1px dashed rgba(100,116,139,.28); border-radius:4px; box-shadow:none; z-index:0; }
+        .organizeFrame-node { min-width:120px; min-height:80px; background:transparent; border:1px dashed rgba(100,116,139,.28); border-radius:4px; box-shadow:none; z-index:0; }
         .organizeFrame-node::before { background:transparent; }
         .organizeFrame-node .node-head { background:transparent; border-bottom:1px dashed rgba(100,116,139,.18); border-radius:0; cursor:move; }
         .organizeFrame-node .node-title { flex:1; min-width:0; }
@@ -1205,6 +1230,8 @@
     </div>
 
     <script src="/static/canvas-node-registry.js?v=20260608-node-registry"></script>
+    <script src="/static/canvas-organize-frames.js?v=20260609-organize-frame-members"></script>
+    <script src="/static/canvas-group-order.js?v=20260609-group-visual-order"></script>
     <script>
         function refreshIcons(){ if(window.lucide) lucide.createIcons(); }
         refreshIcons();
@@ -1384,6 +1411,7 @@
         let clipboard = null;
         let lastImagePasteAt = 0;
         const activeCanvasTaskPolls = new Set();
+        const activeDreaminaTaskPolls = new Set();
         let hoveredConnectionId = '';
         let lastMouseBoard = {x: 0, y: 0};
         let undoStack = [];
@@ -3129,7 +3157,6 @@
                 resolutionType:'2k',
                 videoResolution:'720P',
                 modelVersion:'seedance2.0fast',
-                poll:30,
                 cliPath:'',
                 inputs:[],
                 running:false
@@ -5723,7 +5750,11 @@
             return !!target.closest('textarea, input, select, option, button, audio, video, [contenteditable="true"], .seg, .gen-btn, .comfy-run, .input-item, .blank-image, .mode-tabs, .ms-model-tabs, .llm-provider, .llm-output, .llm-chat-log, .llm-bubble, .llm-pane-resizer, .loop-preview');
         }
         function isNodeDragSurface(target){
-            return !isNodeControl(target) && !target.closest('.port, .resize-handle, .output-img-wrap, audio, video');
+            return !isNodeControl(target) && !target.closest('.port, .resize-handle, .organize-resize-handle, .output-img-wrap, audio, video');
+        }
+        function organizeFrameResizeHandlesHtml(){
+            const dirs = window.CanvasOrganizeFrames?.RESIZE_DIRECTIONS || ['n','e','s','w','ne','nw','se','sw'];
+            return dirs.map(dir => `<div class="organize-resize-handle organize-resize-${dir}" data-resize-dir="${dir}" title="${tr('canvas.resize')}"></div>`).join('');
         }
         function renderNode(node){
             normalizeApiNodeLayout(node);
@@ -6059,9 +6090,16 @@
             const canOutput = ['image','prompt','loop','group','promptGroup','generator','comfy','rh','llm','msgen','video','png','dreamina'].includes(node.type);
             if(canInput) el.insertAdjacentHTML('beforeend', `<div class="port in" title="${tr('canvas.connectHere')}"></div>`);
             if(canOutput) el.insertAdjacentHTML('beforeend', `<div class="port out" title="${tr('canvas.dragConnect')}"></div>`);
-            el.insertAdjacentHTML('beforeend', `<div class="resize-handle" title="${tr('canvas.resize')}"></div>`);
             el.querySelector('.node-head').onmousedown = e => { if(e.button === 0) startNodeDrag(e, node); };
-            el.querySelector('.resize-handle').onmousedown = e => { if(e.button === 0 && !e.shiftKey) startNodeResize(e, node); };
+            if(isOrganizeFrame(node)){
+                el.insertAdjacentHTML('beforeend', organizeFrameResizeHandlesHtml());
+                el.querySelectorAll('.organize-resize-handle').forEach(handle => {
+                    handle.onmousedown = e => { if(e.button === 0 && !e.shiftKey) startNodeResize(e, node, handle.dataset.resizeDir); };
+                });
+            } else {
+                el.insertAdjacentHTML('beforeend', `<div class="resize-handle" title="${tr('canvas.resize')}"></div>`);
+                el.querySelector('.resize-handle').onmousedown = e => { if(e.button === 0 && !e.shiftKey) startNodeResize(e, node); };
+            }
             el.ondragstart = e => { e.preventDefault(); e.stopPropagation(); };
             const out = el.querySelector('.port.out');
             if(out) out.onmousedown = e => { if(e.button === 0 && !e.shiftKey) startLink(e, node.id, 'out'); };
@@ -6241,9 +6279,7 @@
             if(!node) return [];
             if(node.type === 'image' && node.url) return [{url:imageNodeReferenceUrl(node), name:node.name || 'image', role:node.role || ''}];
             if(node.type === 'group'){
-                return (node.items || [])
-                    .map(id => nodes.find(x => x.id === id))
-                    .filter(x => x?.type === 'image' && x?.url)
+                return orderedGroupItems(node, item => item?.type === 'image' && item?.url)
                     .map(img => ({url:imageNodeReferenceUrl(img), name:img.name || 'image', role:img.role || ''}));
             }
             if(node.type === 'output'){
@@ -6947,7 +6983,7 @@
                     if(last) urls.push(last);
                 }
                 if(n.type === 'group'){
-                    (n.items || []).map(id => nodes.find(x => x.id === id)).filter(x => x?.type === 'image' && x?.url).forEach(img => urls.push(img.url));
+                    orderedGroupItems(n, item => item?.type === 'image' && item?.url).forEach(img => urls.push(img.url));
                 }
             });
             return urls;
@@ -7444,7 +7480,6 @@
             node.resolutionType = node.resolutionType || '2k';
             node.videoResolution = node.videoResolution || '720P';
             node.modelVersion = node.modelVersion || 'seedance2.0fast';
-            node.poll = Math.max(1, Math.min(1800, Number(node.poll || 30)));
             const modeLabels = {
                 auto:'Auto',
                 text2image:'Text -> Image',
@@ -7490,10 +7525,6 @@
                             <div class="setting-title">Duration</div>
                             <input class="setting-input dreamina-duration" type="number" min="1" max="30" step="1" value="${Number(node.duration || 5)}">
                         </label>` : ''}
-                        <label class="field" style="flex:1">
-                            <div class="setting-title">Poll</div>
-                            <input class="setting-input dreamina-poll" type="number" min="1" max="1800" step="1" value="${Number(node.poll || 30)}">
-                        </label>
                     </div>
                     <div class="gen-settings-row">
                         ${videoOutput ? '' : `<label class="field" style="flex:1">
@@ -7533,7 +7564,6 @@
             const modeSelect = wrap.querySelector('.dreamina-mode');
             const ratioSelect = wrap.querySelector('.dreamina-ratio');
             const durationInput = wrap.querySelector('.dreamina-duration');
-            const pollInput = wrap.querySelector('.dreamina-poll');
             const imageResSelect = wrap.querySelector('.dreamina-image-res');
             const videoResSelect = wrap.querySelector('.dreamina-video-res');
             const modelVersionSelect = wrap.querySelector('.dreamina-model-version');
@@ -7542,7 +7572,7 @@
             if(imageResSelect) imageResSelect.value = node.resolutionType || '2k';
             if(videoResSelect) videoResSelect.value = node.videoResolution || '720P';
             if(modelVersionSelect) modelVersionSelect.value = node.modelVersion || 'seedance2.0fast';
-            [promptInput, modeSelect, ratioSelect, durationInput, pollInput, imageResSelect, videoResSelect, modelVersionSelect].filter(Boolean).forEach(input => {
+            [promptInput, modeSelect, ratioSelect, durationInput, imageResSelect, videoResSelect, modelVersionSelect].filter(Boolean).forEach(input => {
                 input.onmousedown = e => e.stopPropagation();
                 input.onclick = e => e.stopPropagation();
             });
@@ -7551,7 +7581,6 @@
             modeSelect.onchange = e => { node.mode = e.target.value; scheduleSave(); };
             ratioSelect.onchange = e => { node.ratio = e.target.value; scheduleSave(); };
             if(durationInput) durationInput.oninput = e => { node.duration = Math.max(1, Math.min(30, Number(e.target.value || 5))); scheduleSave(); };
-            pollInput.oninput = e => { node.poll = Math.max(1, Math.min(1800, Number(e.target.value || 30))); scheduleSave(); };
             if(imageResSelect) imageResSelect.onchange = e => { node.resolutionType = e.target.value; scheduleSave(); };
             if(videoResSelect) videoResSelect.onchange = e => { node.videoResolution = e.target.value; scheduleSave(); };
             if(modelVersionSelect) modelVersionSelect.onchange = e => { node.modelVersion = e.target.value; scheduleSave(); };
@@ -7982,7 +8011,7 @@
                 list.innerHTML = filtered.map(item => {
                     const text = promptTemplateText(item);
                     const tags = (item.tags || []).slice(0, 5).map(t => `<span>${escapeHtml(t)}</span>`).join('');
-                    return `<div class="template-card" draggable="true" data-template-id="${escapeAttr(item.id)}">
+                    return `<div class="template-card" data-template-id="${escapeAttr(item.id)}">
                         <div>
                             <div class="template-card-title">${escapeHtml(item.name || 'Template')}</div>
                             <div class="template-card-meta">${escapeHtml(item.category || 'custom')}${item.scene ? ` / ${escapeHtml(item.scene)}` : ''}</div>
@@ -7997,17 +8026,6 @@
                 list.querySelectorAll('.template-card').forEach(card => {
                     const item = templates.find(t => String(t.id) === String(card.dataset.templateId));
                     if(item) card.onpointerdown = e => beginPromptTemplatePointerDrag(e, item, card);
-                    card.ondragstart = e => {
-                        e.stopPropagation();
-                        const item = templates.find(t => String(t.id) === String(card.dataset.templateId));
-                        if(!item) return;
-                        const text = promptTemplateText(item);
-                        draggingPromptTemplate = {id:item.id, name:item.name || 'Template', text};
-                        e.dataTransfer.effectAllowed = 'copy';
-                        e.dataTransfer.setData('application/x-prompt-template', JSON.stringify(draggingPromptTemplate));
-                        e.dataTransfer.setData('text/plain', text);
-                    };
-                    card.ondragend = () => { draggingPromptTemplate = null; };
                 });
                 list.querySelectorAll('[data-template-apply]').forEach(btn => {
                     btn.onclick = e => {
@@ -8069,6 +8087,31 @@
             if(clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) return false;
             return !pointInsideElement(clientX, clientY, '#promptTemplatePanel') && !pointInsideElement(clientX, clientY, '#promptTemplateManager');
         }
+        function promptTemplateDropTargetNode(clientX, clientY){
+            if(pointInsideElement(clientX, clientY, '#promptTemplatePanel') || pointInsideElement(clientX, clientY, '#promptTemplateManager')) return null;
+            const el = document.elementFromPoint(clientX, clientY)?.closest?.('.node[data-id]');
+            if(!el) return null;
+            return nodes.find(node => node.id === el.dataset.id) || null;
+        }
+        function applyPromptTemplateDrop(item, clientX, clientY){
+            if(!item?.text || !Number.isFinite(clientX) || !Number.isFinite(clientY)) return false;
+            if(!ensureCanvas()) return false;
+            const target = promptTemplateDropTargetNode(clientX, clientY);
+            if(target && appendPromptTextToNode(target, item.text)){
+                selected.clear();
+                selected.add(target.id);
+                closePromptTemplatePanel();
+                render();
+                scheduleSave();
+                return true;
+            }
+            if(isPointOnCanvas(clientX, clientY)){
+                createPromptNodeFromTemplate(item, screenToWorld(clientX, clientY));
+                closePromptTemplatePanel();
+                return true;
+            }
+            return false;
+        }
         function finishPromptTemplatePointerDrag(event){
             const drag = promptTemplatePointerDrag;
             if(!drag) return;
@@ -8080,10 +8123,7 @@
             drag.ghost?.remove();
             promptTemplatePointerDrag = null;
             draggingPromptTemplate = null;
-            if(Number.isFinite(clientX) && Number.isFinite(clientY) && isPointOnCanvas(clientX, clientY) && item?.text){
-                createPromptNodeFromTemplate(item, screenToWorld(clientX, clientY));
-                closePromptTemplatePanel();
-            }
+            applyPromptTemplateDrop(item, clientX, clientY);
         }
         function promptTemplateFromDataTransfer(dataTransfer){
             if(!dataTransfer) return null;
@@ -8108,11 +8148,10 @@
         }
         function handlePromptTemplateDrop(event){
             const item = draggingPromptTemplate || promptTemplateFromDataTransfer(event.dataTransfer);
-            if(!item?.text || !isPointOnCanvas(event.clientX, event.clientY)) return false;
+            if(!item?.text) return false;
             event.preventDefault();
             event.stopPropagation();
-            createPromptNodeFromTemplate(item, screenToWorld(event.clientX, event.clientY));
-            closePromptTemplatePanel();
+            applyPromptTemplateDrop(item, event.clientX, event.clientY);
             clearPromptTemplateDragState();
             return true;
         }
@@ -8513,7 +8552,7 @@
                 list.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:12px">正在加载...</div>';
                 const templates = await loadPromptTemplates(true);
                 list.innerHTML = templates.map(item => `
-                    <div class="template-manager-item" draggable="true" data-manager-template="${escapeAttr(item.id)}">
+                    <div class="template-manager-item" data-manager-template="${escapeAttr(item.id)}">
                         <div class="template-manager-item-head">
                             <div>
                                 <div class="template-manager-item-title">${escapeHtml(item.name || 'Template')}</div>
@@ -8531,17 +8570,6 @@
                 list.querySelectorAll('.template-manager-item').forEach(card => {
                     const item = templates.find(t => String(t.id) === String(card.dataset.managerTemplate));
                     if(item) card.onpointerdown = e => beginPromptTemplatePointerDrag(e, item, card);
-                    card.ondragstart = e => {
-                        e.stopPropagation();
-                        const item = templates.find(t => String(t.id) === String(card.dataset.managerTemplate));
-                        if(!item) return;
-                        const text = promptTemplateText(item);
-                        draggingPromptTemplate = {id:item.id, name:item.name || 'Template', text};
-                        e.dataTransfer.effectAllowed = 'copy';
-                        e.dataTransfer.setData('application/x-prompt-template', JSON.stringify(draggingPromptTemplate));
-                        e.dataTransfer.setData('text/plain', text);
-                    };
-                    card.ondragend = () => { draggingPromptTemplate = null; };
                 });
                 list.querySelectorAll('[data-manager-use]').forEach(btn => {
                     btn.onclick = () => {
@@ -9832,6 +9860,38 @@
                 .filter(url => includeMedia || (!isVideoUrl(url) && !isAudioUrl(url)))
                 .map((url, i) => ({url, name:outputImageName(url) || `${node.type || 'generated'}-${i + 1}`}));
         }
+        function orderedGroupItems(group, filter=null){
+            if(window.CanvasGroupOrder?.orderedGroupItems){
+                return window.CanvasGroupOrder.orderedGroupItems(group, nodes, nodeRect, filter);
+            }
+            return (group?.items || [])
+                .map(id => nodes.find(item => item.id === id))
+                .filter(node => node && (!filter || filter(node)));
+        }
+        function enforceGroupSourceVisualOrder(ordered, sources){
+            const canonicalGroups = new Map();
+            sources.forEach(src => {
+                if(src?.type !== 'groupImage' || !src.groupId) return;
+                if(!canonicalGroups.has(src.groupId)) canonicalGroups.set(src.groupId, []);
+                canonicalGroups.get(src.groupId).push(src);
+            });
+            if(!canonicalGroups.size) return ordered;
+            const availableIds = new Set(ordered.map(src => src.id));
+            const emittedGroups = new Set();
+            const result = [];
+            ordered.forEach(src => {
+                if(src?.type !== 'groupImage' || !src.groupId || !canonicalGroups.has(src.groupId)){
+                    result.push(src);
+                    return;
+                }
+                if(emittedGroups.has(src.groupId)) return;
+                emittedGroups.add(src.groupId);
+                canonicalGroups.get(src.groupId).forEach(groupSrc => {
+                    if(availableIds.has(groupSrc.id)) result.push(groupSrc);
+                });
+            });
+            return result;
+        }
         function generatorSources(gen){
             return connections.filter(c => c.to === gen.id).map(c => nodes.find(n => n.id === c.from)).filter(Boolean).map(n => {
                 if(n.type === 'output' && (n.images||[]).length){
@@ -9859,7 +9919,7 @@
                     return {id:n.id, type:'image', label:n.name || 'image', preview:previewUrl, refs:[{url:refUrl, name:n.name || 'image', role:n.role || ''}], prompt:''};
                 }
                 if(n.type === 'group') {
-                    const items = (n.items || []).map(id => nodes.find(x => x.id === id)).filter(Boolean);
+                    const items = orderedGroupItems(n);
                     const sources = items.filter(x => x.type === 'image' && x.url).map(img => ({
                         id:`${n.id}:${img.id}`,
                         type:'groupImage',
@@ -9912,7 +9972,10 @@
         function orderedSources(gen, sources){
             gen.inputs = (gen.inputs || []).filter(id => sources.some(s => s.id === id));
             sources.forEach(s => { if(!gen.inputs.includes(s.id)) gen.inputs.push(s.id); });
-            return gen.inputs.map(id => sources.find(s => s.id === id)).filter(Boolean);
+            const ordered = gen.inputs.map(id => sources.find(s => s.id === id)).filter(Boolean);
+            const visualOrdered = enforceGroupSourceVisualOrder(ordered, sources);
+            gen.inputs = visualOrdered.map(src => src.id);
+            return visualOrdered;
         }
         function reorderInput(gen, movedId, targetId){
             if(!movedId || movedId === targetId) return;
@@ -10348,6 +10411,7 @@ ${referenceNote}
             if(out) out._pending = [...(out._pending || []), makePending(pendingId, run)];
             if(!opts.cascade){ node.running = true; refreshRunNodes(node, out); }
             else refreshRunNodes(node, out);
+            let keepRunning = false;
             try {
                 const result = await fetch('/api/dreamina/run', {
                     method:'POST',
@@ -10362,15 +10426,39 @@ ${referenceNote}
                         resolution_type:node.resolutionType || '2k',
                         video_resolution:node.videoResolution || '720P',
                         model_version:node.modelVersion || 'seedance2.0fast',
-                        poll:Number(node.poll || 30),
                         output_type:outputType,
+                        wait_for_result:false,
                         cli_path:node.cliPath || ''
                     })
                 }).then(async r => { if(!r.ok) throw new Error(await responseErrorMessage(r, 'Dreamina CLI failed.')); return r.json(); });
+                run.request = requestMetaFromResult(result);
+                if(result.status === 'pending' && result.submit_id){
+                    const pending = pendingById(out, pendingId);
+                    if(pending){
+                        pending.canvasTaskType = 'dreamina';
+                        pending.dreaminaSubmitId = result.submit_id;
+                        pending.dreaminaKind = outputType;
+                        pending.dreaminaCliPath = node.cliPath || '';
+                        pending.appendGenerated = Boolean(opts.cascade);
+                        pending.run = run;
+                    }
+                    node.runStatus = 'running';
+                    node.runError = result.message || `Dreamina task queued. submit_id=${result.submit_id}`;
+                    keepRunning = true;
+                    refreshRunNodes(node, out);
+                    scheduleSave();
+                    await saveCanvas();
+                    if(!opts.cascade){
+                        pollDreaminaTask(result.submit_id);
+                        return;
+                    }
+                    const status = await pollDreaminaTask(result.submit_id);
+                    if(status === 'failed') throw new Error(node.runError || 'Dreamina task failed.');
+                    return;
+                }
                 const meta = collectRunMeta(out, pendingId);
                 if(out) out._pending = (out._pending || []).filter(p => p.id !== pendingId);
                 const outputs = [...(result.images || []), ...(result.videos || [])].filter(Boolean);
-                run.request = requestMetaFromResult(result);
                 if(!outputs.length) throw new Error(result.message || 'Dreamina CLI returned no media output.');
                 appendOutputImages(out, outputs, refs[0], [meta]);
                 mergeGeneratedOutputs(node, outputs, Boolean(opts.cascade));
@@ -10389,7 +10477,7 @@ ${referenceNote}
                 if(opts.cascade) throw err;
                 alert(node.runError);
             } finally {
-                node.running = false;
+                if(!keepRunning) node.running = false;
                 refreshRunNodes(node, out);
             }
         }
@@ -11312,6 +11400,7 @@ ${referenceNote}
                 provider_id: result.provider_id || result.params?.provider_id || '',
                 backend: result.backend || '',
                 prompt_id: result.prompt_id || '',
+                submit_id: result.submit_id || result.raw?.submit_id || '',
                 workflow_json: result.workflow_json || '',
                 seed: result.seed || '',
             };
@@ -11471,6 +11560,42 @@ ${referenceNote}
             }
             return null;
         }
+        function findPendingDreaminaTask(submitId){
+            for(const out of nodes.filter(n => n.type === 'output')){
+                const pending = (out._pending || []).find(p => p.dreaminaSubmitId === submitId);
+                if(pending) return {out, pending};
+            }
+            return null;
+        }
+        function dreaminaPollDelay(pending){
+            const elapsed = nowMs() - Number(pending?.startedAt || nowMs());
+            if(elapsed >= 60 * 60 * 1000) return 60 * 1000;
+            if(elapsed >= 10 * 60 * 1000) return 10 * 1000;
+            return 2 * 1000;
+        }
+        function dreaminaResultOutputs(result={}){
+            const urls = [...(result.urls || []), ...(result.images || []), ...(result.videos || [])].filter(Boolean);
+            const seen = new Set();
+            return urls.filter(url => {
+                if(seen.has(url)) return false;
+                seen.add(url);
+                return true;
+            });
+        }
+        async function queryDreaminaTask(submitId, kind='video', cliPath=''){
+            const res = await fetch('/api/dreamina/query-media', {
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({
+                    submit_id:submitId,
+                    kind,
+                    cli_path:cliPath || '',
+                    timeout:300
+                })
+            });
+            if(!res.ok) throw new Error(await responseErrorMessage(res, 'Dreamina query failed.'));
+            return res.json();
+        }
         async function createCanvasImageTask(payload){
             const res = await fetch('/api/canvas-image-tasks', {
                 method:'POST',
@@ -11481,6 +11606,74 @@ ${referenceNote}
             return res.json();
         }
         function sleep(ms){ return new Promise(resolve => setTimeout(resolve, ms)); }
+        async function pollDreaminaTask(submitId){
+            if(!submitId) return 'failed';
+            if(activeDreaminaTaskPolls.has(submitId)) return 'running';
+            activeDreaminaTaskPolls.add(submitId);
+            try {
+                while(true){
+                    const found = findPendingDreaminaTask(submitId);
+                    if(!found) return 'missing';
+                    const {pending} = found;
+                    const data = await queryDreaminaTask(submitId, pending.dreaminaKind || 'video', pending.dreaminaCliPath || '');
+                    if(data.status === 'succeeded'){
+                        completeDreaminaTask(submitId, data);
+                        return 'succeeded';
+                    }
+                    if(data.status === 'failed'){
+                        failDreaminaTask(submitId, data.error || data.message || 'Dreamina task failed.');
+                        return 'failed';
+                    }
+                    await sleep(dreaminaPollDelay(pending));
+                }
+            } catch(err) {
+                failDreaminaTask(submitId, err.message || String(err));
+                return 'failed';
+            } finally {
+                activeDreaminaTaskPolls.delete(submitId);
+            }
+        }
+        function completeDreaminaTask(submitId, result){
+            const found = findPendingDreaminaTask(submitId);
+            if(!found) return;
+            const {out, pending} = found;
+            const meta = {
+                runMs: nowMs() - Number(pending.startedAt || nowMs()),
+                run: pending.run || {},
+            };
+            meta.run.request = requestMetaFromResult(result);
+            const outputs = dreaminaResultOutputs(result);
+            if(!outputs.length) throw new Error(result.message || result.error || 'Dreamina task succeeded but returned no media.');
+            out._pending = (out._pending || []).filter(p => p.id !== pending.id);
+            appendOutputImages(out, outputs, meta.run?.refs?.[0], [meta]);
+            const gen = nodes.find(n => n.id === meta.run?.node?.id);
+            if(gen){
+                mergeGeneratedOutputs(gen, outputs, Boolean(pending.appendGenerated));
+                gen.runStatus = 'done';
+                gen.runError = '';
+                gen.running = false;
+            }
+            addGenerationLog({run:meta.run, outputs, runMs:meta.runMs || 0});
+            refreshRunNodes(gen, out);
+            scheduleSave();
+        }
+        function failDreaminaTask(submitId, message){
+            const found = findPendingDreaminaTask(submitId);
+            if(!found) return;
+            const {out, pending} = found;
+            const run = pending.run || {};
+            const runMs = nowMs() - Number(pending.startedAt || nowMs());
+            out._pending = (out._pending || []).filter(p => p.id !== pending.id);
+            const gen = nodes.find(n => n.id === run?.node?.id);
+            if(gen){
+                gen.runStatus = 'failed';
+                gen.runError = message || 'Dreamina task failed.';
+                gen.running = false;
+            }
+            addGenerationLog({run, outputs:[], runMs, error:message || 'Dreamina task failed.'});
+            refreshRunNodes(gen, out);
+            scheduleSave();
+        }
         async function pollCanvasImageTask(taskId){
             if(!taskId) return 'failed';
             if(activeCanvasTaskPolls.has(taskId)) return 'running';
@@ -11554,6 +11747,7 @@ ${referenceNote}
             nodes.filter(n => n.type === 'output').forEach(out => {
                 (out._pending || []).forEach(p => {
                     if(p.canvasTaskType === 'online-image' && p.canvasTaskId) pollCanvasImageTask(p.canvasTaskId);
+                    if(p.canvasTaskType === 'dreamina' && p.dreaminaSubmitId) pollDreaminaTask(p.dreaminaSubmitId);
                 });
             });
         }
@@ -11973,6 +12167,7 @@ ${referenceNote}
             }
             const firstTargetIndex = targets.length ? Math.min(...targets.map(n => nodes.findIndex(item => item.id === n.id)).filter(i => i >= 0)) : nodes.length;
             nodes.splice(Math.max(0, firstTargetIndex), 0, frame);
+            syncOrganizeFrameMembership([frame]);
             selected.clear();
             selected.add(frame.id);
             render();
@@ -12147,6 +12342,10 @@ ${referenceNote}
             if(startKnifeDrag(e)) return;
             e.preventDefault();
             e.stopPropagation();
+            const organizeFramesToSync = selected.has(node.id)
+                ? [...selected].map(id => nodes.find(n => n.id === id)).filter(isOrganizeFrame)
+                : (isOrganizeFrame(node) ? [node] : []);
+            syncOrganizeFrameMembership(organizeFramesToSync);
             let dragTarget = node;
             if(e.altKey){
                 const copy = cloneNode(node, 0, 0);
@@ -12212,32 +12411,79 @@ ${referenceNote}
             renderSelectionHub();
             scheduleMinimapRender();
         }
-        function startNodeResize(e, node){
+        function resizeDirectionClass(direction){
+            return `canvas-node-resize-${direction}`;
+        }
+        function clearResizeDirectionClasses(){
+            const dirs = window.CanvasOrganizeFrames?.RESIZE_DIRECTIONS || ['n','e','s','w','ne','nw','se','sw'];
+            document.body.classList.remove(...dirs.map(resizeDirectionClass));
+        }
+        function resizeMinimumSize(node){
+            if(isOrganizeFrame(node)) return {w:120, h:80};
+            const min = defaultNodeSize(node.type);
+            return {w:Math.min(min.w, 220), h:96};
+        }
+        function startNodeResize(e, node, direction='se'){
             e.preventDefault();
             e.stopPropagation();
+            const resizeDirection = window.CanvasOrganizeFrames?.normalizeResizeDirection
+                ? window.CanvasOrganizeFrames.normalizeResizeDirection(direction)
+                : (direction || 'se');
             const el = nodesEl.querySelector(`.node[data-id="${node.id}"]`);
             const rect = el?.getBoundingClientRect();
             resizeNode = {
                 node,
+                direction:resizeDirection,
                 sx:e.clientX,
                 sy:e.clientY,
+                ox:Number(node.x || 0),
+                oy:Number(node.y || 0),
                 sw:(rect?.width ? rect.width / viewport.scale : node.w || defaultNodeSize(node.type).w),
                 sh:(rect?.height ? rect.height / viewport.scale : node.h || defaultNodeSize(node.type).h || 160)
             };
+            clearResizeDirectionClasses();
             document.body.classList.add('canvas-node-resize');
+            document.body.classList.add(resizeDirectionClass(resizeDirection));
             window.onmousemove = onNodeResize;
             window.onmouseup = endDrag;
         }
         function onNodeResize(e){
             if(!resizeNode) return;
-            const min = defaultNodeSize(resizeNode.node.type);
-            const nextW = Math.max(Math.min(min.w, 220), resizeNode.sw + (e.clientX - resizeNode.sx) / viewport.scale);
-            const nextH = Math.max(96, resizeNode.sh + (e.clientY - resizeNode.sy) / viewport.scale);
+            const direction = resizeNode.direction || 'se';
+            const dx = (e.clientX - resizeNode.sx) / viewport.scale;
+            const dy = (e.clientY - resizeNode.sy) / viewport.scale;
+            const min = resizeMinimumSize(resizeNode.node);
+            let nextX = resizeNode.ox;
+            let nextY = resizeNode.oy;
+            let nextW = resizeNode.sw;
+            let nextH = resizeNode.sh;
+            if(direction.includes('e')) nextW = resizeNode.sw + dx;
+            if(direction.includes('s')) nextH = resizeNode.sh + dy;
+            if(direction.includes('w')){
+                nextW = resizeNode.sw - dx;
+                nextX = resizeNode.ox + dx;
+            }
+            if(direction.includes('n')){
+                nextH = resizeNode.sh - dy;
+                nextY = resizeNode.oy + dy;
+            }
+            if(nextW < min.w){
+                if(direction.includes('w')) nextX = resizeNode.ox + resizeNode.sw - min.w;
+                nextW = min.w;
+            }
+            if(nextH < min.h){
+                if(direction.includes('n')) nextY = resizeNode.oy + resizeNode.sh - min.h;
+                nextH = min.h;
+            }
+            resizeNode.node.x = Math.round(nextX);
+            resizeNode.node.y = Math.round(nextY);
             resizeNode.node.w = Math.round(nextW);
             resizeNode.node.h = Math.round(nextH);
             const el = nodesEl.querySelector(`.node[data-id="${resizeNode.node.id}"]`);
             if(el){
                 el.classList.add('sized');
+                el.style.left = `${resizeNode.node.x}px`;
+                el.style.top = `${resizeNode.node.y}px`;
                 el.style.width = `${resizeNode.node.w}px`;
                 el.style.height = `${resizeNode.node.h}px`;
             }
@@ -12356,11 +12602,19 @@ ${referenceNote}
             connections = (connections || []).filter(c => canConnect(c.from, c.to));
         }
         function endDrag(event=null){
+            let organizeMembershipChanged = false;
+            const resizedOrganizeFrame = resizeNode?.node && isOrganizeFrame(resizeNode.node) ? resizeNode.node : null;
             if(dragNode){
                 const moved = [dragNode.node, ...(dragNode.children || []).map(c => c.node)].filter(Boolean);
                 // 拖动 group/promptGroup/整理框 自身时不重新评估（成员跟着一起走，包含关系不变）
                 const draggedGroup = moved.some(isFrameContainerNode);
                 if(!draggedGroup) updateGroupMembership(moved);
+                organizeMembershipChanged = syncOrganizeFrameMembership();
+                syncGeneratorInputs();
+                refreshGeneratorInputViews();
+            }
+            if(resizedOrganizeFrame){
+                organizeMembershipChanged = syncOrganizeFrameMembership([resizedOrganizeFrame]) || organizeMembershipChanged;
             }
             dragNode = null;
             dragBoard = null;
@@ -12375,9 +12629,10 @@ ${referenceNote}
             if(!event?.shiftKey) setKnifeMode(false);
             if(textSelectionGuard) textSelectionGuard.active = false;
             document.body.classList.remove('canvas-node-drag', 'canvas-node-resize', 'canvas-selecting', 'canvas-board-pan');
+            clearResizeDirectionClasses();
             window.onmousemove = null;
             window.onmouseup = null;
-            if(shouldRenderKnife) render();
+            if(shouldRenderKnife || organizeMembershipChanged) render();
             scheduleMinimapRender();
             scheduleSave();
         }
@@ -12386,6 +12641,30 @@ ${referenceNote}
             const w = el?.offsetWidth || n.w || 260;
             const h = el?.offsetHeight || n.h || 200;
             return {x:n.x, y:n.y, w, h, cx:n.x + w/2, cy:n.y + h/2};
+        }
+        function nodeCenterInsideFrame(node, frame){
+            return window.CanvasOrganizeFrames?.nodeCenterInsideFrame
+                ? window.CanvasOrganizeFrames.nodeCenterInsideFrame(node, frame, nodeRect)
+                : false;
+        }
+        function syncOrganizeFrameMembership(frameList=null){
+            const frameTargets = (frameList?.length ? frameList : nodes.filter(isOrganizeFrame))
+                .map(frame => typeof frame === 'string' ? nodes.find(n => n.id === frame) : frame)
+                .filter(isOrganizeFrame);
+            if(!frameTargets.length) return false;
+            const sameIdList = window.CanvasOrganizeFrames?.sameIdList || ((a, b) => Array.isArray(a) && Array.isArray(b) && a.length === b.length && a.every((id, index) => id === b[index]));
+            let changed = false;
+            frameTargets.forEach(frame => {
+                const nextItems = window.CanvasOrganizeFrames?.frameMembershipIds
+                    ? window.CanvasOrganizeFrames.frameMembershipIds(nodes, frame, nodeRect)
+                    : nodes.filter(node => nodeCenterInsideFrame(node, frame)).map(node => node.id);
+                const currentItems = Array.isArray(frame.items) ? frame.items : [];
+                if(!sameIdList(currentItems, nextItems)){
+                    frame.items = nextItems;
+                    changed = true;
+                }
+            });
+            return changed;
         }
         function handoffExistingInputsToGroup(group, children){
             if(!group || group.type !== 'group') return false;
@@ -12836,7 +13115,7 @@ ${referenceNote}
             e.stopPropagation();
             dropOverlay.classList.remove('active');
             const item = promptTemplateFromDataTransfer(e.dataTransfer);
-            if(item?.text) createPromptNodeFromTemplate(item, screenToWorld(e.clientX, e.clientY));
+            if(item?.text) applyPromptTemplateDrop(item, e.clientX, e.clientY);
             draggingPromptTemplate = null;
             return true;
         }

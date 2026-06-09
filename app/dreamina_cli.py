@@ -32,6 +32,12 @@ CONTENT_TYPE_EXTS = {
     "video/webm": ".webm",
     "video/quicktime": ".mov",
 }
+DREAMINA_CLI_POLL_SECONDS = 30
+DREAMINA_LONG_POLL_TIMEOUT_SECONDS = 24 * 60 * 60
+DREAMINA_INITIAL_QUERY_SECONDS = 2
+DREAMINA_QUERY_TIMEOUT_SECONDS = 120
+DREAMINA_TEN_MINUTES_SECONDS = 10 * 60
+DREAMINA_ONE_HOUR_SECONDS = 60 * 60
 
 
 def _default_cli_path() -> str:
@@ -97,7 +103,7 @@ def _build_command(payload: DreaminaRunRequest) -> Tuple[str, List[str], List[st
         raise HTTPException(status_code=400, detail="image2video needs a connected image. Use multimodal2video for video inputs.")
 
     cli = _clean_cli_path(payload.cli_path)
-    args = [cli, mode, f"--prompt={prompt}", f"--poll={int(payload.poll or 30)}"]
+    args = [cli, mode, f"--prompt={prompt}", f"--poll={DREAMINA_CLI_POLL_SECONDS}"]
     if mode in {"text2image", "image2image"}:
         args.extend([f"--ratio={payload.ratio or '1:1'}", f"--resolution_type={payload.resolution_type or '2k'}"])
     if mode in {"text2video", "image2video"}:
@@ -117,7 +123,7 @@ def _build_command(payload: DreaminaRunRequest) -> Tuple[str, List[str], List[st
         args.extend(["--image", first_image])
     elif mode == "multimodal2video":
         duration = max(4, min(15, int(payload.duration or 5)))
-        args = [cli, mode, f"--prompt={prompt}", f"--duration={duration}", f"--ratio={payload.ratio or '16:9'}", f"--video_resolution={(payload.video_resolution or '720P').lower()}", f"--model_version={payload.model_version or 'seedance2.0fast'}", f"--poll={int(payload.poll or 30)}"]
+        args = [cli, mode, f"--prompt={prompt}", f"--duration={duration}", f"--ratio={payload.ratio or '16:9'}", f"--video_resolution={(payload.video_resolution or '720P').lower()}", f"--model_version={payload.model_version or 'seedance2.0fast'}", f"--poll={DREAMINA_CLI_POLL_SECONDS}"]
         for path, kind in local_inputs:
             if kind == "image":
                 args.extend(["--image", path])
@@ -192,6 +198,62 @@ def _json_media_urls(text: str) -> List[str]:
     return urls
 
 
+def _json_local_media_paths(text: str) -> List[str]:
+    try:
+        data = json.loads(text or "{}")
+    except Exception:
+        return []
+    roots = []
+    if isinstance(data, dict):
+        for key in ["result_json", "result", "outputs", "output", "data"]:
+            if key in data:
+                roots.append(data[key])
+        if "images" in data or "videos" in data:
+            roots.append({"images": data.get("images"), "videos": data.get("videos")})
+    else:
+        roots.append(data)
+    if not roots:
+        roots = [data]
+
+    paths = []
+    seen = set()
+
+    def add_path(value: Any):
+        if not isinstance(value, str):
+            return
+        path = value.strip().strip('"').strip("'")
+        ext = os.path.splitext(path)[1].lower()
+        if ext not in IMAGE_EXTS | VIDEO_EXTS:
+            return
+        abs_path = os.path.abspath(path)
+        if os.path.exists(abs_path) and abs_path not in seen:
+            seen.add(abs_path)
+            paths.append(abs_path)
+
+    def walk(value: Any, path_keys: Tuple[str, ...] = ()):
+        if isinstance(value, dict):
+            for key, item in value.items():
+                walk(item, (*path_keys, str(key).lower()))
+            return
+        if isinstance(value, list):
+            for item in value:
+                walk(item, path_keys)
+            return
+        if not isinstance(value, str):
+            return
+        key_hint = path_keys[-1] if path_keys else ""
+        joined_keys = ".".join(path_keys)
+        if key_hint in {"path", "file", "file_path", "filepath", "local_path", "download_path"}:
+            add_path(value)
+            return
+        if any(part in joined_keys for part in ["result_json", "outputs", "output", "images", "videos"]):
+            add_path(value)
+
+    for root in roots:
+        walk(root)
+    return paths
+
+
 def _media_urls(text: str) -> List[str]:
     urls = []
     seen = set()
@@ -210,7 +272,7 @@ def _media_urls(text: str) -> List[str]:
 def _local_outputs(text: str) -> List[str]:
     outputs = []
     seen = set()
-    for token in re.findall(r"(?:(?:[A-Za-z]:)?[\\/][^\s\"'<>]+|[A-Za-z]:\\[^\s\"'<>]+)", text or ""):
+    for token in [*_json_local_media_paths(text), *re.findall(r"(?:(?:[A-Za-z]:)?[\\/][^\s\"'<>]+|[A-Za-z]:\\[^\s\"'<>]+)", text or "")]:
         path = token.rstrip(".,;)]}'\"")
         ext = os.path.splitext(path)[1].lower()
         if ext not in IMAGE_EXTS | VIDEO_EXTS:
@@ -223,6 +285,9 @@ def _local_outputs(text: str) -> List[str]:
 
 
 def _copy_local_output(path: str) -> str:
+    existing_url = media_store.asset_url_from_path(path)
+    if existing_url:
+        return existing_url
     ext = os.path.splitext(path)[1].lower()
     prefix = "dreamina_video_" if ext in VIDEO_EXTS else "dreamina_"
     filename = f"{prefix}{uuid.uuid4().hex[:10]}{ext or '.bin'}"
@@ -293,24 +358,57 @@ async def _query_result(cli: str, submit_id: str, timeout: int) -> subprocess.Co
     )
 
 
-async def _query_until_outputs(cli: str, submit_id: str, wait_seconds: int) -> Tuple[List[str], List[str], str, str]:
-    deadline = asyncio.get_running_loop().time() + max(1, wait_seconds)
+def _dreamina_query_interval(elapsed_seconds: float) -> int:
+    if elapsed_seconds >= DREAMINA_ONE_HOUR_SECONDS:
+        return 60
+    if elapsed_seconds >= DREAMINA_TEN_MINUTES_SECONDS:
+        return 10
+    return 2
+
+
+def _dreamina_failed_status(text: str) -> bool:
+    status_text = (text or "").lower()
+    return any(flag in status_text for flag in [
+        '"gen_status": "fail',
+        '"gen_status":"fail',
+        '"queue_status": "fail',
+        '"queue_status":"fail',
+        '"status": "failed"',
+        '"status":"failed"',
+        '"status": "error"',
+        '"status":"error"',
+    ])
+
+
+async def _query_until_outputs(cli: str, submit_id: str, wait_seconds: int) -> Tuple[List[str], List[str], str, str, str]:
+    loop = asyncio.get_running_loop()
+    started = loop.time()
+    deadline = started + max(1, wait_seconds)
     last_stdout = ""
     last_stderr = ""
     while True:
-        proc = await _query_result(cli, submit_id, min(60, max(5, wait_seconds)))
-        last_stdout = proc.stdout or ""
-        last_stderr = proc.stderr or ""
-        combined = "\n".join([last_stdout, last_stderr])
-        images, videos = await _localize_outputs(_media_urls(combined), _local_outputs(combined))
-        if images or videos:
-            return images, videos, last_stdout, last_stderr
-        status_text = combined.lower()
-        if any(flag in status_text for flag in ['"gen_status": "fail', '"gen_status":"fail', '"queue_status": "fail', '"queue_status":"fail']):
-            return images, videos, last_stdout, last_stderr
-        if asyncio.get_running_loop().time() >= deadline:
-            return images, videos, last_stdout, last_stderr
-        await asyncio.sleep(2)
+        try:
+            proc = await _query_result(cli, submit_id, DREAMINA_QUERY_TIMEOUT_SECONDS)
+        except subprocess.TimeoutExpired:
+            proc = None
+            last_stderr = f"Dreamina query_result timed out after {DREAMINA_QUERY_TIMEOUT_SECONDS} seconds."
+        if proc is None:
+            images, videos = [], []
+            combined = last_stderr
+        else:
+            last_stdout = proc.stdout or ""
+            last_stderr = proc.stderr or ""
+            combined = "\n".join([last_stdout, last_stderr])
+            images, videos = await _localize_outputs(_media_urls(combined), _local_outputs(combined))
+            if images or videos:
+                return images, videos, last_stdout, last_stderr, "succeeded"
+            if _dreamina_failed_status(combined):
+                return images, videos, last_stdout, last_stderr, "failed"
+        now = loop.time()
+        if now >= deadline:
+            return images, videos, last_stdout, last_stderr, "timeout"
+        interval = _dreamina_query_interval(now - started)
+        await asyncio.sleep(min(interval, max(0.1, deadline - now)))
 
 
 async def run_dreamina_cli(payload: DreaminaRunRequest) -> Dict[str, Any]:
@@ -332,19 +430,37 @@ async def run_dreamina_cli(payload: DreaminaRunRequest) -> Dict[str, Any]:
     submit_id = _extract_submit_id(combined) or _extract_latest_log_submit_id()
     query_stdout = ""
     query_stderr = ""
+    query_status = ""
     if not images and not videos and submit_id:
-        images, videos, query_stdout, query_stderr = await _query_until_outputs(args[0], submit_id, int(payload.poll or 30))
+        wait_seconds = DREAMINA_LONG_POLL_TIMEOUT_SECONDS if payload.wait_for_result else DREAMINA_INITIAL_QUERY_SECONDS
+        images, videos, query_stdout, query_stderr, query_status = await _query_until_outputs(
+            args[0],
+            submit_id,
+            wait_seconds,
+        )
+    if not images and not videos and query_status == "failed":
+        raise HTTPException(
+            status_code=502,
+            detail=(query_stderr or query_stdout or f"Dreamina task failed. submit_id={submit_id}")[:1200],
+        )
+    if not images and not videos and query_status == "timeout" and payload.wait_for_result:
+        raise HTTPException(
+            status_code=504,
+            detail=f"Dreamina task is still pending after {DREAMINA_LONG_POLL_TIMEOUT_SECONDS // 3600} hours. submit_id={submit_id}",
+        )
     message = ""
     if not images and not videos:
-        message = "Dreamina CLI returned no media output."
         if submit_id:
-            message += f" submit_id={submit_id}. Open Dreamina history or run query_result to check whether the task failed."
+            message = f"Dreamina task is still pending. submit_id={submit_id}"
+        else:
+            message = "Dreamina CLI returned no media output."
     return {
+        "status": "succeeded" if images or videos else ("pending" if submit_id else "empty"),
         "mode": mode,
         "images": images,
         "videos": videos,
         "submit_id": submit_id,
-        "message": "Dreamina CLI returned no media output." if not images and not videos else "",
+        "message": message,
         "request": {
             "mode": mode,
             "inputs": len(local_inputs),
@@ -356,6 +472,7 @@ async def run_dreamina_cli(payload: DreaminaRunRequest) -> Dict[str, Any]:
             "stderr": stderr[-4000:],
             "query_stdout": query_stdout[-4000:],
             "query_stderr": query_stderr[-4000:],
+            "query_status": query_status,
         },
     }
 

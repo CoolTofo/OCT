@@ -15,7 +15,7 @@ from threading import Lock
 from typing import Any, Dict, List
 
 
-DEFAULT_UPDATE_REPO = "hero8152/Infinite-Canvas"
+DEFAULT_UPDATE_REPO = "CoolTofo/OCT"
 DEFAULT_UPDATE_BRANCH = "main"
 
 
@@ -61,11 +61,14 @@ def update_allowed_file(path: str) -> bool:
     if not normalized or any(part in {"", ".", ".."} for part in normalized.split("/")):
         return False
     root_allowed = {
+        ".gitignore",
+        "AGENTS.md",
         "main.py",
         "requirements.txt",
         "VERSION",
         "启动服务.bat",
         "安装依赖.bat",
+        "更新GitHub最新版.bat",
         "mac-启动服务.command",
         "mac-修复权限.command",
         "MAC-使用说明.md",

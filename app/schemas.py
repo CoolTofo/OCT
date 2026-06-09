@@ -183,9 +183,10 @@ class DreaminaRunRequest(BaseModel):
     resolution_type: str = "2k"
     video_resolution: str = "720P"
     model_version: str = "seedance2.0fast"
-    poll: int = Field(default=30, ge=1, le=1800)
+    poll: Optional[int] = Field(default=None, ge=1, le=86400)
     output_type: str = "auto"
-    timeout: int = Field(default=1800, ge=5, le=3600)
+    timeout: int = Field(default=1800, ge=5, le=86400)
+    wait_for_result: bool = False
     cli_path: str = ""
 
 
