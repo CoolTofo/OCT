@@ -15,10 +15,38 @@ from threading import Lock
 from typing import Any, Dict, List
 
 
-GITHUB_REPO_URL = "https://github.com/hero8152/Infinite-Canvas"
-GITHUB_VERSION_URL = "https://raw.githubusercontent.com/hero8152/Infinite-Canvas/main/VERSION"
-GITHUB_TREE_URL = "https://api.github.com/repos/hero8152/Infinite-Canvas/git/trees/main?recursive=1"
-GITHUB_RAW_ROOT = "https://raw.githubusercontent.com/hero8152/Infinite-Canvas/main"
+DEFAULT_UPDATE_REPO = "hero8152/Infinite-Canvas"
+DEFAULT_UPDATE_BRANCH = "main"
+
+
+def normalized_update_repo() -> str:
+    repo = os.getenv("OCT_UPDATE_REPO", DEFAULT_UPDATE_REPO).strip().strip("/")
+    if repo.startswith("https://github.com/"):
+        repo = repo.removeprefix("https://github.com/").strip("/")
+    if repo.endswith(".git"):
+        repo = repo[:-4]
+    return repo or DEFAULT_UPDATE_REPO
+
+
+def update_branch() -> str:
+    return os.getenv("OCT_UPDATE_BRANCH", DEFAULT_UPDATE_BRANCH).strip() or DEFAULT_UPDATE_BRANCH
+
+
+def github_repo_url() -> str:
+    return f"https://github.com/{normalized_update_repo()}"
+
+
+def github_version_url() -> str:
+    return f"https://raw.githubusercontent.com/{normalized_update_repo()}/{update_branch()}/VERSION"
+
+
+def github_tree_url() -> str:
+    return f"https://api.github.com/repos/{normalized_update_repo()}/git/trees/{update_branch()}?recursive=1"
+
+
+def github_raw_root() -> str:
+    return f"https://raw.githubusercontent.com/{normalized_update_repo()}/{update_branch()}"
+
 
 UPDATE_LOCK = Lock()
 GITHUB_TREE_CACHE: Dict[str, Any] = {"etag": "", "data": None, "expires_at": 0.0}
@@ -32,7 +60,20 @@ def update_allowed_file(path: str) -> bool:
     normalized = str(path or "").replace("\\", "/").lstrip("/")
     if not normalized or any(part in {"", ".", ".."} for part in normalized.split("/")):
         return False
-    return normalized in {"main.py", "VERSION"} or normalized.startswith("static/")
+    root_allowed = {
+        "main.py",
+        "requirements.txt",
+        "VERSION",
+        "启动服务.bat",
+        "安装依赖.bat",
+        "mac-启动服务.command",
+        "mac-修复权限.command",
+        "MAC-使用说明.md",
+        "MIGRATION_DEV_README.md",
+        "换电脑使用说明.txt",
+    }
+    allowed_dirs = ("app/", "static/", "tools/", "workflows/", "Doc/")
+    return normalized in root_allowed or normalized.startswith(allowed_dirs)
 
 
 def safe_update_target(base_dir: str, path: str) -> str:
@@ -52,7 +93,7 @@ def github_json(url: str, use_etag_cache: bool = False) -> Dict[str, Any]:
         "User-Agent": "Infinite-Canvas-Updater",
     }
     cache_key = url
-    if use_etag_cache and cache_key == GITHUB_TREE_URL:
+    if use_etag_cache and cache_key == github_tree_url():
         if GITHUB_TREE_CACHE["data"] and time.time() < GITHUB_TREE_CACHE["expires_at"]:
             return GITHUB_TREE_CACHE["data"]
         if GITHUB_TREE_CACHE["etag"]:
@@ -62,7 +103,7 @@ def github_json(url: str, use_etag_cache: bool = False) -> Dict[str, Any]:
         with urllib.request.urlopen(req, timeout=30) as resp:
             etag = resp.headers.get("ETag", "")
             payload = json.loads(resp.read().decode("utf-8", errors="replace"))
-            if use_etag_cache and cache_key == GITHUB_TREE_URL:
+            if use_etag_cache and cache_key == github_tree_url():
                 GITHUB_TREE_CACHE.update({
                     "etag": etag,
                     "data": payload,
@@ -80,6 +121,34 @@ def github_bytes(url: str) -> bytes:
     req = urllib.request.Request(url, headers={"User-Agent": "Infinite-Canvas-Updater"})
     with urllib.request.urlopen(req, timeout=60) as resp:
         return resp.read()
+
+
+def read_local_version(base_dir: str) -> str:
+    version_path = os.path.join(base_dir, "VERSION")
+    try:
+        with open(version_path, "r", encoding="utf-8-sig") as f:
+            return f.read().strip()
+    except OSError:
+        return ""
+
+
+def github_text(url: str) -> str:
+    return github_bytes(url).decode("utf-8-sig", errors="replace").strip()
+
+
+def update_status(base_dir: str) -> Dict[str, Any]:
+    local_version = read_local_version(base_dir)
+    remote_version = github_text(github_version_url())
+    return {
+        "ok": True,
+        "repo": normalized_update_repo(),
+        "repo_url": github_repo_url(),
+        "branch": update_branch(),
+        "local_version": local_version,
+        "remote_version": remote_version,
+        "update_available": bool(remote_version and remote_version != local_version),
+        "checked_at": time.time(),
+    }
 
 
 def schedule_self_restart(base_dir: str, delay_seconds: int = 3) -> bool:
@@ -143,7 +212,9 @@ def run_update(base_dir: str, data_dir: str, auto_restart: bool = False, restart
     if not UPDATE_LOCK.acquire(blocking=False):
         raise UpdateBusyError("An update or rollback is already running.")
     try:
-        tree_data = github_json(GITHUB_TREE_URL, use_etag_cache=True)
+        local_version = read_local_version(base_dir)
+        remote_version = github_text(github_version_url())
+        tree_data = github_json(github_tree_url(), use_etag_cache=True)
         entries = tree_data.get("tree") or []
         files = []
         for entry in entries:
@@ -159,7 +230,7 @@ def run_update(base_dir: str, data_dir: str, auto_restart: bool = False, restart
         updated = []
         for rel in files:
             target = safe_update_target(base_dir, rel)
-            raw_url = f"{GITHUB_RAW_ROOT}/{urllib.parse.quote(rel, safe='/')}"
+            raw_url = f"{github_raw_root()}/{urllib.parse.quote(rel, safe='/')}"
             data = github_bytes(raw_url)
             if os.path.exists(target):
                 backup_path = os.path.join(backup_root, *rel.split("/"))
@@ -181,6 +252,10 @@ def run_update(base_dir: str, data_dir: str, auto_restart: bool = False, restart
             "backup_dir": backup_root if os.path.exists(backup_root) else "",
             "restart_required": True,
             "restart_scheduled": restart_scheduled,
+            "local_version": local_version,
+            "remote_version": remote_version,
+            "repo_url": github_repo_url(),
+            "branch": update_branch(),
         }
     finally:
         UPDATE_LOCK.release()

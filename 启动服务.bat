@@ -27,7 +27,7 @@ if "%ERRORLEVEL%"=="0" (
     exit /b 0
 )
 
-"%PYEXE%" main.py
+"%PYEXE%" main.py --port %APP_PORT%
 
 echo.
 echo Server stopped.

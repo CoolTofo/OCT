@@ -28,6 +28,12 @@ python.zip
 packages/
 _split_files/
 
+# Local build/package outputs
+dist/
+dist_clean/
+dist_migration/
+*.zip
+
 # OS/editor noise
 .DS_Store
 Thumbs.db
