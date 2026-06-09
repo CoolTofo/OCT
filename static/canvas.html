@@ -431,8 +431,14 @@
         .port.in { left:-29px; cursor:crosshair; }
         .port.out { right:-15px; }
         .node > .port { top:50%; }
-        .group-node,.promptGroup-node { min-width:260px; background:rgba(255,255,255,.96); border:1px solid #e8edf3; box-shadow:0 16px 42px rgba(15,23,42,.08); z-index:0; }
+        .group-node,.promptGroup-node { min-width:260px; background:rgba(255,255,255,.96); border:1px solid #e8edf3; box-shadow:0 16px 42px rgba(15,23,42,.08); z-index:1; }
         .group-node .node-head,.promptGroup-node .node-head { background:#fff; border-bottom:1px solid #f1f5f9; }
+        .organizeFrame-node { min-width:240px; background:transparent; border:1px dashed rgba(100,116,139,.28); border-radius:4px; box-shadow:none; z-index:0; }
+        .organizeFrame-node::before { background:transparent; }
+        .organizeFrame-node .node-head { background:transparent; border-bottom:1px dashed rgba(100,116,139,.18); border-radius:0; cursor:move; }
+        .organizeFrame-node .node-title { flex:1; min-width:0; }
+        .organize-frame-title-input { width:100%; border:0; outline:none; background:transparent; color:#64748b; font-size:12px; font-weight:850; letter-spacing:.02em; }
+        .organize-frame-body { height:100%; display:flex; align-items:flex-start; justify-content:flex-end; padding:10px; color:rgba(100,116,139,.22); font-size:10px; font-weight:850; pointer-events:none; background:transparent; }
         .llm-node { width:420px; }
         .llm-body { display:flex; flex-direction:column; gap:10px; min-height:0; }
         .node.sized.llm-node .llm-body { height:100%; }
@@ -698,8 +704,10 @@
         .theme-dark .llm-pane-resizer::before { background:#475569; }
         .theme-dark .group-node,
         .theme-dark .promptGroup-node,
+        .theme-dark .organizeFrame-node,
         .theme-dark .group-node .node-head,
         .theme-dark .promptGroup-node .node-head,
+        .theme-dark .organizeFrame-node .node-head,
         .theme-dark .model-panel,
         .theme-dark .image-edit-panel,
         .theme-dark .gate-panel { background:var(--card); border-color:var(--line); }
@@ -779,6 +787,9 @@
         .theme-dark .create-menu { background:var(--panel); border-color:var(--line); }
         .theme-dark .menu-btn { color:var(--muted); }
         .theme-dark .menu-btn:hover { background:var(--soft); color:var(--text); }
+        .theme-dark .organizeFrame-node { background:transparent; border-color:rgba(148,163,184,.32); }
+        .theme-dark .organizeFrame-node .node-head { background:transparent; border-bottom-color:rgba(148,163,184,.18); }
+        .theme-dark .organize-frame-title-input { color:#94a3b8; }
         .theme-dark .gen-btn,
         .theme-dark .llm-run,
         .theme-dark .primary-btn,
@@ -938,6 +949,7 @@
                     <button class="tool-btn" onclick="addDreaminaVideoNode()"><i data-lucide="terminal" class="w-4 h-4"></i><span>Dreamina 视频</span></button>
                     <button class="tool-btn" onclick="openPromptTemplatePanel()"><i data-lucide="library" class="w-4 h-4"></i><span>模板库</span></button>
                     <button class="tool-btn" onclick="autoArrangeCanvasNodes()"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>整理节点</span></button>
+                    <button class="tool-btn" onclick="createOrganizeFrameFromSelection()" title="Ctrl+Alt+G"><i data-lucide="box-select" class="w-4 h-4"></i><span>整理框</span></button>
                     <button id="linkVisibilityBtn" class="tool-btn" onclick="toggleLinkVisibilityMode()" title="连线：全部显示" aria-label="连线：全部显示"><i data-lucide="git-branch" class="w-4 h-4"></i><span>连线</span></button>
                     <button class="tool-btn" onclick="addComfyNode()"><i data-lucide="workflow" class="w-4 h-4"></i>ComfyUI</button>
                     <button class="tool-btn" onclick="addRhNode()"><i data-lucide="workflow" class="w-4 h-4"></i>RunningHub</button>
@@ -1006,6 +1018,7 @@
                 <button class="menu-btn" onclick="menuAdd('dreaminaImage')"><i data-lucide="image-plus" class="w-4 h-4"></i><span>Dreamina 图</span></button>
                 <button class="menu-btn" onclick="menuAdd('dreaminaVideo')"><i data-lucide="terminal" class="w-4 h-4"></i><span>Dreamina 视频</span></button>
                 <button class="menu-btn" onclick="openPromptTemplatePanel()"><i data-lucide="library" class="w-4 h-4"></i><span>模板库</span></button>
+                <button class="menu-btn" onclick="createOrganizeFrameFromSelection()"><i data-lucide="box-select" class="w-4 h-4"></i><span>整理框</span></button>
                 <button class="menu-btn" onclick="menuAdd('comfy')"><i data-lucide="workflow" class="w-4 h-4"></i><span data-i18n="canvas.comfyGenerate">ComfyUI 生成</span></button>
                 <button class="menu-btn" onclick="menuAdd('rh')"><i data-lucide="workflow" class="w-4 h-4"></i><span>RunningHub</span></button>
                 <button class="menu-btn" onclick="menuAdd('output')"><i data-lucide="circle-dot" class="w-4 h-4"></i>Output</button>
@@ -5632,11 +5645,15 @@
             return applyImageCrop();
         }
 
+        function renderNodeStackOrder(list){
+            const layer = node => node?.type === 'organizeFrame' ? 0 : (node?.type === 'group' || node?.type === 'promptGroup' ? 1 : 2);
+            return [...(list || [])].sort((a, b) => layer(a) - layer(b) || nodes.indexOf(a) - nodes.indexOf(b));
+        }
         function render(){
             const outputScrolls = captureOutputScrolls();
             applyViewport();
             nodesEl.innerHTML = '';
-            nodes.forEach(node => nodesEl.appendChild(renderNode(node)));
+            renderNodeStackOrder(nodes).forEach(node => nodesEl.appendChild(renderNode(node)));
             restoreOutputScrolls(outputScrolls);
             refreshGeometry();
             refreshGeometryAfterLayout();
@@ -5734,7 +5751,7 @@
                 else openGeneratorNodeMenu(node.id, e.clientX, e.clientY);
             };
             const registryTitle = window.CanvasNodeRegistry.titleFor(node.type, tr);
-            const title = node.generatorKind === 'storyboard' ? '分镜图工坊' : node.type === 'promptGroup' ? 'Prompts' : node.type === 'dreamina' ? (node.outputType === 'video' ? 'Dreamina Video' : 'Dreamina Image') : node.type === 'imageExtend' ? '扩展图片' : node.type === 'video' ? (node.videoKind === 'seedance' ? tr('canvas.sd2VideoGenerate') : registryTitle) : registryTitle || tr('canvas.apiGenerate');
+            const title = node.type === 'organizeFrame' ? (node.title || node.name || '整理框') : node.generatorKind === 'storyboard' ? '分镜图工坊' : node.type === 'promptGroup' ? 'Prompts' : node.type === 'dreamina' ? (node.outputType === 'video' ? 'Dreamina Video' : 'Dreamina Image') : node.type === 'imageExtend' ? '扩展图片' : node.type === 'video' ? (node.videoKind === 'seedance' ? tr('canvas.sd2VideoGenerate') : registryTitle) : registryTitle || tr('canvas.apiGenerate');
             // 失败徽章只在一键运行模式中显示，单节点失败已通过 alert 提示
             const showStatus = ['generator','msgen','comfy','rh','llm','png','dreamina'].includes(node.type) && node.runStatus
                 && (node.runStatus !== 'failed' || node._cascadeFailed);
@@ -5742,9 +5759,22 @@
                 const label = { queued:'排队中', running:'运行中', done:'完成', failed:'失败' }[node.runStatus] || '';
                 return `<span class="node-run-status ${node.runStatus}"><span class="dot"></span>${escapeHtml(label)}${node._cascadeIdx?' '+node._cascadeIdx:''}</span>`;
             })() : '';
-            el.innerHTML = `<div class="node-head"><span class="node-title">${title}</span><div style="display:flex;align-items:center;gap:8px">${statusHtml}<button onclick="deleteNode('${node.id}', event)" class="text-gray-300 hover:text-red-500"><i data-lucide="x" class="w-4 h-4"></i></button></div></div>`;
+            if(node.type === 'organizeFrame'){
+                el.ondblclick = e => { if(!isNodeControl(e.target)) renameOrganizeFrame(node.id, e); };
+                el.innerHTML = `<div class="node-head"><span class="node-title"><input class="organize-frame-title-input" value="${escapeAttr(title)}" title="重命名整理框"></span><div style="display:flex;align-items:center;gap:8px"><button onclick="renameOrganizeFrame('${node.id}', event)" class="text-gray-300 hover:text-blue-500" title="重命名整理框"><i data-lucide="pencil" class="w-4 h-4"></i></button><button onclick="deleteNode('${node.id}', event)" class="text-gray-300 hover:text-red-500"><i data-lucide="x" class="w-4 h-4"></i></button></div></div>`;
+            } else {
+                el.innerHTML = `<div class="node-head"><span class="node-title">${title}</span><div style="display:flex;align-items:center;gap:8px">${statusHtml}<button onclick="deleteNode('${node.id}', event)" class="text-gray-300 hover:text-red-500"><i data-lucide="x" class="w-4 h-4"></i></button></div></div>`;
+            }
             const body = document.createElement('div');
             body.className = 'node-body';
+            if(node.type === 'organizeFrame'){
+                body.classList.add('organize-frame-body');
+                body.innerHTML = `<span>${(node.items || []).length} 个节点</span>`;
+                const titleInput = el.querySelector('.organize-frame-title-input');
+                titleInput.onmousedown = e => e.stopPropagation();
+                titleInput.onclick = e => { e.stopPropagation(); titleInput.select(); };
+                titleInput.onchange = e => { node.title = String(e.target.value || '').trim() || '整理框'; scheduleSave(); render(); };
+            }
             if(node.type === 'image') {
                 if(node.url) {
                     const missing = isMissingAssetUrl(node.url);
@@ -6141,6 +6171,7 @@
             if(type === 'comfy') return {w:420, h:460};
             if(type === 'rh') return {w:430, h:0};
             if(type === 'output') return {w:460, h:0};
+            if(type === 'organizeFrame') return {w:360, h:260};
             return {w:260, h:0};
         }
         function loopCount(node){
@@ -8054,6 +8085,44 @@
                 closePromptTemplatePanel();
             }
         }
+        function promptTemplateFromDataTransfer(dataTransfer){
+            if(!dataTransfer) return null;
+            const templatePayload = dataTransfer.getData('application/x-prompt-template');
+            if(templatePayload){
+                try {
+                    const item = JSON.parse(templatePayload);
+                    if(item?.text) return item;
+                } catch {}
+            }
+            const text = dataTransfer.getData('text/plain');
+            return text ? {id:'dropped-template', name:'Template', text} : null;
+        }
+        function dataTransferHasPromptTemplate(dataTransfer){
+            return Array.from(dataTransfer?.types || []).includes('application/x-prompt-template');
+        }
+        function clearPromptTemplateDragState(){
+            promptTemplatePointerDrag?.card?.classList.remove('pointer-dragging');
+            promptTemplatePointerDrag?.ghost?.remove();
+            promptTemplatePointerDrag = null;
+            draggingPromptTemplate = null;
+        }
+        function handlePromptTemplateDrop(event){
+            const item = draggingPromptTemplate || promptTemplateFromDataTransfer(event.dataTransfer);
+            if(!item?.text || !isPointOnCanvas(event.clientX, event.clientY)) return false;
+            event.preventDefault();
+            event.stopPropagation();
+            createPromptNodeFromTemplate(item, screenToWorld(event.clientX, event.clientY));
+            closePromptTemplatePanel();
+            clearPromptTemplateDragState();
+            return true;
+        }
+        board.addEventListener('dragover', event => {
+            if(draggingPromptTemplate || dataTransferHasPromptTemplate(event.dataTransfer)){
+                event.preventDefault();
+                event.dataTransfer.dropEffect = 'copy';
+            }
+        });
+        board.addEventListener('drop', handlePromptTemplateDrop);
         document.addEventListener('pointermove', event => {
             if(!promptTemplatePointerDrag) return;
             event.preventDefault();
@@ -8073,7 +8142,7 @@
             const nodeById = new Map(nodes.map(node => [node.id, node]));
             const parentByChild = new Map();
             nodes.forEach(node => {
-                if(node.type !== 'group' && node.type !== 'promptGroup') return;
+                if(!isFrameContainerNode(node)) return;
                 (node.items || []).forEach(id => {
                     if(nodeById.has(id)) parentByChild.set(id, node.id);
                 });
@@ -8173,7 +8242,7 @@
             moved.add(node.id);
             node.x = Math.round(Number(node.x || 0) + dx);
             node.y = Math.round(Number(node.y || 0) + dy);
-            if(node.type === 'group' || node.type === 'promptGroup'){
+            if(isFrameContainerNode(node)){
                 (node.items || []).forEach(id => moveNodeWithGroupChildren(graph.nodeById.get(id), dx, dy, graph, moved));
             }
         }
@@ -8183,11 +8252,6 @@
             const laneGap = Math.max(120, Number(rules.orphanColumnGap || AUTO_ARRANGE_WRAP_RULES.orphanColumnGap));
             const sortedItems = items
                 .sort((a, b) => (preferredY.get(a.id) ?? Number(a.y || 0)) - (preferredY.get(b.id) ?? Number(b.y || 0)) || Number(a.x || 0) - Number(b.x || 0));
-            const estimatedStackHeight = sortedItems.reduce((sum, node) => {
-                const rect = rectById.get(node.id) || estimatedNodeRect(node);
-                return sum + (rect.h || 180) + rowGap;
-            }, 0);
-            const compactLongStack = estimatedStackHeight > maxColumnHeight;
             let laneX = x;
             let cursor = startY;
             let laneWidth = 0;
@@ -8198,8 +8262,9 @@
                     const rect = rectById.get(node.id) || estimatedNodeRect(node);
                     const width = rect.w || 260;
                     const height = rect.h || 180;
-                    const preferred = Math.round(preferredY.get(node.id) ?? cursor);
-                    let y = compactLongStack ? cursor : Math.max(cursor, preferred);
+                    // Keep preferredY as an ordering hint only. Reusing it as an absolute
+                    // placement offset preserves old diagonal layouts after clicking 整理节点.
+                    let y = cursor;
                     if(cursor > startY && height < maxColumnHeight && y + height - startY > maxColumnHeight){
                         laneX += laneWidth + laneGap;
                         cursor = startY;
@@ -11866,6 +11931,53 @@ ${referenceNote}
             currentOutputLightboxUrl = '';
             setupOutputPromptPanel(null);
         }
+        function isOrganizeFrame(node){ return node?.type === 'organizeFrame'; }
+        function isFrameContainerNode(node){ return node && (node.type === 'group' || node.type === 'promptGroup' || node.type === 'organizeFrame'); }
+        function renameOrganizeFrame(id, event=null){
+            event?.preventDefault?.();
+            event?.stopPropagation?.();
+            const node = nodes.find(n => n.id === id && isOrganizeFrame(n));
+            if(!node) return;
+            const current = String(node.title || node.name || '整理框');
+            const next = prompt('整理框名称', current);
+            if(next === null) return;
+            const title = String(next || '').trim() || '整理框';
+            if(title === current) return;
+            pushUndo();
+            node.title = title;
+            render();
+            scheduleSave();
+        }
+        function createOrganizeFrameFromSelection(){
+            if(!ensureCanvas()) return;
+            const targets = [...selected]
+                .map(id => nodes.find(n => n.id === id))
+                .filter(n => n && n.type !== 'organizeFrame');
+            pushUndo();
+            let frame;
+            if(targets.length){
+                const box = nodeBounds(targets.map(n => n.id));
+                frame = {
+                    id:uid('frame'),
+                    type:'organizeFrame',
+                    title:'整理框',
+                    x:box.x - 36,
+                    y:box.y - 54,
+                    w:box.w + 72,
+                    h:box.h + 90,
+                    items:targets.map(n => n.id)
+                };
+            } else {
+                const p = defaultPoint(0, 0);
+                frame = {id:uid('frame'), type:'organizeFrame', title:'整理框', x:p.x, y:p.y, w:420, h:280, items:[]};
+            }
+            const firstTargetIndex = targets.length ? Math.min(...targets.map(n => nodes.findIndex(item => item.id === n.id)).filter(i => i >= 0)) : nodes.length;
+            nodes.splice(Math.max(0, firstTargetIndex), 0, frame);
+            selected.clear();
+            selected.add(frame.id);
+            render();
+            scheduleSave();
+        }
         function groupSelectedImages(){
             if(!ensureCanvas()) return;
             const targets = [...selected].map(id => nodes.find(n => n.id === id)).filter(n => n?.type === 'image' || n?.type === 'prompt');
@@ -12021,7 +12133,7 @@ ${referenceNote}
             const idMap = new Map();
             const copies = clipboard.map(n => { const c = cloneNode(n, dx, dy); idMap.set(n.id, c.id); return c; });
             copies.forEach(c => {
-                if((c.type === 'group' || c.type === 'promptGroup') && c.items)
+                if(isFrameContainerNode(c) && c.items)
                     c.items = c.items.map(id => idMap.get(id) || id);
             });
             nodes.push(...copies);
@@ -12038,7 +12150,7 @@ ${referenceNote}
             let dragTarget = node;
             if(e.altKey){
                 const copy = cloneNode(node, 0, 0);
-                const isGroup = node.type === 'group' || node.type === 'promptGroup';
+                const isGroup = isFrameContainerNode(node);
                 if(isGroup && node.items?.length){
                     const idMap = new Map();
                     const childCopies = node.items
@@ -12054,12 +12166,12 @@ ${referenceNote}
                 dragTarget = copy;
                 render();
             }
-            const isGroup = dragTarget.type === 'group' || dragTarget.type === 'promptGroup';
+            const isGroup = isFrameContainerNode(dragTarget);
             const collected = new Map();
             const collect = n => {
                 if(!n || collected.has(n.id) || n.id === dragTarget.id) return;
                 collected.set(n.id, {node:n, ox:n.x, oy:n.y});
-                if(n.type === 'group' || n.type === 'promptGroup'){
+                if(isFrameContainerNode(n)){
                     (n.items || []).map(id => nodes.find(x => x.id === id)).forEach(collect);
                 }
             };
@@ -12246,8 +12358,8 @@ ${referenceNote}
         function endDrag(event=null){
             if(dragNode){
                 const moved = [dragNode.node, ...(dragNode.children || []).map(c => c.node)].filter(Boolean);
-                // 拖动 group/promptGroup 自身时不重新评估（成员跟着一起走，包含关系不变）
-                const draggedGroup = moved.some(n => n.type === 'group' || n.type === 'promptGroup');
+                // 拖动 group/promptGroup/整理框 自身时不重新评估（成员跟着一起走，包含关系不变）
+                const draggedGroup = moved.some(isFrameContainerNode);
                 if(!draggedGroup) updateGroupMembership(moved);
             }
             dragNode = null;
@@ -12780,7 +12892,8 @@ ${referenceNote}
                 return;
             }
             if(e.key === 'Escape' && outputLightbox.classList.contains('open')) { closeOutputLightbox(); return; }
-            if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'g') { e.preventDefault(); groupSelectedImages(); }
+            if((e.ctrlKey || e.metaKey) && e.altKey && !e.shiftKey && e.key.toLowerCase() === 'g') { e.preventDefault(); createOrganizeFrameFromSelection(); return; }
+            if((e.ctrlKey || e.metaKey) && !e.altKey && e.key.toLowerCase() === 'g') { e.preventDefault(); groupSelectedImages(); }
             if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c') {
                 // 在输入框/可编辑元素里时，让浏览器原生 Ctrl+C 工作
                 const tag = document.activeElement?.tagName;
