@@ -69,6 +69,48 @@ def create_router(deps: Dict[str, Any]) -> APIRouter:
         if loop:
             asyncio.run_coroutine_threadsafe(manager.broadcast_new_image(record), loop)
 
+    async def fetch_remote_workflow_fields(provider, workflow_id: str):
+        api_key = runninghub_api_key(provider)
+        url = f"{runninghub_base_url(provider)}/api/openapi/getJsonApiFormat"
+        body = {"apiKey": api_key, "workflowId": workflow_id}
+        timeout = httpx.Timeout(connect=20.0, read=180.0, write=60.0, pool=20.0)
+        async with httpx.AsyncClient(timeout=timeout, follow_redirects=True) as client:
+            resp = None
+            raw = {}
+            for attempt in range(2):
+                try:
+                    resp = await client.post(url, headers=runninghub_headers(provider), json=body)
+                    try:
+                        raw = resp.json()
+                    except Exception:
+                        raw = {"code": resp.status_code, "message": (resp.text or "RunningHub returned a non-JSON response")[:500]}
+                    break
+                except httpx.RequestError as exc:
+                    if attempt == 0:
+                        await asyncio.sleep(1)
+                        continue
+                    message = str(exc).strip() or repr(exc)
+                    raise HTTPException(status_code=502, detail=f"RunningHub request failed ({exc.__class__.__name__}): {message}") from exc
+            if resp is None:
+                raise HTTPException(status_code=502, detail="RunningHub request failed: no response received.")
+        if resp.status_code >= 400:
+            raise HTTPException(status_code=resp.status_code, detail=f"RunningHub HTTP {resp.status_code}: {rh_responses.api_error_text(raw)}")
+        if not isinstance(raw, dict) or raw.get("code") not in (None, 0, "0"):
+            detail = rh_responses.api_error_text(raw, f"RunningHub workflow fetch failed: {raw}")
+            raise HTTPException(status_code=400, detail=detail)
+        data = raw.get("data") if isinstance(raw.get("data"), dict) else {}
+        prompt = data.get("prompt")
+        workflow = {}
+        if isinstance(prompt, str) and prompt.strip():
+            try:
+                workflow = json.loads(prompt)
+            except Exception as exc:
+                raise HTTPException(status_code=502, detail=f"Failed to parse RunningHub workflow JSON: {exc}") from exc
+        elif isinstance(prompt, dict):
+            workflow = prompt
+        fields = fields_from_workflow_json(workflow)
+        return {"workflowId": workflow_id, "fields": fields, "workflow": workflow, "raw": raw}
+
     @router.get("/api/runninghub/workflows")
     async def list_runninghub_workflows():
         return {"workflows": load_workflows()}
@@ -135,46 +177,7 @@ def create_router(deps: Dict[str, Any]) -> APIRouter:
         provider = get_api_provider_exact(provider_id)
         if not is_runninghub_provider(provider):
             raise HTTPException(status_code=400, detail="Selected provider is not RunningHub.")
-        api_key = runninghub_api_key(provider)
-        url = f"{runninghub_base_url(provider)}/api/openapi/getJsonApiFormat"
-        body = {"apiKey": api_key, "workflowId": workflow_id}
-        timeout = httpx.Timeout(connect=20.0, read=180.0, write=60.0, pool=20.0)
-        async with httpx.AsyncClient(timeout=timeout, follow_redirects=True) as client:
-            resp = None
-            raw = {}
-            for attempt in range(2):
-                try:
-                    resp = await client.post(url, headers=runninghub_headers(provider), json=body)
-                    try:
-                        raw = resp.json()
-                    except Exception:
-                        raw = {"code": resp.status_code, "message": (resp.text or "RunningHub returned a non-JSON response")[:500]}
-                    break
-                except httpx.RequestError as exc:
-                    if attempt == 0:
-                        await asyncio.sleep(1)
-                        continue
-                    message = str(exc).strip() or repr(exc)
-                    raise HTTPException(status_code=502, detail=f"RunningHub request failed ({exc.__class__.__name__}): {message}") from exc
-            if resp is None:
-                raise HTTPException(status_code=502, detail="RunningHub request failed: no response received.")
-        if resp.status_code >= 400:
-            raise HTTPException(status_code=resp.status_code, detail=f"RunningHub HTTP {resp.status_code}: {rh_responses.api_error_text(raw)}")
-        if not isinstance(raw, dict) or raw.get("code") not in (None, 0, "0"):
-            detail = rh_responses.api_error_text(raw, f"RunningHub workflow fetch failed: {raw}")
-            raise HTTPException(status_code=400, detail=detail)
-        data = raw.get("data") if isinstance(raw.get("data"), dict) else {}
-        prompt = data.get("prompt")
-        workflow = {}
-        if isinstance(prompt, str) and prompt.strip():
-            try:
-                workflow = json.loads(prompt)
-            except Exception as exc:
-                raise HTTPException(status_code=502, detail=f"Failed to parse RunningHub workflow JSON: {exc}") from exc
-        elif isinstance(prompt, dict):
-            workflow = prompt
-        fields = fields_from_workflow_json(workflow)
-        return {"workflowId": workflow_id, "fields": fields, "workflow": workflow, "raw": raw}
+        return await fetch_remote_workflow_fields(provider, workflow_id)
 
     @router.post("/api/runninghub/upload")
     async def upload_runninghub_files(files: List[UploadFile] = File(...), provider_id: str = "runninghub", fileType: str = "input"):
@@ -236,47 +239,81 @@ def create_router(deps: Dict[str, Any]) -> APIRouter:
         if template and isinstance(template.get("options"), dict):
             options.update(template.get("options") or {})
         options.update(payload.options or {})
-        body = {
-            "addMetadata": True,
-            "randomSeed": True,
-            "nodeInfoList": node_info,
-            "instanceType": "default",
-            "usePersonalQueue": False,
-        }
         access_password = (payload.accessPassword or payload.access_password or (template or {}).get("accessPassword") or "").strip()
-        if access_password:
-            body["accessPassword"] = access_password
         retain = payload.retainSeconds if payload.retainSeconds is not None else (template or {}).get("defaultRetainSeconds")
-        if retain:
-            try:
-                retain = int(retain)
-                if 10 <= retain <= 180:
-                    body["retainSeconds"] = retain
-            except Exception:
-                pass
-        for key in ("addMetadata", "randomSeed", "webhookUrl", "instanceType", "usePersonalQueue", "retainSeconds"):
-            if key in options and options[key] not in ("", None):
-                body[key] = options[key]
-        if payload.addMetadata is not None:
-            body["addMetadata"] = bool(payload.addMetadata)
-        if payload.randomSeed is not None:
-            body["randomSeed"] = bool(payload.randomSeed)
-        if payload.webhookUrl:
-            body["webhookUrl"] = payload.webhookUrl
-        if payload.instanceType:
-            body["instanceType"] = payload.instanceType
-        if payload.usePersonalQueue is not None:
-            body["usePersonalQueue"] = bool(payload.usePersonalQueue)
+
+        def build_task_body(current_node_info):
+            body = {
+                "addMetadata": True,
+                "randomSeed": True,
+                "nodeInfoList": current_node_info,
+                "instanceType": "default",
+                "usePersonalQueue": False,
+            }
+            if access_password:
+                body["accessPassword"] = access_password
+            if retain:
+                try:
+                    retain_value = int(retain)
+                    if 10 <= retain_value <= 180:
+                        body["retainSeconds"] = retain_value
+                except Exception:
+                    pass
+            for key in ("addMetadata", "randomSeed", "webhookUrl", "instanceType", "usePersonalQueue", "retainSeconds"):
+                if key in options and options[key] not in ("", None):
+                    body[key] = options[key]
+            if payload.addMetadata is not None:
+                body["addMetadata"] = bool(payload.addMetadata)
+            if payload.randomSeed is not None:
+                body["randomSeed"] = bool(payload.randomSeed)
+            if payload.webhookUrl:
+                body["webhookUrl"] = payload.webhookUrl
+            if payload.instanceType:
+                body["instanceType"] = payload.instanceType
+            if payload.usePersonalQueue is not None:
+                body["usePersonalQueue"] = bool(payload.usePersonalQueue)
+            return body
+
         api_base = runninghub_api_base_url(provider)
         submit_url = f"{api_base}/openapi/v2/run/workflow/{urllib.parse.quote(workflow_id, safe='')}"
-        async with httpx.AsyncClient(timeout=60, follow_redirects=True) as client:
-            resp = await client.post(submit_url, headers=runninghub_headers(provider, base_url=api_base), json=body)
+
+        async def submit_task_body(body):
+            async with httpx.AsyncClient(timeout=60, follow_redirects=True) as client:
+                return await client.post(submit_url, headers=runninghub_headers(provider, base_url=api_base), json=body)
+
+        def submit_response_failed(resp, raw) -> bool:
+            if resp.status_code >= 400 or not isinstance(raw, dict):
+                return True
+            if raw.get("code") not in (None, "", 0, "0"):
+                return True
+            error_code = str(raw.get("errorCode") or raw.get("error_code") or "").strip().upper()
+            if error_code and error_code not in {"0", "NONE", "NULL"}:
+                return True
+            error_message = str(raw.get("errorMessage") or raw.get("error_message") or "").strip()
+            return bool(error_message)
+
+        body = build_task_body(node_info)
+        resp = await submit_task_body(body)
         try:
             raw = resp.json()
         except Exception as exc:
             raise HTTPException(status_code=502, detail=f"RunningHub returned non-JSON response: {resp.text[:500]}") from exc
-        if resp.status_code >= 400 or raw.get("code") not in (None, 0):
-            detail = raw.get("message") or raw.get("msg") or raw.get("errorMessage") or raw
+
+        dropped_node_info = []
+        if submit_response_failed(resp, raw) and rh_responses.node_info_mismatch(raw):
+            remote = await fetch_remote_workflow_fields(provider, workflow_id)
+            filtered_node_info, dropped_node_info = rh_service.filter_node_info_by_fields(node_info, remote.get("fields") or [])
+            if dropped_node_info:
+                node_info = filtered_node_info
+                body = build_task_body(node_info)
+                resp = await submit_task_body(body)
+                try:
+                    raw = resp.json()
+                except Exception as exc:
+                    raise HTTPException(status_code=502, detail=f"RunningHub returned non-JSON response: {resp.text[:500]}") from exc
+
+        if submit_response_failed(resp, raw):
+            detail = raw.get("message") or raw.get("msg") or raw.get("errorMessage") or raw if isinstance(raw, dict) else raw
             raise HTTPException(status_code=resp.status_code if resp.status_code >= 400 else 502, detail=detail)
         data = raw.get("data") if isinstance(raw.get("data"), dict) else raw
         task_id = str(data.get("taskId") or raw.get("taskId") or "").strip()
@@ -291,6 +328,13 @@ def create_router(deps: Dict[str, Any]) -> APIRouter:
             "promptTips": data.get("promptTips") or raw.get("promptTips") or "",
             "raw": raw,
         }
+        if dropped_node_info:
+            result["nodeInfoSync"] = {
+                "dropped": [
+                    {"nodeId": item.get("nodeId") or item.get("node_id") or "", "fieldName": item.get("fieldName") or item.get("field_name") or ""}
+                    for item in dropped_node_info
+                ]
+            }
         items = rh_responses.result_items(raw)
         if str(status or "").upper() in SUCCESS_STATUSES and items:
             images, videos, texts, files = await localize_results(items)
@@ -407,13 +451,24 @@ def create_router(deps: Dict[str, Any]) -> APIRouter:
 def node_info_from_payload(payload: RunningHubTaskRequest, template=None):
     node_info = payload.nodeInfoList or payload.node_info_list or []
     cleaned = []
+    template_fields = [
+        rh_service.normalize_field(field, i)
+        for i, field in enumerate((template or {}).get("fields") or [])
+        if isinstance(field, dict)
+    ]
+    template_field_by_key = {
+        (str(field.get("nodeId") or ""), str(field.get("fieldName") or "")): field
+        for field in template_fields
+    }
     for item in node_info:
         if not isinstance(item, dict):
             continue
         node_id = str(item.get("nodeId") or item.get("node_id") or "").strip()
         field_name = str(item.get("fieldName") or item.get("field_name") or "").strip()
         if node_id and field_name:
-            cleaned.append({"nodeId": node_id, "fieldName": field_name, "fieldValue": item.get("fieldValue", item.get("field_value", ""))})
+            field = template_field_by_key.get((node_id, field_name), {"nodeId": node_id, "fieldName": field_name})
+            value = item.get("fieldValue", item.get("field_value", ""))
+            cleaned.append({"nodeId": node_id, "fieldName": field_name, "fieldValue": rh_service.coerce_value(value, field, use_default_for_empty=False)})
     if cleaned:
         return cleaned
     fields = [
@@ -421,13 +476,23 @@ def node_info_from_payload(payload: RunningHubTaskRequest, template=None):
         for i, field in enumerate(payload.fields or [])
     ]
     if not fields and template:
-        fields = template.get("fields") or []
+        fields = template_fields
     values = payload.values or {}
     for field in fields:
         node_id = str(field.get("nodeId") or "").strip()
         field_name = str(field.get("fieldName") or "").strip()
         if not node_id or not field_name:
             continue
-        value = values.get(field.get("id"), values.get(f"{node_id}.{field_name}", field.get("default", "")))
-        cleaned.append({"nodeId": node_id, "fieldName": field_name, "fieldValue": rh_service.coerce_value(value, field)})
+        field_id = field.get("id")
+        dotted_key = f"{node_id}.{field_name}"
+        explicit = False
+        if field_id in values:
+            value = values.get(field_id)
+            explicit = True
+        elif dotted_key in values:
+            value = values.get(dotted_key)
+            explicit = True
+        else:
+            value = field.get("default", "")
+        cleaned.append({"nodeId": node_id, "fieldName": field_name, "fieldValue": rh_service.coerce_value(value, field, use_default_for_empty=not explicit)})
     return cleaned

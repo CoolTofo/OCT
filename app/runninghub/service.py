@@ -63,5 +63,54 @@ def field_key(field: Dict[str, Any]) -> str:
     return fields.field_key(field)
 
 
-def coerce_value(value: Any, field: Dict[str, Any] | None) -> Any:
+def field_key_set(raw_fields: List[Dict[str, Any]] | None) -> set[tuple[str, str]]:
+    keys: set[tuple[str, str]] = set()
+    for field in raw_fields or []:
+        if not isinstance(field, dict):
+            continue
+        node_id = str(field.get("nodeId") or field.get("node_id") or field.get("node") or "").strip()
+        field_name = str(field.get("fieldName") or field.get("field_name") or field.get("input") or "").strip()
+        if node_id and field_name:
+            keys.add((node_id, field_name))
+    return keys
+
+
+def filter_node_info_by_fields(node_info: List[Dict[str, Any]] | None, raw_fields: List[Dict[str, Any]] | None) -> tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    allowed = field_key_set(raw_fields)
+    if not allowed:
+        return list(node_info or []), []
+    kept: List[Dict[str, Any]] = []
+    dropped: List[Dict[str, Any]] = []
+    for item in node_info or []:
+        if not isinstance(item, dict):
+            continue
+        key = (
+            str(item.get("nodeId") or item.get("node_id") or "").strip(),
+            str(item.get("fieldName") or item.get("field_name") or "").strip(),
+        )
+        if key in allowed:
+            kept.append(item)
+        else:
+            dropped.append(item)
+    return kept, dropped
+
+
+def is_unresolved_string_format_placeholder(value: Any, field: Dict[str, Any] | None) -> bool:
+    field = field or {}
+    class_type = str(field.get("classType") or field.get("class_type") or "").strip().lower()
+    field_name = str(field.get("fieldName") or field.get("field_name") or "").strip().lower()
+    if "stringformat" not in class_type or field_name not in {"f_string", "format", "text"}:
+        return False
+    text = str(value or "").strip()
+    default = str(field.get("default", "") or "").strip()
+    if default and text != default:
+        return False
+    return re.fullmatch(r"\{\s*[A-Za-z_][A-Za-z0-9_]*\s*\}", text) is not None
+
+
+def coerce_value(value: Any, field: Dict[str, Any] | None, use_default_for_empty: bool = True) -> Any:
+    if is_unresolved_string_format_placeholder(value, field):
+        return ""
+    if value == "" and not use_default_for_empty:
+        return ""
     return fields.coerce_value(value, field)

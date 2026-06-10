@@ -16,22 +16,31 @@
         comfy: {labelKey:'canvas.comfyGenerate', fallback:'ComfyUI 生成', icon:'workflow', title:'ComfyUI'},
         rh: {fallback:'RunningHub', icon:'workflow', title:'RunningHub'},
         video: {labelKey:'canvas.videoGenerateNode', fallback:'视频生成', icon:'clapperboard', titleKey:'canvas.videoGenerateNode'},
+        sd2Video: {labelKey:'canvas.sd2VideoGenerate', fallback:'SD2.0 视频', icon:'film', titleKey:'canvas.sd2VideoGenerate'},
         dreaminaImage: {fallback:'Dreamina 图', icon:'image-plus', title:'Dreamina Image'},
         dreaminaVideo: {fallback:'Dreamina 视频', icon:'terminal', title:'Dreamina Video'},
+        imageExtend: {fallback:'扩展图片', icon:'expand', title:'扩展图片'},
         panorama: {fallback:'360 全景', icon:'orbit', title:'360 全景'},
         png: {labelKey:'canvas.pngComposeNode', fallback:'PNG 合成节点', icon:'file-image', titleKey:'canvas.pngComposeNode'},
         output: {fallback:'Output', icon:'circle-dot', title:'Output'},
         image: {labelKey:'canvas.imageCard', fallback:'图片卡片', icon:'image-plus', title:'Image'},
         prompt: {labelKey:'canvas.prompt', fallback:'提示词', icon:'text-cursor-input', title:'Prompt'},
+        flowFrame: {fallback:'流帧心法', icon:'film', title:'流帧心法'},
         loop: {labelKey:'canvas.loopNode', fallback:'循环节点', icon:'repeat-2', titleKey:'canvas.loopNode'},
         group: {labelKey:'canvas.group', fallback:'分组', icon:'group', title:'Group'},
         llm: {fallback:'LLM', icon:'message-square-text', title:'LLM'}
     });
 
-    const GENERATOR_TYPES = Object.freeze(['generator','msgen','comfy','rh','video','png','dreamina']);
-    const IMAGE_OUTPUT_TYPES = Object.freeze(['generator','msgen','comfy','rh','png','dreamina']);
-    const ADDABLE_GENERATOR_TYPES = Object.freeze(['generator','storyboard','msgen','comfy','rh','video','dreaminaImage','dreaminaVideo','png']);
-    const ADDABLE_SOURCE_TYPES = Object.freeze(['image','prompt','loop','group','llm']);
+    const GENERATOR_TYPES = Object.freeze(['generator','msgen','comfy','rh','video','png','dreamina','imageExtend','panorama']);
+    const IMAGE_OUTPUT_TYPES = Object.freeze(['generator','msgen','comfy','rh','png','dreamina','imageExtend','panorama']);
+    const ADDABLE_GENERATOR_TYPES = Object.freeze(['generator','storyboard','msgen','comfy','rh','video','sd2Video','dreaminaImage','dreaminaVideo','png','imageExtend','panorama']);
+    const ADDABLE_SOURCE_TYPES = Object.freeze(['image','prompt','flowFrame','loop','group','llm']);
+    const NODE_PALETTE_SECTIONS = Object.freeze([
+        {id:'source', fallback:'素材', types:['image','prompt','flowFrame','loop','group','output']},
+        {id:'imageGen', fallback:'图片 / 合成', types:['generator','storyboard','msgen','png','imageExtend','panorama']},
+        {id:'videoGen', fallback:'视频', types:['video','sd2Video','dreaminaImage','dreaminaVideo']},
+        {id:'workflow', fallback:'工作流 / AI', types:['llm','comfy','rh']}
+    ]);
 
     function resolveText(meta, tr, primaryKey){
         const key = primaryKey || meta.labelKey;
@@ -52,6 +61,14 @@
         return ADDABLE_SOURCE_TYPES.map(type => option(type, tr));
     }
 
+    function nodePaletteSections(tr){
+        return NODE_PALETTE_SECTIONS.map(section => ({
+            id:section.id,
+            title:section.fallback,
+            items:section.types.map(type => option(type, tr))
+        }));
+    }
+
     function titleFor(type, tr){
         const meta = NODE_META[type];
         if(!meta) return '';
@@ -65,6 +82,7 @@
         IMAGE_OUTPUT_TYPES,
         addableGeneratorOptions,
         addableSourceOptions,
+        nodePaletteSections,
         titleFor
     });
 })(window);

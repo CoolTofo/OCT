@@ -114,6 +114,7 @@
         .node-title { font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
         .linked-clone-badge { height:22px; padding:0 7px; border-radius:999px; display:inline-flex; align-items:center; gap:4px; background:rgba(245,158,11,.14); color:#b45309; border:1px solid rgba(245,158,11,.36); font-size:10px; font-weight:900; letter-spacing:.06em; }
         .linked-clone-badge i { width:12px; height:12px; }
+        .linked-clone-code { padding:1px 4px; border-radius:5px; background:rgba(245,158,11,.2); color:#92400e; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:10px; line-height:1; letter-spacing:0; }
         /* 一键运行级联状态徽章 */
         .node-run-status { display:inline-flex; align-items:center; gap:4px; padding:2px 7px; border-radius:6px; font-size:10px; font-weight:800; letter-spacing:.04em; }
         .node-run-status.queued { background:#e5e7eb; color:#6b7280; }
@@ -270,6 +271,23 @@
         .prompt-node { width:310px; }
         .prompt-node .node-body { overflow:hidden !important; }
         .prompt-node textarea { width:100%; height:140px; min-height:72px; resize:none; overflow-y:auto; scrollbar-width:thin; border:1px solid #edf2f7; border-radius:16px; outline:none; padding:12px; background:#fbfdff; font-size:13px; line-height:1.6; }
+        .flowFrame-node { width:380px; }
+        .flow-frame-body { display:flex; flex-direction:column; gap:10px; min-width:0; }
+        .flow-frame-note { color:var(--muted); font-size:11px; line-height:1.5; font-weight:700; padding:8px 10px; border:1px dashed var(--line-2); border-radius:14px; background:var(--soft); }
+        .flow-frame-body .sd2-prompt-input { min-height:120px; resize:vertical; }
+        .flow-frame-settings { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+        .flow-frame-asset-list { display:flex; flex-direction:column; gap:7px; }
+        .flow-frame-asset { display:grid; grid-template-columns:72px minmax(0,1fr); gap:8px; padding:7px; border:1px solid var(--line); border-radius:12px; background:var(--soft); }
+        .flow-frame-asset-thumb { position:relative; height:60px; border-radius:10px; overflow:hidden; background:var(--card-solid); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; }
+        .flow-frame-asset-thumb img { width:100%; height:100%; object-fit:cover; }
+        .flow-frame-asset-tag { position:absolute; top:4px; left:4px; min-width:40px; height:18px; padding:0 6px; border-radius:999px; background:rgba(15,23,42,.82); color:#fff; display:flex; align-items:center; justify-content:center; font-size:9.5px; font-weight:900; }
+        .flow-frame-asset-meta { min-width:0; display:flex; flex-direction:column; gap:5px; }
+        .flow-frame-asset-name { min-width:0; color:var(--muted); font-size:10.5px; font-weight:850; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .flow-frame-asset-role { width:100%; height:30px; border:1px solid var(--line-2); border-radius:9px; outline:none; background:var(--card-solid); color:var(--text); padding:0 9px; font-size:11px; font-weight:700; }
+        .flow-frame-preview { min-height:150px; font-size:11px; line-height:1.5; resize:vertical; }
+        .flow-frame-actions { display:flex; flex-direction:column; gap:6px; }
+        .flow-frame-actions-row { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+        .flow-frame-sync-hint { color:var(--faint); font-size:10.5px; line-height:1.45; font-weight:700; }
         .prompt-editor { height:100%; display:flex; flex-direction:column; gap:7px; }
         .prompt-editor-tools { display:flex; align-items:center; gap:6px; }
         .prompt-template-select { flex:1; min-width:0; height:30px; border:1px solid var(--line); border-radius:10px; background:var(--card-solid); color:var(--muted); padding:0 9px; font-size:11px; font-weight:800; outline:none; }
@@ -294,10 +312,19 @@
         .template-drag-ghost-title { font-size:12px; font-weight:900; line-height:1.25; }
         .template-drag-ghost-sub { margin-top:3px; color:var(--muted); font-size:10px; font-weight:800; }
         .template-card.pointer-dragging { opacity:.55; }
-        .canvas-left-tools { position:absolute; left:24px; top:50%; transform:translateY(-50%); z-index:28; display:flex; flex-direction:column; gap:8px; pointer-events:auto; }
-        .canvas-left-tool { width:42px; height:42px; border-radius:15px; border:1px solid var(--line); background:var(--card-solid); color:var(--muted); display:flex; align-items:center; justify-content:center; box-shadow:0 12px 34px var(--shadow); transition:all .16s var(--ease); }
-        .canvas-left-tool:hover { color:var(--text); border-color:var(--line-2); transform:translateX(2px); }
-        .tool-btn.active,.canvas-left-tool.active { color:var(--text); border-color:var(--strong); background:rgba(99,102,241,.12); }
+        .node-palette { position:absolute; left:22px; top:112px; bottom:82px; z-index:28; width:168px; padding:8px; border:1px solid var(--line); border-radius:14px; background:rgba(255,255,255,.94); box-shadow:0 14px 36px rgba(15,23,42,.08); backdrop-filter:blur(16px); display:flex; flex-direction:column; gap:8px; pointer-events:auto; }
+        .node-palette-head { display:flex; align-items:center; justify-content:space-between; min-height:24px; padding:0 3px; }
+        .node-palette-title { color:var(--text); font-size:12px; font-weight:900; letter-spacing:0; }
+        .node-palette-list { min-height:0; flex:1; overflow:auto; display:flex; flex-direction:column; gap:4px; scrollbar-width:thin; }
+        .node-palette-btn { width:100%; min-width:0; height:36px; border-radius:9px; border:1px solid transparent; background:transparent; color:var(--muted); display:flex; align-items:center; justify-content:flex-start; gap:8px; padding:0 9px; transition:background .14s var(--ease), border-color .14s var(--ease), color .14s var(--ease); }
+        .node-palette-btn:hover { color:var(--text); border-color:var(--line); background:var(--soft); }
+        .node-palette-btn i { width:16px; height:16px; flex:0 0 16px; stroke-width:2; }
+        .node-palette-btn span { min-width:0; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left; font-size:11.5px; line-height:1.1; font-weight:800; }
+        .node-palette-tools { flex:0 0 auto; display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); gap:4px; padding-top:7px; border-top:1px solid var(--line); }
+        .node-palette-tool { width:100%; height:30px; border-radius:9px; border:1px solid transparent; background:transparent; color:var(--muted); display:flex; align-items:center; justify-content:center; transition:background .14s var(--ease), border-color .14s var(--ease), color .14s var(--ease); }
+        .node-palette-tool:hover { color:var(--text); border-color:var(--line); background:var(--soft); }
+        .node-palette-tool i { width:15px; height:15px; }
+        .tool-btn.active,.node-palette-tool.active { color:var(--text); border-color:var(--strong); background:rgba(99,102,241,.12); }
         .template-manager { position:fixed; left:88px; top:22px; bottom:22px; z-index:1000; width:min(430px, calc(100vw - 118px)); background:var(--card-solid); border:1px solid var(--line); border-radius:20px; box-shadow:0 24px 80px rgba(15,23,42,.18); display:flex; flex-direction:column; overflow:hidden; }
         .template-manager-head { padding:16px; border-bottom:1px solid var(--line); display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
         .template-manager-title { font-size:14px; font-weight:900; color:var(--text); }
@@ -542,7 +569,7 @@
         .hint { position:absolute; left:50%; bottom:24px; transform:translateX(-50%); z-index:25; color:#94a3b8; font-size:11px; font-weight:700; pointer-events:none; }
         .drop-overlay { position:absolute; inset:0; z-index:20; display:none; align-items:center; justify-content:center; color:#64748b; background:rgba(248,250,252,.72); backdrop-filter:blur(2px); font-weight:800; letter-spacing:.16em; pointer-events:none; }
         .drop-overlay.active { display:flex; }
-        .create-menu { position:absolute; z-index:40; display:none; width:190px; padding:8px; border-radius:18px; background:rgba(255,255,255,.96); border:1px solid #e8edf3; box-shadow:0 20px 50px rgba(15,23,42,.14); backdrop-filter:blur(16px); }
+        .create-menu { position:absolute; z-index:40; display:none; width:190px; max-height:min(76vh, 620px); overflow:auto; padding:8px; border-radius:18px; background:rgba(255,255,255,.96); border:1px solid #e8edf3; box-shadow:0 20px 50px rgba(15,23,42,.14); backdrop-filter:blur(16px); scrollbar-width:thin; }
         .create-menu.open { display:block; }
         .menu-btn { width:100%; height:38px; border-radius:12px; display:flex; align-items:center; gap:9px; padding:0 10px; color:#475569; font-size:12px; font-weight:700; }
         .menu-btn span { min-width:0; overflow:hidden; text-overflow:ellipsis; }
@@ -817,6 +844,9 @@
         .theme-dark .selection-box { border-color:var(--strong); background:rgba(248,250,252,.08); }
         .theme-dark .selection-hub,
         .theme-dark .create-menu { background:var(--panel); border-color:var(--line); }
+        .theme-dark .node-palette { background:var(--panel); border-color:var(--line); box-shadow:0 14px 36px rgba(0,0,0,.24); }
+        .theme-dark .node-palette-btn:hover,
+        .theme-dark .node-palette-tool:hover { background:var(--soft); border-color:var(--line); }
         .theme-dark .menu-btn { color:var(--muted); }
         .theme-dark .menu-btn:hover { background:var(--soft); color:var(--text); }
         .theme-dark .organizeFrame-node { background:transparent; border-color:rgba(148,163,184,.32); }
@@ -942,6 +972,8 @@
             .topbar { left:14px; right:14px; top:14px; }
             .library { width:calc(100vw - 28px); max-height:42vh; }
             .canvas-nav { min-width:0; width:max-content; max-width:calc(100vw - 28px); }
+            .node-palette { left:14px; top:92px; bottom:auto; max-height:52vh; width:160px; }
+            .node-palette-btn { height:34px; }
             .canvas-gate { padding:16px; align-items:center; }
             .gate-panel { padding:20px; }
             .gate-head { flex-direction:column; align-items:stretch; gap:14px; }
@@ -964,34 +996,6 @@
                     <div id="currentCanvasTime" class="current-canvas-time">--</div>
                 </div>
                 <p id="saveState" style="display:none" data-i18n="canvas.chooseFirst">请选择或新建画布</p>
-            </div>
-            <div id="quickToolbar" class="panel toolbar editor-only">
-                <button class="tool-btn toolbar-toggle" type="button" onclick="toggleQuickToolbar()" title="折叠快捷菜单" aria-label="折叠快捷菜单"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
-                <div class="toolbar-items">
-                    <button class="tool-btn" onclick="addImageNode()"><i data-lucide="image-plus" class="w-4 h-4"></i><span data-i18n="canvas.image">图片</span></button>
-                    <button class="tool-btn" onclick="addPromptNode()"><i data-lucide="text-cursor-input" class="w-4 h-4"></i><span data-i18n="canvas.prompt">提示词</span></button>
-                    <button class="tool-btn" onclick="addLoopNode()"><i data-lucide="repeat-2" class="w-4 h-4"></i><span data-i18n="canvas.loop">循环</span></button>
-                    <button class="tool-btn" onclick="addLLMNode()"><i data-lucide="message-square-text" class="w-4 h-4"></i>LLM</button>
-                    <button class="tool-btn" onclick="addPngComposeNode()"><i data-lucide="file-image" class="w-4 h-4"></i><span data-i18n="canvas.pngCompose">PNG 合成</span></button>
-                    <button class="tool-btn" onclick="addGeneratorNode()"><i data-lucide="wand-sparkles" class="w-4 h-4"></i><span data-i18n="canvas.apiGenerate">API生成</span></button>
-                    <button class="tool-btn" onclick="addStoryboardNode()"><i data-lucide="layout-template" class="w-4 h-4"></i><span>分镜图工坊</span></button>
-                    <button class="tool-btn" onclick="addMsGenNode()"><i data-lucide="cloud-lightning" class="w-4 h-4"></i><span data-i18n="canvas.msGenerate">MS生成</span></button>
-                    <button class="tool-btn" onclick="addVideoNode()"><i data-lucide="clapperboard" class="w-4 h-4"></i><span data-i18n="canvas.videoGenerate">视频生成</span></button>
-                    <button class="tool-btn" onclick="addSd2VideoNode()"><i data-lucide="film" class="w-4 h-4"></i><span data-i18n="canvas.sd2VideoGenerate">SD2.0 视频</span></button>
-                    <button class="tool-btn" onclick="addDreaminaImageNode()"><i data-lucide="image-plus" class="w-4 h-4"></i><span>Dreamina 图</span></button>
-                    <button class="tool-btn" onclick="addDreaminaVideoNode()"><i data-lucide="terminal" class="w-4 h-4"></i><span>Dreamina 视频</span></button>
-                    <button class="tool-btn" onclick="openPromptTemplatePanel()"><i data-lucide="library" class="w-4 h-4"></i><span>模板库</span></button>
-                    <button class="tool-btn" onclick="autoArrangeCanvasNodes()"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>整理节点</span></button>
-                    <button class="tool-btn" onclick="createOrganizeFrameFromSelection()" title="Ctrl+Alt+G"><i data-lucide="box-select" class="w-4 h-4"></i><span>整理框</span></button>
-                    <button id="linkVisibilityBtn" class="tool-btn" onclick="toggleLinkVisibilityMode()" title="连线：全部显示" aria-label="连线：全部显示"><i data-lucide="git-branch" class="w-4 h-4"></i><span>连线</span></button>
-                    <button class="tool-btn" onclick="addComfyNode()"><i data-lucide="workflow" class="w-4 h-4"></i>ComfyUI</button>
-                    <button class="tool-btn" onclick="addRhNode()"><i data-lucide="workflow" class="w-4 h-4"></i>RunningHub</button>
-                    <button class="tool-btn" onclick="addOutputNode()"><i data-lucide="circle-dot" class="w-4 h-4"></i>Output</button>
-                    <button class="tool-btn" onclick="groupSelectedImages()"><i data-lucide="group" class="w-4 h-4"></i><span data-i18n="canvas.group">分组</span></button>
-                </div>
-                <div class="toolbar-fixed">
-                    <button class="tool-btn toolbar-log" onclick="openCanvasLog()" title="日志" aria-label="日志" data-i18n-title="canvas.logs"><i data-lucide="list-todo" class="w-4 h-4"></i><span data-i18n="canvas.logs">日志</span></button>
-                </div>
             </div>
         </div>
 
@@ -1030,10 +1034,18 @@
         </div>
 
         <div id="board" class="board editor-only">
-            <div class="canvas-left-tools" aria-label="画布设置">
-                <button class="canvas-left-tool" type="button" onclick="openPromptTemplateManager()" title="模板预设管理" aria-label="模板预设管理"><i data-lucide="library" class="w-4 h-4"></i></button>
-                <button class="canvas-left-tool" type="button" onclick="autoArrangeCanvasNodes()" title="整理画布节点" aria-label="整理画布节点"><i data-lucide="layout-dashboard" class="w-4 h-4"></i></button>
-                <button id="linkVisibilitySideBtn" class="canvas-left-tool" type="button" onclick="toggleLinkVisibilityMode()" title="连线：全部显示" aria-label="连线：全部显示"><i data-lucide="git-branch" class="w-4 h-4"></i></button>
+            <div id="nodePalette" class="node-palette" aria-label="节点面板">
+                <div class="node-palette-head">
+                    <div class="node-palette-title">节点</div>
+                </div>
+                <div id="nodePaletteList" class="node-palette-list"></div>
+                <div class="node-palette-tools" aria-label="画布设置">
+                    <button class="node-palette-tool" type="button" onclick="openPromptTemplatePanel()" title="模板库" aria-label="模板库"><i data-lucide="library" class="w-4 h-4"></i></button>
+                    <button class="node-palette-tool" type="button" onclick="autoArrangeCanvasNodes()" title="整理节点" aria-label="整理节点"><i data-lucide="layout-dashboard" class="w-4 h-4"></i></button>
+                    <button class="node-palette-tool" type="button" onclick="createOrganizeFrameFromSelection()" title="整理框" aria-label="整理框"><i data-lucide="box-select" class="w-4 h-4"></i></button>
+                    <button id="linkVisibilitySideBtn" class="node-palette-tool" type="button" onclick="toggleLinkVisibilityMode()" title="连线：全部显示" aria-label="连线：全部显示"><i data-lucide="git-branch" class="w-4 h-4"></i></button>
+                    <button class="node-palette-tool" type="button" onclick="openCanvasLog()" title="日志" aria-label="日志"><i data-lucide="list-todo" class="w-4 h-4"></i></button>
+                </div>
             </div>
             <div id="dropOverlay" class="drop-overlay" data-i18n="canvas.dropImage">拖放图片到画布</div>
             <div id="selectionBox" class="selection-box"></div>
@@ -1043,15 +1055,20 @@
                 <div class="menu-divider" data-menu-paste-divider style="display:none"></div>
                 <button class="menu-btn" onclick="menuAdd('image')"><i data-lucide="image-plus" class="w-4 h-4"></i><span data-i18n="canvas.imageCard">图片卡片</span></button>
                 <button class="menu-btn" onclick="menuAdd('prompt')"><i data-lucide="text-cursor-input" class="w-4 h-4"></i><span data-i18n="canvas.prompt">提示词</span></button>
+                <button class="menu-btn" onclick="menuAdd('flowFrame')"><i data-lucide="film" class="w-4 h-4"></i><span>流帧心法</span></button>
                 <button class="menu-btn" onclick="menuAdd('loop')"><i data-lucide="repeat-2" class="w-4 h-4"></i><span data-i18n="canvas.loopNode">循环节点</span></button>
+                <button class="menu-btn" onclick="menuAdd('group')"><i data-lucide="group" class="w-4 h-4"></i><span data-i18n="canvas.group">分组</span></button>
                 <button class="menu-btn" onclick="menuAdd('llm')"><i data-lucide="message-square-text" class="w-4 h-4"></i><span data-i18n="canvas.llmNode">LLM 节点</span></button>
                 <button class="menu-btn" onclick="menuAdd('png')"><i data-lucide="file-image" class="w-4 h-4"></i><span data-i18n="canvas.pngComposeNode">PNG 合成节点</span></button>
                 <button class="menu-btn" onclick="menuAdd('generator')"><i data-lucide="wand-sparkles" class="w-4 h-4"></i><span data-i18n="canvas.apiGenerate">API生成</span></button>
                 <button class="menu-btn" onclick="menuAdd('storyboard')"><i data-lucide="layout-template" class="w-4 h-4"></i><span>分镜图工坊</span></button>
                 <button class="menu-btn" onclick="menuAdd('msgen')"><i data-lucide="cloud-lightning" class="w-4 h-4"></i><span data-i18n="canvas.modelscopeGenerate">Modelscope生成</span></button>
                 <button class="menu-btn" onclick="menuAdd('video')"><i data-lucide="clapperboard" class="w-4 h-4"></i><span data-i18n="canvas.videoGenerateNode">视频生成</span></button>
+                <button class="menu-btn" onclick="menuAdd('sd2Video')"><i data-lucide="film" class="w-4 h-4"></i><span data-i18n="canvas.sd2VideoGenerate">SD2.0 视频</span></button>
                 <button class="menu-btn" onclick="menuAdd('dreaminaImage')"><i data-lucide="image-plus" class="w-4 h-4"></i><span>Dreamina 图</span></button>
                 <button class="menu-btn" onclick="menuAdd('dreaminaVideo')"><i data-lucide="terminal" class="w-4 h-4"></i><span>Dreamina 视频</span></button>
+                <button class="menu-btn" onclick="menuAdd('imageExtend')"><i data-lucide="expand" class="w-4 h-4"></i><span>扩展图片</span></button>
+                <button class="menu-btn" onclick="menuAdd('panorama')"><i data-lucide="orbit" class="w-4 h-4"></i><span>360 全景</span></button>
                 <button class="menu-btn" onclick="openPromptTemplatePanel()"><i data-lucide="library" class="w-4 h-4"></i><span>模板库</span></button>
                 <button class="menu-btn" onclick="createOrganizeFrameFromSelection()"><i data-lucide="box-select" class="w-4 h-4"></i><span>整理框</span></button>
                 <button class="menu-btn" onclick="menuAdd('comfy')"><i data-lucide="workflow" class="w-4 h-4"></i><span data-i18n="canvas.comfyGenerate">ComfyUI 生成</span></button>
@@ -1240,9 +1257,10 @@
         </div>
     </div>
 
-    <script src="/static/canvas-node-registry.js?v=20260608-node-registry"></script>
+    <script src="/static/canvas-node-registry.js?v=20260610-node-palette-flow-frame"></script>
     <script src="/static/canvas-organize-frames.js?v=20260609-organize-frame-members"></script>
     <script src="/static/canvas-group-order.js?v=20260609-group-visual-order"></script>
+    <script src="/static/canvas-flow-frame.js?v=20260610-flow-frame-cinema"></script>
     <script src="/static/canvas-linked-clones.js?v=20260609-linked-clones"></script>
     <script>
         function refreshIcons(){ if(window.lucide) lucide.createIcons(); }
@@ -1264,6 +1282,7 @@
             if(canvas) {
                 currentCanvasTitle.textContent = canvas?.title || tr('canvas.untitled');
             }
+            renderNodePalette();
             renderCanvasList();
             render();
         }
@@ -1283,6 +1302,7 @@
             document.title = tr('canvas.title');
             refreshGateViewControls();
             if(canvas) currentCanvasTitle.textContent = canvas?.title || tr('canvas.untitled');
+            renderNodePalette();
             renderCanvasList();
             render();
         });
@@ -1298,6 +1318,7 @@
         const linkControlsEl = document.getElementById('linkControls');
         const dropOverlay = document.getElementById('dropOverlay');
         const createMenu = document.getElementById('createMenu');
+        const nodePaletteList = document.getElementById('nodePaletteList');
         const linkCreateMenu = document.getElementById('linkCreateMenu');
         const nodeInputMenu = document.getElementById('nodeInputMenu');
         const nodeOutputMenu = document.getElementById('nodeOutputMenu');
@@ -1455,6 +1476,13 @@
         let imageEditBaseH = 0;
         let textSelectionGuard = null;
         const PROMPT_TEXT_MAX_LENGTH = 20000;
+        const FLOW_FRAME_LEGACY_METHOD_TEXT = `流帧心法：
+1. 保持主体身份、服装、道具、空间方向、光影和镜头语言连续。
+2. 每一帧只推进一个明确动作变化，避免突然换景、换脸、换服装或道具跳变。
+3. 按 IMG 1、IMG 2、IMG 3 的顺序引用上游素材；同组素材按画布中左上到右下的位置排序。
+4. 描述动作时写清起势、承接、落点和节奏，让画面像连续镜头而不是无关截图。
+5. 如果有视频或音频参考，优先继承节奏、运动方向和情绪强度。`;
+        const FLOW_FRAME_DEFAULT_BRIEF_TEXT = '请根据连接素材生成一个时间连续、主体稳定、镜头语言清晰的 Seedance / 即梦视频提示词。';
         const STORYBOARD_NODE_DEFAULT_BRIEF = `输入剧情、场景、角色、旁白、镜头时长或制作要求。节点会按“分镜图工坊”规则生成一张 16:9 分镜图板。
 
 示例：未来都市高层公寓夜，女主璃光站在白色茶几后，男主方奇半主观视角坐在沙发。0-15 秒：系统启动、坏结局存档闪过、热茶与右眼红光、手触碰门把手，结尾黑屏字幕“回家门票”。`;
@@ -2178,9 +2206,17 @@
             if(!id) return false;
             return nodes.some(other => other.id !== node.id && other.linkedCloneId === id);
         }
+        function linkedCloneCode(node){
+            const id = String(node?.linkedCloneId || '').trim();
+            if(!id) return '';
+            let hash = 0;
+            for(let i = 0; i < id.length; i++) hash = ((hash * 31) + id.charCodeAt(i)) >>> 0;
+            return hash.toString(36).toUpperCase().padStart(4, '0').slice(-4);
+        }
         function linkedCloneBadgeHtml(node){
             if(!isActiveLinkedClone(node)) return '';
-            return `<span class="linked-clone-badge" title="高级复制联动节点"><i data-lucide="link-2"></i><span>联动</span></span>`;
+            const code = linkedCloneCode(node);
+            return `<span class="linked-clone-badge" title="Linked clone group ${escapeAttr(code)}"><i data-lucide="link-2"></i><span>LINK</span><span class="linked-clone-code">${escapeHtml(code)}</span></span>`;
         }
         function cleanupLinkedCloneIds(){
             let changed = false;
@@ -3061,6 +3097,31 @@
             const p = point || defaultPoint(0, 0);
             return addNode({id:uid('prompt'), type:'prompt', x:p.x, y:p.y, text:''});
         }
+        function addFlowFrameNode(point){
+            const p = point || defaultPoint(20, 0);
+            return addNode({
+                id:uid('flow'),
+                type:'flowFrame',
+                x:p.x,
+                y:p.y,
+                w:380,
+                h:0,
+                mode:'auto',
+                aspectRatio:'16:9',
+                duration:10,
+                fps:24,
+                briefText:FLOW_FRAME_DEFAULT_BRIEF_TEXT,
+                styleText:window.CanvasFlowFrame?.DEFAULTS?.styleText || '',
+                negativeText:window.CanvasFlowFrame?.DEFAULTS?.negativeText || '',
+                cinemaProfile:'deakins',
+                shotPacing:'auto',
+                promptLanguage:'zh',
+                useAiPlanning:true,
+                assetRoles:{},
+                lastShotAnalysis:'',
+                inputs:[]
+            });
+        }
         function addLoopNode(point){
             const p = point || defaultPoint(40, 0);
             return addNode({
@@ -3825,16 +3886,18 @@
             const node = nodes.find(n => n.id === state?.originId);
             if(!node) return [];
             if(state.originKind === 'out'){
-                if(['image','prompt','loop','group','promptGroup','llm'].includes(node.type)){
+                if(['image','prompt','loop','group','promptGroup','llm','flowFrame'].includes(node.type)){
                     return [
+                        ...(node.type === 'flowFrame' ? [] : [{type:'flowFrame', label:'流帧心法', icon:'film'}]),
                         ...window.CanvasNodeRegistry.addableGeneratorOptions(tr),
                         {type:'llm', label:'LLM', icon:'message-square-text'}
                     ];
                 }
                 return [];
             }
-            if(CANVAS_GENERATOR_TYPES.includes(node.type) || node.type === 'llm'){
-                return window.CanvasNodeRegistry.addableSourceOptions(tr);
+            if(CANVAS_GENERATOR_TYPES.includes(node.type) || node.type === 'llm' || node.type === 'flowFrame'){
+                const options = window.CanvasNodeRegistry.addableSourceOptions(tr);
+                return node.type === 'flowFrame' ? options.filter(opt => opt.type !== 'flowFrame') : options;
             }
             return [];
         }
@@ -4156,6 +4219,7 @@
         function createNodeByType(type, point){
             if(type === 'image') return addImageNode(point);
             if(type === 'prompt') return addPromptNode(point);
+            if(type === 'flowFrame') return addFlowFrameNode(point);
             if(type === 'loop') return addLoopNode(point);
             if(type === 'group') return addGroupNode(point);
             if(type === 'llm') return addLLMNode(point);
@@ -4164,9 +4228,12 @@
             if(type === 'storyboard') return addStoryboardNode(point);
             if(type === 'msgen') return addMsGenNode(point);
             if(type === 'video') return addVideoNode(point);
+            if(type === 'sd2Video') return addSd2VideoNode(point);
             if(type === 'dreamina') return addDreaminaNode(point);
             if(type === 'dreaminaImage') return addDreaminaImageNode(point);
             if(type === 'dreaminaVideo') return addDreaminaVideoNode(point);
+            if(type === 'imageExtend') return addImageExtendNode(point);
+            if(type === 'panorama') return addPanoramaNode(point);
             if(type === 'comfy') return addComfyNode(point);
             if(type === 'rh') return addRhNode(point);
             if(type === 'output') return addOutputNode(point);
@@ -4176,19 +4243,60 @@
             closeCreateMenu();
             if(type === 'image') addImageNode(menuPoint);
             if(type === 'prompt') addPromptNode(menuPoint);
+            if(type === 'flowFrame') addFlowFrameNode(menuPoint);
             if(type === 'loop') addLoopNode(menuPoint);
+            if(type === 'group') addGroupNode(menuPoint);
             if(type === 'llm') addLLMNode(menuPoint);
             if(type === 'png') addPngComposeNode(menuPoint);
             if(type === 'generator') addGeneratorNode(menuPoint);
             if(type === 'storyboard') addStoryboardNode(menuPoint);
             if(type === 'msgen') addMsGenNode(menuPoint);
             if(type === 'video') addVideoNode(menuPoint);
+            if(type === 'sd2Video') addSd2VideoNode(menuPoint);
             if(type === 'dreamina') addDreaminaNode(menuPoint);
             if(type === 'dreaminaImage') addDreaminaImageNode(menuPoint);
             if(type === 'dreaminaVideo') addDreaminaVideoNode(menuPoint);
+            if(type === 'imageExtend') addImageExtendNode(menuPoint);
+            if(type === 'panorama') addPanoramaNode(menuPoint);
             if(type === 'comfy') addComfyNode(menuPoint);
             if(type === 'rh') addRhNode(menuPoint);
             if(type === 'output') addOutputNode(menuPoint);
+        }
+        function nodePaletteSpawnPoint(){
+            const rect = board?.getBoundingClientRect?.();
+            const left = rect?.left || 0;
+            const top = rect?.top || 0;
+            const x = Math.min(window.innerWidth - 360, Math.max(left + 250, window.innerWidth * 0.38));
+            const y = Math.min(window.innerHeight - 180, Math.max(top + 150, window.innerHeight * 0.46));
+            return screenToWorld(x, y);
+        }
+        function addNodeFromPalette(type){
+            if(!ensureCanvas()) return;
+            closeCreateMenu();
+            const node = createNodeByType(type, nodePaletteSpawnPoint());
+            if(node){
+                selected.clear();
+                selected.add(node.id);
+                refreshSelectionVisuals();
+            }
+        }
+        function renderNodePalette(){
+            if(!nodePaletteList || !window.CanvasNodeRegistry?.nodePaletteSections) return;
+            const sections = window.CanvasNodeRegistry.nodePaletteSections(tr);
+            const seen = new Set();
+            const items = sections
+                .flatMap(section => section.items || [])
+                .filter(item => item?.type && !seen.has(item.type) && seen.add(item.type));
+            nodePaletteList.innerHTML = items.map(item =>
+                `<button class="node-palette-btn" type="button" data-palette-node="${escapeAttr(item.type)}" title="${escapeAttr(item.label)}"><i data-lucide="${escapeAttr(item.icon)}"></i><span>${escapeHtml(item.label)}</span></button>`
+            ).join('');
+            nodePaletteList.querySelectorAll('[data-palette-node]').forEach(btn => {
+                btn.onclick = e => {
+                    e.stopPropagation();
+                    addNodeFromPalette(btn.dataset.paletteNode);
+                };
+            });
+            refreshIcons();
         }
         function menuPasteNodes(){
             pasteNodes(menuPoint || lastMouseBoard);
@@ -5970,7 +6078,7 @@
             const registryTitle = window.CanvasNodeRegistry.titleFor(node.type, tr);
             const title = node.type === 'organizeFrame' ? (node.title || node.name || '整理框') : node.type === 'group' ? (node.title || node.name || 'GROUP') : node.type === 'promptGroup' ? (node.title || node.name || 'PROMPTS') : node.generatorKind === 'storyboard' ? '分镜图工坊' : node.type === 'dreamina' ? (node.outputType === 'video' ? 'Dreamina Video' : 'Dreamina Image') : node.type === 'imageExtend' ? '扩展图片' : node.type === 'video' ? (node.videoKind === 'seedance' ? tr('canvas.sd2VideoGenerate') : registryTitle) : registryTitle || tr('canvas.apiGenerate');
             // 失败徽章只在一键运行模式中显示，单节点失败已通过 alert 提示
-            const showStatus = ['generator','msgen','comfy','rh','llm','png','dreamina'].includes(node.type) && node.runStatus
+            const showStatus = ['generator','msgen','comfy','rh','llm','png','dreamina','video','imageExtend','panorama'].includes(node.type) && node.runStatus
                 && (node.runStatus !== 'failed' || node._cascadeFailed);
             const statusHtml = showStatus ? (() => {
                 const label = { queued:'排队中', running:'运行中', done:'完成', failed:'失败' }[node.runStatus] || '';
@@ -6275,6 +6383,7 @@
                 };
             }
             if(node.type === 'loop') body.appendChild(renderLoopBody(node));
+            if(node.type === 'flowFrame') body.appendChild(renderFlowFrameBody(node));
             if(node.type === 'group') {
                 const items = (node.items || []).map(id => nodes.find(n => n.id === id)).filter(Boolean);
                 const imgCount = items.filter(n => n.type === 'image').length;
@@ -6322,8 +6431,8 @@
                 }
                 startNodeDrag(e, node);
             };
-            const canInput = ['generator','comfy','rh','output','llm','msgen','video','png','dreamina'].includes(node.type) || (node.type === 'loop' && (node.imageInput || node.showPrompt));
-            const canOutput = ['image','prompt','loop','group','promptGroup','generator','comfy','rh','llm','msgen','video','png','dreamina'].includes(node.type);
+            const canInput = ['generator','comfy','rh','output','llm','msgen','video','png','dreamina','flowFrame','imageExtend','panorama'].includes(node.type) || (node.type === 'loop' && (node.imageInput || node.showPrompt));
+            const canOutput = ['image','prompt','loop','group','promptGroup','flowFrame','generator','comfy','rh','llm','msgen','video','png','dreamina','imageExtend','panorama'].includes(node.type);
             if(canInput) el.insertAdjacentHTML('beforeend', `<div class="port in" title="${tr('canvas.connectHere')}"></div>`);
             if(canOutput) el.insertAdjacentHTML('beforeend', `<div class="port out" title="${tr('canvas.dragConnect')}"></div>`);
             el.querySelector('.node-head').onmousedown = e => { if(e.button === 0) startNodeDrag(e, node); };
@@ -6435,6 +6544,7 @@
         function defaultNodeSize(type){
             if(type === 'image') return {w:260, h:336};
             if(type === 'prompt') return {w:310, h:0};
+            if(type === 'flowFrame') return {w:380, h:0};
             if(type === 'loop') return {w:336, h:0};
             if(type === 'llm') return {w:420, h:590};
             if(type === 'png') return {w:360, h:0};
@@ -6442,6 +6552,8 @@
             if(type === 'msgen') return {w:380, h:0};
             if(type === 'video') return {w:400, h:0};
             if(type === 'dreamina') return {w:400, h:0};
+            if(type === 'imageExtend') return {w:410, h:0};
+            if(type === 'panorama') return {w:410, h:0};
             if(type === 'comfy') return {w:420, h:460};
             if(type === 'rh') return {w:430, h:0};
             if(type === 'output') return {w:460, h:0};
@@ -6461,6 +6573,7 @@
             return [trimmed];
         }
         const loopPromptVisiting = new Set();
+        const flowFrameSourceVisiting = new Set();
         function loopInputPromptItems(node){
             if(!node?.showPrompt) return [];
             if(loopPromptVisiting.has(node.id)) return [];
@@ -6511,6 +6624,91 @@
             if(selected) return replaceVars(selected);
             return replaceVars(variable);
         }
+        function normalizeFlowFrameNode(node){
+            if(!node || node.type !== 'flowFrame') return node;
+            const defaults = window.CanvasFlowFrame?.DEFAULTS || {};
+            if(!['auto','text','firstLast','allReference'].includes(node.mode)) node.mode = 'auto';
+            node.aspectRatio = String(node.aspectRatio || defaults.aspectRatio || '16:9');
+            node.duration = Math.max(4, Math.min(15, Number(node.duration || defaults.duration || 10)));
+            node.fps = Math.max(1, Math.min(120, Number(node.fps || defaults.fps || 24)));
+            const legacy = String(node.promptText || '').trim();
+            if(!String(node.briefText || '').trim()){
+                node.briefText = legacy && legacy !== FLOW_FRAME_LEGACY_METHOD_TEXT.trim()
+                    ? legacy
+                    : FLOW_FRAME_DEFAULT_BRIEF_TEXT;
+            }
+            const styleText = String(node.styleText || '').trim();
+            if(!styleText || styleText === 'cinematic, stable identity, coherent lighting, physically plausible motion') node.styleText = defaults.styleText || '';
+            if(!String(node.negativeText || '').trim()) node.negativeText = defaults.negativeText || '';
+            if(!String(node.cinemaProfile || '').trim()) node.cinemaProfile = defaults.cinemaProfile || 'deakins';
+            if(!String(node.shotPacing || '').trim()) node.shotPacing = defaults.shotPacing || 'auto';
+            if(!String(node.promptLanguage || '').trim()) node.promptLanguage = defaults.promptLanguage || 'zh';
+            if(typeof node.useAiPlanning !== 'boolean') node.useAiPlanning = defaults.useAiPlanning !== false;
+            if(typeof node.lastShotAnalysis !== 'string') node.lastShotAnalysis = '';
+            if(!node.assetRoles || typeof node.assetRoles !== 'object' || Array.isArray(node.assetRoles)) node.assetRoles = {};
+            return node;
+        }
+        function flowFrameSourceSortNode(src){
+            if(!src) return null;
+            if(src.imageId) return nodes.find(n => n.id === src.imageId) || null;
+            const baseId = String(src.id || '').split(':')[0];
+            return nodes.find(n => n.id === baseId) || nodes.find(n => n.id === src.groupId) || null;
+        }
+        function flowFrameSourceSortRect(src, index){
+            const node = flowFrameSourceSortNode(src);
+            const rect = node ? nodeRect(node) : null;
+            if(rect && Number.isFinite(rect.cx) && Number.isFinite(rect.cy)) return rect;
+            return {x:index * 10, y:0, w:1, h:1, cx:index * 10, cy:0};
+        }
+        function flowFrameVisualMediaOrder(mediaSources){
+            const entries = (mediaSources || []).map((src, index) => ({
+                id:src.id,
+                src,
+                index,
+                rect:flowFrameSourceSortRect(src, index)
+            }));
+            if(window.CanvasGroupOrder?.orderedByVisualPosition){
+                return window.CanvasGroupOrder
+                    .orderedByVisualPosition(entries, entry => entry.rect)
+                    .map(entry => entry.src);
+            }
+            return entries
+                .sort((a, b) => a.rect.cy - b.rect.cy || a.rect.cx - b.rect.cx || a.index - b.index)
+                .map(entry => entry.src);
+        }
+        function flowFrameOrderedSources(node, sources=null){
+            const base = orderedSources(node, sources || generatorSources(node));
+            const media = base.filter(src => src.refs?.length);
+            const nonMedia = base.filter(src => !src.refs?.length);
+            const visualMedia = flowFrameVisualMediaOrder(media);
+            const ordered = [...visualMedia, ...nonMedia];
+            node.inputs = ordered.map(src => src.id);
+            return ordered;
+        }
+        function flowFrameDraft(node, sources=null){
+            normalizeFlowFrameNode(node);
+            const sourceList = sources || flowFrameOrderedSources(node);
+            return window.CanvasFlowFrame?.buildPrompt
+                ? window.CanvasFlowFrame.buildPrompt({node, sources:sourceList})
+                : {mode:'allReference', modeLabel:'全素材参考', assets:[], prompt:String(node?.briefText || '')};
+        }
+        function flowFrameOutputSources(node){
+            if(!node) return [];
+            if(flowFrameSourceVisiting.has(node.id)) return [];
+            flowFrameSourceVisiting.add(node.id);
+            try {
+                const upstream = flowFrameOrderedSources(node);
+                return upstream.filter(src => src.refs?.length).map((src, i) => ({
+                    ...src,
+                    id:`${node.id}:ref:${i}:${src.id}`,
+                    type:'flowFrameImage',
+                    label:src.label || `IMG ${i + 1}`,
+                    prompt:''
+                }));
+            } finally {
+                flowFrameSourceVisiting.delete(node.id);
+            }
+        }
         function imageRefsFromNode(node){
             if(!node) return [];
             if(node.type === 'image' && node.url) return [{url:imageNodeReferenceUrl(node), name:node.name || 'image', role:node.role || ''}];
@@ -6524,6 +6722,7 @@
                     .filter(url => url && !isVideoUrl(url))
                     .map((url, i) => ({url, name:outputImageName(url) || `output-${i + 1}.png`}));
             }
+            if(node.type === 'flowFrame') return flowFrameOutputSources(node).flatMap(src => src.refs || []);
             if(CANVAS_IMAGE_OUTPUT_TYPES.includes(node.type)) return generatedImageRefs(node);
             return [];
         }
@@ -7221,6 +7420,9 @@
                 if(n.type === 'group'){
                     orderedGroupItems(n, item => item?.type === 'image' && item?.url).forEach(img => urls.push(img.url));
                 }
+                if(n.type === 'flowFrame'){
+                    imageRefsFromNode(n).filter(ref => ref?.url && !isVideoUrl(ref.url) && !isAudioUrl(ref.url)).forEach(ref => urls.push(ref.url));
+                }
             });
             return urls;
         }
@@ -7855,6 +8057,262 @@
             bindCascadeButtons(wrap, node.id);
             return wrap;
         }
+        function flowFrameModeOptions(selected){
+            return [
+                ['auto','自动判断'],
+                ['text','纯文本'],
+                ['firstLast','首尾帧'],
+                ['allReference','全素材参考']
+            ].map(([value, label]) => `<option value="${value}" ${selected === value ? 'selected' : ''}>${label}</option>`).join('');
+        }
+        function updateFlowFramePreview(wrap, node){
+            const preview = wrap?.querySelector?.('.flow-frame-preview');
+            const inferred = wrap?.querySelector?.('.flow-frame-inferred-mode');
+            if(!preview) return;
+            const draft = flowFrameDraft(node);
+            preview.value = node.lastGeneratedPrompt || draft.prompt;
+            const allAssets = draft.allAssets || draft.assets || [];
+            const omitted = draft.omittedAssets || [];
+            const suffix = omitted.length ? `，${omitted.length} 个超出上限` : '';
+            if(inferred) inferred.textContent = `当前结构：${draft.modeLabel} · ${allAssets.length ? `${allAssets.length} 个素材引用${suffix}` : '无素材引用'}`;
+        }
+        function renderFlowFrameAssetRoles(list, node, draft, onChange){
+            if(!list) return;
+            const assets = draft.allAssets || draft.assets || [];
+            if(!assets.length){
+                list.innerHTML = `<div class="text-[11px] text-gray-300 py-2">没有连接素材时，会按纯文本模式生成提示词。</div>`;
+                return;
+            }
+            list.innerHTML = '';
+            assets.forEach(asset => {
+                const item = document.createElement('div');
+                item.className = 'flow-frame-asset';
+                const safeUrl = escapeAttr(asset.url || '');
+                const omittedLabel = asset.included === false ? '（超出9张，未参与正式映射）' : '';
+                const thumb = isVideoUrl(asset.url)
+                    ? '<i data-lucide="file-video" class="w-6 h-6 text-slate-400"></i>'
+                    : isAudioUrl(asset.url)
+                        ? '<i data-lucide="file-audio" class="w-6 h-6 text-slate-400"></i>'
+                        : (asset.url && !isMissingAssetUrl(asset.url) ? `<img src="${safeUrl}" alt="">` : missingAssetHtml(asset.url, true));
+                item.innerHTML = `
+                    <div class="flow-frame-asset-thumb">
+                        ${thumb}
+                        <span class="flow-frame-asset-tag">${escapeHtml(asset.tag)}</span>
+                    </div>
+                    <div class="flow-frame-asset-meta">
+                        <div class="flow-frame-asset-name" title="${escapeAttr(asset.name || asset.sourceLabel || '')}">${escapeHtml((asset.name || asset.sourceLabel || asset.tag) + omittedLabel)}</div>
+                        <input class="flow-frame-asset-role" data-flow-asset-id="${escapeAttr(asset.id)}" data-flow-source-id="${escapeAttr(asset.sourceId)}" value="${escapeAttr(asset.role || '')}" placeholder="素材用途，例如：主角外观、场景空间、服装道具、光影色彩">
+                    </div>
+                `;
+                const input = item.querySelector('.flow-frame-asset-role');
+                input.onmousedown = e => e.stopPropagation();
+                input.onclick = e => e.stopPropagation();
+                input.oninput = e => {
+                    node.assetRoles = node.assetRoles || {};
+                    node.assetRoles[input.dataset.flowAssetId || input.dataset.flowSourceId] = e.target.value;
+                    node.lastGeneratedPrompt = '';
+                    onChange();
+                };
+                list.appendChild(item);
+            });
+            refreshIcons();
+        }
+        function renderFlowFrameBody(node){
+            normalizeFlowFrameNode(node);
+            const wrap = document.createElement('div');
+            wrap.className = 'flow-frame-body';
+            const ordered = flowFrameOrderedSources(node);
+            const promptInputs = ordered.filter(src => src.prompt && !src.refs?.length);
+            const draft = flowFrameDraft(node, ordered);
+            wrap.innerHTML = `
+                    <div class="flow-frame-note">AI 先分析剧本节奏和多图映射，再生成罗杰·迪金斯 / Roger Deakins 风格电影镜头提示词；本节点继续向下游提供媒体引用。</div>
+                <div class="flow-frame-settings">
+                    <label class="field"><div class="setting-title">模式</div><select class="select-lite flow-frame-field" data-flow-field="mode">${flowFrameModeOptions(node.mode || 'auto')}</select></label>
+                    <label class="field"><div class="setting-title">比例</div><select class="select-lite flow-frame-field" data-flow-field="aspectRatio">
+                        ${['16:9','9:16','1:1','4:3','3:4'].map(value => `<option value="${value}" ${node.aspectRatio === value ? 'selected' : ''}>${value}</option>`).join('')}
+                    </select></label>
+                    <label class="field"><div class="setting-title">时长</div><input class="setting-input flow-frame-field" data-flow-field="duration" type="number" min="4" max="15" step="1" value="${Number(node.duration || 10)}"></label>
+                    <label class="field"><div class="setting-title">帧率</div><input class="setting-input flow-frame-field" data-flow-field="fps" type="number" min="1" max="120" step="1" value="${Number(node.fps || 24)}"></label>
+                </div>
+                <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">References</div>
+                <div class="flow-frame-asset-list"></div>
+                <div class="sd2-prompt-wrap">
+                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">创作需求</div>
+                    <textarea class="sd2-prompt-input flow-frame-field" data-flow-field="briefText" placeholder="输入剧情、动作、镜头或台词；台词会原样保留。">${escapeHtml(node.briefText || '')}</textarea>
+                </div>
+                <div class="sd2-prompt-wrap">
+                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">风格 / 规则</div>
+                    <textarea class="sd2-prompt-input flow-frame-field" data-flow-field="styleText" placeholder="例如：电影感、稳定身份、连贯光照、物理合理运动。">${escapeHtml(node.styleText || '')}</textarea>
+                </div>
+                <div class="sd2-prompt-wrap">
+                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">负面约束</div>
+                    <textarea class="sd2-prompt-input flow-frame-field" data-flow-field="negativeText">${escapeHtml(node.negativeText || '')}</textarea>
+                </div>
+                <div class="prompt-list"></div>
+                <div class="sd2-prompt-wrap">
+                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Prompt Preview</div>
+                    <textarea class="sd2-prompt-input flow-frame-preview" readonly>${escapeHtml(node.lastGeneratedPrompt || draft.prompt)}</textarea>
+                </div>
+                <div class="flow-frame-actions">
+                    <div class="flow-frame-actions-row">
+                        <button class="gen-btn flow-frame-sync ${node.flowFrameBusy ? 'running' : ''}" type="button" ${node.flowFrameBusy ? 'disabled' : ''}><i data-lucide="clapperboard" class="w-4 h-4"></i>${node.flowFrameBusy ? '生成中' : '生成电影提示词'}</button>
+                        <button class="gen-btn flow-frame-ai ${node.flowFrameBusy ? 'running' : ''}" type="button" ${node.flowFrameBusy ? 'disabled' : ''}><i data-lucide="sparkles" class="w-4 h-4"></i>${node.flowFrameBusy ? '润色中' : 'AI 润色并同步'}</button>
+                    </div>
+                    <div class="flow-frame-sync-hint flow-frame-inferred-mode">当前结构：${escapeHtml(draft.modeLabel)} · ${(draft.allAssets || draft.assets || []).length ? `${(draft.allAssets || draft.assets || []).length} 个素材引用` : '无素材引用'}</div>
+                </div>
+            `;
+            const onChange = () => {
+                node.lastGeneratedPrompt = '';
+                updateFlowFramePreview(wrap, node);
+                scheduleSave();
+            };
+            renderFlowFrameAssetRoles(wrap.querySelector('.flow-frame-asset-list'), node, draft, onChange);
+            const promptList = wrap.querySelectorAll('.prompt-list');
+            renderPromptPreview(promptList[promptList.length - 1], promptInputs);
+            wrap.querySelectorAll('.flow-frame-field').forEach(input => {
+                input.onmousedown = e => e.stopPropagation();
+                input.onclick = e => e.stopPropagation();
+                bindScrollableText(input);
+                input.oninput = e => {
+                    const field = input.dataset.flowField;
+                    if(field === 'duration') node.duration = Math.max(4, Math.min(15, Number(input.value || 10)));
+                    else if(field === 'fps') node.fps = Math.max(1, Math.min(120, Number(input.value || 24)));
+                    else node[field] = input.value;
+                    if(field === 'mode') renderFlowFrameAssetRoles(wrap.querySelector('.flow-frame-asset-list'), node, flowFrameDraft(node), onChange);
+                    onChange();
+                };
+                input.onchange = input.oninput;
+            });
+            bindScrollableText(wrap.querySelector('.flow-frame-preview'));
+            wrap.querySelector('.flow-frame-sync').onclick = e => { e.stopPropagation(); generateFlowFramePrompt(node.id, {llm:true}); };
+            wrap.querySelector('.flow-frame-ai').onclick = e => { e.stopPropagation(); generateFlowFramePrompt(node.id, {llm:true, polish:true}); };
+            return wrap;
+        }
+        function flowFramePromptSyncTargets(nodeId){
+            const runTypes = typeof canvasRunTypes === 'function' ? canvasRunTypes() : ['generator','msgen','comfy','rh','llm','video','png','dreamina','imageExtend','panorama'];
+            return connections
+                .filter(c => c.from === nodeId)
+                .map(c => nodes.find(n => n.id === c.to))
+                .filter(n => n && runTypes.includes(n.type));
+        }
+        function syncFlowFramePromptNode(node, promptText){
+            let promptNode = nodes.find(n => n.id === node.syncedPromptNodeId && n.type === 'prompt');
+            if(!promptNode){
+                promptNode = {
+                    id:uid('prompt'),
+                    type:'prompt',
+                    x:(Number(node.x) || 0) + (Number(node.w) || defaultNodeSize('flowFrame').w || 380) + 70,
+                    y:Number(node.y) || 0,
+                    text:''
+                };
+                nodes.push(promptNode);
+                node.syncedPromptNodeId = promptNode.id;
+            }
+            promptNode.text = promptText || '';
+            flowFramePromptSyncTargets(node.id).forEach(target => {
+                if(target.id === promptNode.id) return;
+                if(connections.some(c => c.from === promptNode.id && c.to === target.id)) return;
+                if(canConnect(promptNode.id, target.id)){
+                    connections.push({id:uid('c'), from:promptNode.id, to:target.id});
+                }
+            });
+            syncGeneratorInputs();
+            refreshGeneratorInputViews();
+            render();
+            scheduleSave();
+            return promptNode;
+        }
+        function extractFlowFrameShotAnalysis(promptText){
+            const text = String(promptText || '');
+            const match = text.match(/镜头策略[:：]\s*([\s\S]*?)(?:\n\s*(?:正式提示词|摄影风格|负面约束|生成设置)[:：]|$)/);
+            return match ? match[1].trim() : '';
+        }
+        function flowFrameGenericStrategyIssue(promptText){
+            const strategy = extractFlowFrameShotAnalysis(promptText);
+            if(!strategy) return false;
+            const compact = strategy.replace(/\s+/g, '');
+            const rangeMenus = compact.match(/(?:对话|情绪|动作|打斗|追逐|空间|氛围|一镜到底|长镜头?)[^。；;]{0,16}[：:]\d+(?:[-–—~到]\d+)?镜/g) || [];
+            const categories = ['对话','情绪','动作','打斗','追逐','空间','氛围','一镜到底','长镜'].filter(word => compact.includes(word)).length;
+            const copiedReference = /(?:通常|参考|可)\d+[-–—~到]\d+镜/.test(compact)
+                || /对话\/情绪戏|动作\/打斗\/追逐|氛围\/空间建立/.test(compact);
+            return rangeMenus.length >= 2 || (categories >= 3 && copiedReference);
+        }
+        function replaceFlowFrameShotAnalysis(promptText, analysis){
+            const text = String(promptText || '');
+            const replacement = String(analysis || '').trim();
+            if(!replacement) return text;
+            const pattern = /(镜头策略[:：]\s*)([\s\S]*?)(\n\s*正式提示词[:：])/;
+            if(pattern.test(text)) return text.replace(pattern, `$1${replacement}$3`);
+            return text;
+        }
+        async function enhanceFlowFramePromptWithLLM(node, draft, options={}){
+            const providerId = resolveChatProviderId(chatApiProviders()[0]?.id || 'comfly');
+            const model = resolveChatModel('', providerId);
+            const pseudoNode = {
+                id:'',
+                type:'llm',
+                llmProvider:providerId,
+                model,
+                systemPrompt:[
+                    '你是“流帧心法V03”的 Seedance 2.0 / 即梦视频电影镜头提示词导演。',
+                    '你必须先分析剧本节奏、素材用途和镜头语言，再输出可直接用于视频生成的最终提示词。',
+                    '最终输出全中文；允许保留“罗杰·迪金斯 / Roger Deakins”人名。',
+                    '必须逐项保留 @image1、@image2、@video1、@audio1 等素材编号，并在正式提示词里准确引用。',
+                    '必须输出严格时间码，格式 00:00.0-00:04.5；镜头数量和时长由剧情决定，不得机械平均。',
+                    '镜头策略必须是当前剧本的单一判断和理由，禁止输出“对话几镜、动作几镜、空间建立几镜”这种通用分类菜单。',
+                    '每个镜头必须包含景别、机位/角度、主运镜、主体动作、光影、空间关系；每个镜头只指定一种主运镜。',
+                    '请完整保留所有中文台词原文、标点和顺序，不得删减、改写、合并或总结台词。',
+                    '最终只输出这些一级标题：模式、素材映射、镜头策略、正式提示词、摄影风格、负面约束、生成设置。不要解释，不要 Markdown 代码块。'
+                ].join('\n')
+            };
+            const message = window.CanvasFlowFrame?.buildLLMUserPrompt
+                ? window.CanvasFlowFrame.buildLLMUserPrompt({node, draft, polish:Boolean(options.polish)})
+                : `请生成全中文电影镜头提示词，保留素材编号和台词，输出严格时间码：\n\n${draft.prompt || ''}`;
+            return (await callCanvasLLM(pseudoNode, message, [])).trim();
+        }
+        async function generateFlowFramePrompt(nodeId, options={}){
+            const node = nodes.find(n => n.id === nodeId);
+            if(!node) return;
+            const draft = flowFrameDraft(node);
+            let finalPrompt = draft.prompt;
+            let usedAi = false;
+            node.flowFrameTimingRepaired = false;
+            node.flowFrameStrategyRepaired = false;
+            const shouldUseAi = options.llm !== false && node.useAiPlanning !== false;
+            if(shouldUseAi){
+                node.flowFrameBusy = true;
+                refreshNodes([node.id]);
+                try {
+                    const llmDraft = options.polish && node.lastGeneratedPrompt ? {...draft, prompt:node.lastGeneratedPrompt} : draft;
+                    const polished = await enhanceFlowFramePromptWithLLM(node, llmDraft, options);
+                    if(polished){
+                        const repaired = window.CanvasFlowFrame?.repairUniformTimecodes
+                            ? window.CanvasFlowFrame.repairUniformTimecodes(polished, {
+                                duration:node.duration,
+                                userText:draft.userText || node.briefText || '',
+                                shotPacing:node.shotPacing || 'auto'
+                            })
+                            : {prompt:polished, changed:false};
+                        finalPrompt = repaired.prompt || polished;
+                        node.flowFrameTimingRepaired = Boolean(repaired.changed);
+                        if(flowFrameGenericStrategyIssue(finalPrompt) && draft.shotAnalysis){
+                            finalPrompt = replaceFlowFrameShotAnalysis(finalPrompt, draft.shotAnalysis);
+                            node.flowFrameStrategyRepaired = true;
+                        }
+                        usedAi = true;
+                    }
+                } catch(err) {
+                    alert(`AI 电影提示词生成失败，已同步本地兜底提示词：${err.message || err}`);
+                } finally {
+                    node.flowFrameBusy = false;
+                }
+            }
+            node.lastGeneratedPrompt = finalPrompt;
+            node.lastShotAnalysis = usedAi
+                ? `${extractFlowFrameShotAnalysis(finalPrompt) || draft.shotAnalysis || ''}${node.flowFrameTimingRepaired ? '（已自动修正接近等分的时间码）' : ''}${node.flowFrameStrategyRepaired ? '（已替换模板化镜头策略）' : ''}`
+                : `本地兜底：${draft.shotAnalysis || ''}`;
+            syncFlowFramePromptNode(node, finalPrompt);
+        }
         function renderCreativeInputTags(mediaInputs){
             const counts = {image:0, video:0, audio:0};
             return (mediaInputs || []).map(src => {
@@ -7903,6 +8361,10 @@
             input.oninput = e => {
                 node.promptText = e.target.value.slice(0, PROMPT_TEXT_MAX_LENGTH);
                 scheduleSave();
+                if(node.type === 'flowFrame'){
+                    syncGeneratorInputs();
+                    refreshGeneratorInputViews();
+                }
             };
         }
         function bindCreativeProviderControls(wrap, node){
@@ -9109,9 +9571,9 @@
             });
         }
         function seedanceOrderedRefs(prompt, refs){
-            const sourceRefs = refs.map((ref, index) => ({...ref, tag:seedanceRefTag(index)}));
+            const sourceRefs = refs.map((ref, index) => ({...ref, tag:seedanceRefTag(index), imageIndex:index + 1}));
             const picked = [];
-            [...String(prompt || '').matchAll(/@图(\d+)/g)].forEach(match => {
+            [...String(prompt || '').matchAll(/@(?:图|image|img)\s*(\d+)/gi)].forEach(match => {
                 const ref = sourceRefs[Number(match[1]) - 1];
                 if(ref && !picked.includes(ref)) picked.push(ref);
             });
@@ -9119,9 +9581,17 @@
             return picked;
         }
         function seedancePromptWithReferenceNote(prompt, refs){
-            const used = refs.filter(ref => ref.tag && String(prompt || '').includes(`@${ref.tag}`));
+            const promptText = String(prompt || '');
+            const used = refs.filter(ref => {
+                const index = Number(ref.imageIndex || String(ref.tag || '').match(/\d+/)?.[0] || 0);
+                return (ref.tag && promptText.includes(`@${ref.tag}`))
+                    || (index && new RegExp(`@(?:image|img)\\s*${index}\\b`, 'i').test(promptText));
+            });
             if(!used.length) return prompt;
-            const note = used.map(ref => `@${ref.tag}=${ref.name || ref.tag}`).join('；');
+            const note = used.map(ref => {
+                const alias = ref.imageIndex ? `/@image${ref.imageIndex}` : '';
+                return `@${ref.tag}${alias}=${ref.name || ref.tag}`;
+            }).join('；');
             return `${prompt}\n\n参考图说明：${note}`;
         }
         function comfyWorkflowOptions(selected){
@@ -9482,6 +9952,15 @@
             if(/prompt|positive|negative|text|caption|description|提示词|正向|负向/.test(key)) return 'prompt';
             return 'text';
         }
+        function rhUnsafeStringFormatDefault(field, value){
+            const classType = String(field?.classType || '').toLowerCase();
+            const fieldName = String(field?.fieldName || '').toLowerCase();
+            if(!classType.includes('stringformat') || !['f_string','format','text'].includes(fieldName)) return false;
+            const text = String(value ?? '').trim();
+            const fallback = String(field?.default ?? '').trim();
+            if(fallback && text !== fallback) return false;
+            return /^\{\s*[A-Za-z_][A-Za-z0-9_]*\s*\}$/.test(text);
+        }
         function isAudioUrl(url){
             const clean = (url || '').split('?')[0].toLowerCase();
             return /\.(mp3|wav|ogg|m4a|flac|aac|wma|opus|aiff|aif|amr)$/.test(clean);
@@ -9550,7 +10029,10 @@
             if(['image','video','audio'].includes(role)){
                 return mediaRef?.url || field.default || '';
             }
-            if(role === 'prompt' && source.prompt) return source.prompt;
+            if(role === 'prompt'){
+                if(source.prompt) return source.prompt;
+                if(rhUnsafeStringFormatDefault(field, field.default)) return '';
+            }
             return field.default ?? '';
         }
         function renderRhBody(node){
@@ -9581,7 +10063,7 @@
                 <div class="comfy-controls">
                     <div class="gen-settings rh-param-list"></div>
                     <div class="gen-run-row">
-                        <button class="gen-btn rh-run ${node.running ? 'running' : ''}" ${node.running || missing ? 'disabled' : ''}><i data-lucide="play" class="w-4 h-4"></i>${node.running ? tr('canvas.generating') : '运行 RunningHub'}</button>
+                        <button class="gen-btn rh-run ${node.running ? 'running' : ''}" ${missing ? 'disabled' : ''}><i data-lucide="play" class="w-4 h-4"></i>${node.running ? tr('canvas.generating') : '运行 RunningHub'}</button>
                         ${cascadeBtnHtml(node)}
                     </div>
                     ${retryBarHtml(node)}
@@ -9817,7 +10299,7 @@
         }
         async function runRhNode(nodeId, opts={}){
             const node = nodes.find(n => n.id === nodeId);
-            if(!node || (node.running && !opts.cascade)) return;
+            if(!node || (opts.cascade && node.running)) return;
             const workflow = ensureRhWorkflowSelection(node);
             if(!workflow){ alert('请先在 RunningHub 面板保存工作流模板'); return; }
             const fields = rhFields(node);
@@ -9826,7 +10308,7 @@
             const pendingId = uid('p');
             const run = runSnapshot(node, workflow.title || 'RunningHub', media.refs);
             run.taskLabel = workflow.title || 'RunningHub';
-            if(out) out._pending = [...(out._pending || []), makePending(pendingId, run)];
+            if(out) out._pending = [...(out._pending || []), makePending(pendingId, run, {canvasTaskType:'runninghub'})];
             if(!opts.cascade) node.running = true;
             refreshRunNodes(node, out);
             try {
@@ -9910,7 +10392,12 @@
                 if(opts.cascade) throw err;
                 alert(err.message || 'RunningHub 任务失败');
             } finally {
-                node.running = false;
+                const stillRunning = hasPendingRunForNode(node.id, 'runninghub');
+                node.running = stillRunning;
+                if(stillRunning){
+                    node.runStatus = 'running';
+                    node.runError = '';
+                }
                 refreshRunNodes(node, out);
             }
         }
@@ -10162,8 +10649,21 @@
                     const last = [...n.images].reverse().map(outputUrlValue).find(Boolean);
                     if(last) return {id:n.id, type:'outputImage', label:'上游输出', preview:last, refs:[{url:last, name:'output.png'}], prompt:''};
                 }
+                if(n.type === 'video' && gen?.type === 'flowFrame'){
+                    const refs = generatedImageRefs(n, true);
+                    if(refs.length){
+                        return refs.map((ref, i) => ({
+                            id:`${n.id}:generated:${i}:${ref.url}`,
+                            type:'generatedMedia',
+                            label:`上游视频 ${i + 1}`,
+                            preview:ref.url,
+                            refs:[ref],
+                            prompt:''
+                        }));
+                    }
+                }
                 if(CANVAS_IMAGE_OUTPUT_TYPES.includes(n.type)){
-                    const includeMedia = gen?.type === 'video' || gen?.type === 'rh' || gen?.type === 'dreamina' || (gen?.type === 'comfy' && (gen.mode || '') === 'custom');
+                    const includeMedia = gen?.type === 'video' || gen?.type === 'rh' || gen?.type === 'dreamina' || gen?.type === 'flowFrame' || (gen?.type === 'comfy' && (gen.mode || '') === 'custom');
                     const refs = generatedImageRefs(n, includeMedia);
                     if(refs.length){
                         return refs.map((ref, i) => ({
@@ -10208,6 +10708,7 @@
                     return sources;
                 }
                 if(n.type === 'prompt') return {id:n.id, type:'prompt', label:(n.text || '提示词').slice(0, 32), refs:[], prompt:n.text || ''};
+                if(n.type === 'flowFrame') return flowFrameOutputSources(n);
                 if(n.type === 'loop') {
                     const prompt = renderLoopPrompt(n);
                     const refs = loopInputImageRefs(n);
@@ -10255,10 +10756,10 @@
             scheduleSave();
         }
         function syncGeneratorInputs(){
-            nodes.filter(n => ['generator','comfy','rh','msgen','video','dreamina','imageExtend'].includes(n.type)).forEach(gen => orderedSources(gen, generatorSources(gen)));
+            nodes.filter(n => ['generator','comfy','rh','msgen','video','dreamina','imageExtend','panorama','flowFrame'].includes(n.type)).forEach(gen => orderedSources(gen, generatorSources(gen)));
         }
         function refreshGeneratorInputViews(){
-            nodes.filter(n => ['generator','comfy','rh','msgen','video','dreamina','imageExtend'].includes(n.type)).forEach(gen => {
+            nodes.filter(n => ['generator','comfy','rh','msgen','video','dreamina','imageExtend','panorama','flowFrame'].includes(n.type)).forEach(gen => {
                 const el = nodesEl.querySelector(`.node[data-id="${gen.id}"]`);
                 if(!el) return;
                 const sources = orderedSources(gen, generatorSources(gen));
@@ -10287,6 +10788,24 @@
                         .map(src => ({...src, refs:(src.refs || []).filter(ref => ref?.url && !isVideoUrl(ref.url) && !isAudioUrl(ref.url))}))
                         .filter(src => src.refs.length);
                     renderCreativeMediaInputs(el.querySelector('.creative-img-list'), gen, creativeImages, 'Connect one image to extend.');
+                }
+                if(gen.type === 'panorama') {
+                    const creativeImages = imageInputs
+                        .map(src => ({...src, refs:(src.refs || []).filter(ref => ref?.url && !isVideoUrl(ref.url) && !isAudioUrl(ref.url))}))
+                        .filter(src => src.refs.length);
+                    renderCreativeMediaInputs(el.querySelector('.creative-img-list'), gen, creativeImages, 'Connect reference images, or use prompt only.');
+                }
+                if(gen.type === 'flowFrame') {
+                    const assetList = el.querySelector('.flow-frame-asset-list');
+                    if(assetList){
+                        const draft = flowFrameDraft(gen, flowFrameOrderedSources(gen, generatorSources(gen)));
+                        renderFlowFrameAssetRoles(assetList, gen, draft, () => {
+                            gen.lastGeneratedPrompt = '';
+                            updateFlowFramePreview(el, gen);
+                            scheduleSave();
+                        });
+                        updateFlowFramePreview(el, gen);
+                    }
                 }
             });
         }
@@ -11200,6 +11719,7 @@ ${referenceNote}
             if(node.type === 'video') return runVideoNode(node.id, runOpts);
             if(node.type === 'dreamina') return runDreaminaNode(node.id, runOpts);
             if(node.type === 'imageExtend') return runImageExtendNode(node.id, runOpts);
+            if(node.type === 'panorama') return runPanoramaNode(node.id, runOpts);
             if(node.type === 'png') return runPngNode(node.id, runOpts);
             return Promise.resolve();
         }
@@ -11226,11 +11746,24 @@ ${referenceNote}
             return Promise.allSettled(workers);
         }
         function canvasRunTypes(){
-            return ['generator','msgen','comfy','rh','llm','video','png','dreamina'];
+            return ['generator','msgen','comfy','rh','llm','video','png','dreamina','imageExtend','panorama'];
         }
         function canvasWorkflowEdges(){
             const runTypes = canvasRunTypes();
             const direct = [];
+            const addRunTargets = (fromId, startNode, seen=new Set()) => {
+                if(!startNode || seen.has(startNode.id)) return;
+                seen.add(startNode.id);
+                if(runTypes.includes(startNode.type)){
+                    direct.push([fromId, startNode.id]);
+                    return;
+                }
+                if(startNode.type === 'flowFrame'){
+                    connections.filter(cc => cc.from === startNode.id).forEach(cc => {
+                        addRunTargets(fromId, nodes.find(n => n.id === cc.to), seen);
+                    });
+                }
+            };
             connections.forEach(c => {
                 const from = nodes.find(n => n.id === c.from);
                 const to = nodes.find(n => n.id === c.to);
@@ -11239,10 +11772,14 @@ ${referenceNote}
                     direct.push([from.id, to.id]);
                     return;
                 }
+                if(to.type === 'flowFrame'){
+                    addRunTargets(from.id, to);
+                    return;
+                }
                 if(to.type === 'output'){
                     connections.filter(cc => cc.from === to.id).forEach(cc => {
                         const next = nodes.find(n => n.id === cc.to);
-                        if(next && runTypes.includes(next.type)) direct.push([from.id, next.id]);
+                        addRunTargets(from.id, next);
                     });
                 }
             });
@@ -11301,19 +11838,23 @@ ${referenceNote}
                 visited.add(id);
                 const node = nodes.find(n => n.id === id);
                 if(!node) return;
-                // 找该节点的上游
-                connections.filter(c => c.to === id).forEach(c => {
-                    const from = nodes.find(n => n.id === c.from);
-                    if(!from) return;
-                    if(GEN_TYPES.includes(from.type)){
-                        dfs(from.id);
-                    } else if(from.type === 'output'){
-                        // output 节点的上游是生成器
-                        connections.filter(cc => cc.to === from.id).forEach(cc => {
-                            const ff = nodes.find(n => n.id === cc.from);
-                            if(ff && GEN_TYPES.includes(ff.type)) dfs(ff.id);
+                const traceRunSource = source => {
+                    if(!source) return;
+                    if(GEN_TYPES.includes(source.type)){
+                        dfs(source.id);
+                    } else if(source.type === 'output'){
+                        connections.filter(cc => cc.to === source.id).forEach(cc => {
+                            traceRunSource(nodes.find(n => n.id === cc.from));
+                        });
+                    } else if(source.type === 'flowFrame'){
+                        connections.filter(cc => cc.to === source.id).forEach(cc => {
+                            traceRunSource(nodes.find(n => n.id === cc.from));
                         });
                     }
+                };
+                // 找该节点的上游
+                connections.filter(c => c.to === id).forEach(c => {
+                    traceRunSource(nodes.find(n => n.id === c.from));
                 });
                 if(GEN_TYPES.includes(node.type)) order.push(id);
             }
@@ -11504,6 +12045,7 @@ ${referenceNote}
                     else if(node.type === 'video') await runVideoNode(id, {cascade:true});
                     else if(node.type === 'dreamina') await runDreaminaNode(id, {cascade:true});
                     else if(node.type === 'imageExtend') await runImageExtendNode(id, {cascade:true});
+                    else if(node.type === 'panorama') await runPanoramaNode(id, {cascade:true});
                     else if(node.type === 'png') await runPngNode(id, {cascade:true});
                     node.runStatus = 'done';
                     refreshNodes([id]);
@@ -11523,6 +12065,7 @@ ${referenceNote}
             // 只重跑从该节点开始的剩余链
             const idx = order.indexOf(nodeId);
             const remain = idx >= 0 ? order.slice(idx) : [nodeId];
+            if(!remain.length) return;
             try { await runOneCascadePass(remain); }
             catch(err) { refreshNodes(remain); return; }
             setTimeout(() => {
@@ -12967,6 +13510,7 @@ ${referenceNote}
             const to = nodes.find(n => n.id === toId);
             if(!from || !to) return false;
             if(CANVAS_GENERATOR_TYPES.includes(from.type)){
+                if(to.type === 'flowFrame' && (CANVAS_IMAGE_OUTPUT_TYPES.includes(from.type) || from.type === 'video')) return !wouldCreateGeneratorCycle(fromId, toId);
                 if(to.type === 'output') return true;
                 if(CANVAS_IMAGE_OUTPUT_TYPES.includes(from.type) && CANVAS_GENERATOR_TYPES.includes(to.type)){
                     return !wouldCreateGeneratorCycle(fromId, toId);
@@ -12978,10 +13522,12 @@ ${referenceNote}
                 const allowPrompt = Boolean(to.showPrompt) && ['prompt','promptGroup','loop','llm'].includes(from.type);
                 return allowImage || allowPrompt;
             }
+            if(to.type === 'flowFrame') return ['image','prompt','loop','group','promptGroup','output','llm'].includes(from.type);
             if(to.type === 'png') return ['image','group','output', ...CANVAS_IMAGE_OUTPUT_TYPES].includes(from.type);
-            if(to.type === 'llm') return ['prompt','loop','promptGroup','llm','image','group','output'].includes(from.type);
+            if(to.type === 'llm') return ['prompt','loop','promptGroup','llm','image','group','output','flowFrame'].includes(from.type);
+            if(from.type === 'flowFrame') return (CANVAS_GENERATOR_TYPES.includes(to.type) || to.type === 'llm') && !wouldCreateGeneratorCycle(fromId, toId);
             if(from.type === 'llm') return CANVAS_GENERATOR_TYPES.includes(to.type);
-            return CANVAS_GENERATOR_TYPES.includes(to.type) && ['image','prompt','loop','group','promptGroup','output','llm'].includes(from.type);
+            return CANVAS_GENERATOR_TYPES.includes(to.type) && ['image','prompt','loop','group','promptGroup','output','llm','flowFrame'].includes(from.type);
         }
         function sanitizeConnections(){
             connections = (connections || []).filter(c => canConnect(c.from, c.to));
@@ -13399,7 +13945,7 @@ ${referenceNote}
         });
         function startBoardPan(e){
             if(!canvas) return false;
-            if(isEditableTarget(e.target) || e.target.closest?.('#createMenu, #linkCreateMenu, #nodeInputMenu, #nodeOutputMenu, #nodeActionMenu, #imageNodeMenu, .minimap')) return false;
+            if(isEditableTarget(e.target) || e.target.closest?.('#nodePalette, #createMenu, #linkCreateMenu, #nodeInputMenu, #nodeOutputMenu, #nodeActionMenu, #imageNodeMenu, .minimap')) return false;
             e.preventDefault();
             e.stopPropagation();
             closeCreateMenu();
@@ -13458,11 +14004,12 @@ ${referenceNote}
             openCreateMenu(e.clientX, e.clientY);
         };
         board.addEventListener('mousedown', e => {
-            if(e.target.closest?.('#createMenu, #linkCreateMenu, #nodeInputMenu, #nodeOutputMenu, #nodeActionMenu, #imageNodeMenu')) return;
+            if(e.target.closest?.('#nodePalette, #createMenu, #linkCreateMenu, #nodeInputMenu, #nodeOutputMenu, #nodeActionMenu, #imageNodeMenu')) return;
             closeCreateMenu();
         });
         board.onwheel = e => {
             if(!canvas) return;
+            if(e.target.closest?.('#nodePalette')) return;
             e.preventDefault();
             const before = screenToWorld(e.clientX, e.clientY);
             viewport.scale = viewport.scale * (e.deltaY > 0 ? .92 : 1.08);
@@ -13662,6 +14209,7 @@ ${referenceNote}
             applyQuickToolbarState();
             if(window.StudioI18n) StudioI18n.apply();
             document.title = tr('canvas.title');
+            renderNodePalette();
             initOutputCompareEvents();
             initOutputPreviewZoomEvents();
             applyViewport();

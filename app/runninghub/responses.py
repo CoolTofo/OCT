@@ -76,6 +76,14 @@ def error_message(raw: Any) -> str:
     return "; ".join(parts) or str(raw)
 
 
+def node_info_mismatch(raw: Any) -> bool:
+    if not isinstance(raw, dict):
+        return False
+    error_code = str(raw.get("errorCode") or raw.get("error_code") or raw.get("code") or "").strip()
+    text = error_message(raw)
+    return error_code == "803" and "NODE_INFO_MISMATCH" in text
+
+
 def response_json(resp: Any) -> Dict[str, Any]:
     try:
         return resp.json()

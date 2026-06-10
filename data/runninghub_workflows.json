@@ -2,46 +2,72 @@
   "workflows": [
     {
       "id": "rh_23f2a42289f3",
-      "title": "保持一致性高清放大",
-      "workflowId": "2063837021713559553",
+      "title": "图片迁移",
+      "workflowId": "2064534704098992129",
       "accessPassword": "",
       "defaultRetainSeconds": 0,
       "fields": [
         {
-          "id": "49.image",
-          "label": "OCT_Load Image / image",
-          "nodeId": "49",
-          "nodeTitle": "OCT_Load Image",
+          "id": "403.image",
+          "label": "OCTInput_Load Image1 / image",
+          "nodeId": "403",
+          "nodeTitle": "OCTInput_Load Image1",
           "classType": "LoadImage",
           "fieldName": "image",
           "type": "image",
-          "default": "6fae03177d1d764b418ac2e5ab6ab34df0af52048848bb99b4c3308abca7dde0.jpg",
+          "default": "pasted/98936f51b4c9f9dafa27eb420a69df5ad623a0895bf51322353f247b03634ce7.png",
           "required": false,
           "accept": "image/*",
           "options": []
         },
         {
-          "id": "59.value",
-          "label": "OCT_修改尺寸 / value",
-          "nodeId": "59",
-          "nodeTitle": "OCT_修改尺寸",
-          "classType": "INTConstant",
+          "id": "404.image",
+          "label": "OCTInput_Load Image2 / image",
+          "nodeId": "404",
+          "nodeTitle": "OCTInput_Load Image2",
+          "classType": "LoadImage",
+          "fieldName": "image",
+          "type": "image",
+          "default": "pasted/75b0c55decc025fabcdbeb8f4cba7441b7f5afe7e131250a8ac409b86b042387.png",
+          "required": false,
+          "accept": "image/*",
+          "options": []
+        },
+        {
+          "id": "407.value",
+          "label": "OCTInput_Scale / value",
+          "nodeId": "407",
+          "nodeTitle": "OCTInput_Scale",
+          "classType": "PrimitiveFloat",
           "fieldName": "value",
           "type": "number",
-          "default": 3840,
+          "default": 4,
           "required": false,
           "accept": "",
           "options": []
         },
         {
-          "id": "70.text",
-          "label": "OCT_String / text",
-          "nodeId": "70",
-          "nodeTitle": "OCT_String",
-          "classType": "JWString",
+          "id": "410.text",
+          "label": "OCTInput_prompt / text",
+          "nodeId": "410",
+          "nodeTitle": "OCTInput_prompt",
+          "classType": "CR Text",
           "fieldName": "text",
           "type": "textarea",
-          "default": "High definition, 4K, Add realistic details to the corrupted image, Restore high frequence details from the corrupted image, ",
+          "default": "将图1角色的光线替换为图2的光线",
+          "required": false,
+          "accept": "",
+          "options": []
+        },
+        {
+          "id": "412.value",
+          "label": "OCTInput_Lora / value",
+          "nodeId": "412",
+          "nodeTitle": "OCTInput_Lora",
+          "classType": "PrimitiveFloat",
+          "fieldName": "value",
+          "type": "number",
+          "default": 0.8,
           "required": false,
           "accept": "",
           "options": []
@@ -49,7 +75,7 @@
       ],
       "options": {},
       "created_at": 1780892183497,
-      "updated_at": 1780892952219
+      "updated_at": 1781059534011
     },
     {
       "id": "rh_9eefa5405293",
@@ -98,7 +124,7 @@
           "classType": "VHS_LoadVideo",
           "fieldName": "video",
           "type": "video",
-          "default": "",
+          "default": "e19c8af40c60d3cc8bfbedc04cee37cb1e4537a00a6bb498980886ecbd8d5d5c.mp4",
           "required": false,
           "accept": "video/*",
           "options": []
@@ -125,19 +151,6 @@
           "fieldName": "value",
           "type": "number",
           "default": 720,
-          "required": false,
-          "accept": "",
-          "options": []
-        },
-        {
-          "id": "1137.boolean",
-          "label": "OCTInput_ZT / boolean",
-          "nodeId": "1137",
-          "nodeTitle": "OCTInput_ZT",
-          "classType": "Logic Boolean Primitive",
-          "fieldName": "boolean",
-          "type": "boolean",
-          "default": false,
           "required": false,
           "accept": "",
           "options": []
@@ -179,147 +192,25 @@
           "default": 6,
           "required": false,
           "accept": "",
+          "options": []
+        },
+        {
+          "id": "1142.image",
+          "label": "OCTInput_Image / image",
+          "nodeId": "1142",
+          "nodeTitle": "OCTInput_Image",
+          "classType": "LoadImage",
+          "fieldName": "image",
+          "type": "image",
+          "default": "example.png",
+          "required": false,
+          "accept": "image/*",
           "options": []
         }
       ],
       "options": {},
       "created_at": 1780540297478,
-      "updated_at": 1780541699129
-    },
-    {
-      "id": "rh_9989dfbf2c1a",
-      "title": "动作迁移1",
-      "workflowId": "2062067628721659905",
-      "accessPassword": "",
-      "defaultRetainSeconds": 0,
-      "fields": [
-        {
-          "id": "1066.value",
-          "label": "OCTInput多人检测开关",
-          "nodeId": "1066",
-          "nodeTitle": "OCTInput多人检测开关",
-          "classType": "Fast Groups Bypasser (rgthree)",
-          "fieldName": "value",
-          "type": "dropdown",
-          "default": "yes",
-          "required": false,
-          "accept": "",
-          "options": [
-            "yes",
-            "no"
-          ]
-        },
-        {
-          "id": "1065.value",
-          "label": "OCTInput表情检测开关",
-          "nodeId": "1065",
-          "nodeTitle": "OCTInput表情检测开关",
-          "classType": "Fast Groups Bypasser (rgthree)",
-          "fieldName": "value",
-          "type": "dropdown",
-          "default": "yes",
-          "required": false,
-          "accept": "",
-          "options": [
-            "yes",
-            "no"
-          ]
-        },
-        {
-          "id": "1071.video",
-          "label": "OCTInput_Load Video (Upload) 🎥🅥🅗🅢 / video",
-          "nodeId": "1071",
-          "nodeTitle": "OCTInput_Load Video (Upload) 🎥🅥🅗🅢",
-          "classType": "VHS_LoadVideo",
-          "fieldName": "video",
-          "type": "video",
-          "default": "",
-          "required": false,
-          "accept": "video/*",
-          "options": []
-        },
-        {
-          "id": "1131.value",
-          "label": "OCTInput_Width / value",
-          "nodeId": "1131",
-          "nodeTitle": "OCTInput_Width",
-          "classType": "Int",
-          "fieldName": "value",
-          "type": "number",
-          "default": 1280,
-          "required": false,
-          "accept": "",
-          "options": []
-        },
-        {
-          "id": "1132.value",
-          "label": "OCTInput_Hight / value",
-          "nodeId": "1132",
-          "nodeTitle": "OCTInput_Hight",
-          "classType": "Int",
-          "fieldName": "value",
-          "type": "number",
-          "default": 720,
-          "required": false,
-          "accept": "",
-          "options": []
-        },
-        {
-          "id": "1137.boolean",
-          "label": "OCTInput_ZT / boolean",
-          "nodeId": "1137",
-          "nodeTitle": "OCTInput_ZT",
-          "classType": "Logic Boolean Primitive",
-          "fieldName": "boolean",
-          "type": "boolean",
-          "default": false,
-          "required": false,
-          "accept": "",
-          "options": []
-        },
-        {
-          "id": "1138.number",
-          "label": "OCTInput_KS / number",
-          "nodeId": "1138",
-          "nodeTitle": "OCTInput_KS",
-          "classType": "LogicUtil_StaticNumberInt",
-          "fieldName": "number",
-          "type": "number",
-          "default": 30,
-          "required": false,
-          "accept": "",
-          "options": []
-        },
-        {
-          "id": "1139.f_string",
-          "label": "OCTInput_Text / f_string",
-          "nodeId": "1139",
-          "nodeTitle": "OCTInput_Text",
-          "classType": "StringFormat",
-          "fieldName": "f_string",
-          "type": "text",
-          "default": "{a}",
-          "required": false,
-          "accept": "",
-          "options": []
-        },
-        {
-          "id": "1140.value",
-          "label": "OCTInput_Step / value",
-          "nodeId": "1140",
-          "nodeTitle": "OCTInput_Step",
-          "classType": "PrimitiveInt",
-          "fieldName": "value",
-          "type": "number",
-          "default": 6,
-          "required": false,
-          "accept": "",
-          "options": []
-        }
-      ],
-      "options": {},
-      "created_at": 1780372720067,
-      "updated_at": 1780539603653
+      "updated_at": 1781000858918
     },
     {
       "id": "rh_e55d165f543f",
