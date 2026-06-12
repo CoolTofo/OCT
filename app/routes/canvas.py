@@ -19,6 +19,7 @@ from app.schemas import (
     CanvasAssetDownloadRequest,
     CanvasCreateRequest,
     CanvasSaveRequest,
+    CanvasViewportSaveRequest,
 )
 
 
@@ -218,6 +219,31 @@ def create_router(manager) -> APIRouter:
         canvas_store.save_canvas(canvas)
         await manager.broadcast_canvas_updated(canvas_id, int(canvas.get("updated_at") or canvas_store.now_ms()), payload.client_id)
         return {"canvas": canvas}
+
+    @router.patch("/api/canvases/{canvas_id}/viewport")
+    async def update_canvas_viewport(canvas_id: str, payload: CanvasViewportSaveRequest):
+        canvas = canvas_store.load_canvas(canvas_id)
+        current_updated_at = int(canvas.get("updated_at") or 0)
+        if payload.base_updated_at and current_updated_at and int(payload.base_updated_at) < current_updated_at:
+            raise HTTPException(status_code=409, detail={
+                "message": "Canvas was updated by another page; the stale viewport save was rejected.",
+                "canvas": canvas,
+                "updated_at": current_updated_at,
+            })
+        canvas["viewport"] = payload.viewport or {}
+        settings = canvas.get("settings") if isinstance(canvas.get("settings"), dict) else {}
+        if isinstance(payload.settings, dict):
+            settings = {**settings, **payload.settings}
+        canvas["settings"] = settings
+        canvas_store.save_canvas(canvas)
+        updated_at = int(canvas.get("updated_at") or canvas_store.now_ms())
+        await manager.broadcast_canvas_updated(canvas_id, updated_at, payload.client_id)
+        return {
+            "id": canvas.get("id"),
+            "updated_at": updated_at,
+            "viewport": canvas.get("viewport") or {},
+            "settings": canvas.get("settings") or {},
+        }
 
     @router.delete("/api/canvases/{canvas_id}")
     async def delete_canvas(canvas_id: str):

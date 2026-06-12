@@ -12,6 +12,7 @@
     const NODE_META = Object.freeze({
         generator: {labelKey:'canvas.apiGenerate', fallback:'API生成', icon:'wand-sparkles', title:'API Generate'},
         storyboard: {fallback:'分镜图工坊', icon:'layout-template', title:'分镜图工坊'},
+        storyboardGrid: {fallback:'多宫格分镜', icon:'panel-top', title:'多宫格分镜'},
         msgen: {labelKey:'canvas.modelscopeGenerate', fallback:'Modelscope生成', icon:'cloud-lightning', titleKey:'canvas.modelscopeGenerate'},
         comfy: {labelKey:'canvas.comfyGenerate', fallback:'ComfyUI 生成', icon:'workflow', title:'ComfyUI'},
         rh: {fallback:'RunningHub', icon:'workflow', title:'RunningHub'},
@@ -26,18 +27,22 @@
         image: {labelKey:'canvas.imageCard', fallback:'图片卡片', icon:'image-plus', title:'Image'},
         prompt: {labelKey:'canvas.prompt', fallback:'提示词', icon:'text-cursor-input', title:'Prompt'},
         flowFrame: {fallback:'流帧心法', icon:'film', title:'流帧心法'},
+        scriptPlanner: {fallback:'长剧本拆分', icon:'scroll-text', title:'长剧本拆分'},
+        scriptSection: {fallback:'剧情段落', icon:'file-text', title:'剧情段落'},
+        scriptSegment: {fallback:'10-15s小段', icon:'list-video', title:'10-15s小段'},
+        seedanceDirector: {fallback:'Seedance导演Agent', icon:'clapperboard', title:'Seedance导演Agent'},
         loop: {labelKey:'canvas.loopNode', fallback:'循环节点', icon:'repeat-2', titleKey:'canvas.loopNode'},
         group: {labelKey:'canvas.group', fallback:'分组', icon:'group', title:'Group'},
         llm: {fallback:'LLM', icon:'message-square-text', title:'LLM'}
     });
 
-    const GENERATOR_TYPES = Object.freeze(['generator','msgen','comfy','rh','video','png','dreamina','imageExtend','panorama']);
-    const IMAGE_OUTPUT_TYPES = Object.freeze(['generator','msgen','comfy','rh','png','dreamina','imageExtend','panorama']);
-    const ADDABLE_GENERATOR_TYPES = Object.freeze(['generator','storyboard','msgen','comfy','rh','video','sd2Video','dreaminaImage','dreaminaVideo','png','imageExtend','panorama']);
+    const GENERATOR_TYPES = Object.freeze(['generator','storyboardGrid','msgen','comfy','rh','video','png','dreamina','imageExtend','panorama']);
+    const IMAGE_OUTPUT_TYPES = Object.freeze(['generator','storyboardGrid','msgen','comfy','rh','png','dreamina','imageExtend','panorama']);
+    const ADDABLE_GENERATOR_TYPES = Object.freeze(['generator','storyboard','storyboardGrid','msgen','comfy','rh','video','sd2Video','dreaminaImage','dreaminaVideo','png','imageExtend','panorama']);
     const ADDABLE_SOURCE_TYPES = Object.freeze(['image','prompt','flowFrame','loop','group','llm']);
     const NODE_PALETTE_SECTIONS = Object.freeze([
-        {id:'source', fallback:'素材', types:['image','prompt','flowFrame','loop','group','output']},
-        {id:'imageGen', fallback:'图片 / 合成', types:['generator','storyboard','msgen','png','imageExtend','panorama']},
+        {id:'source', fallback:'素材', types:['image','prompt','flowFrame','scriptPlanner','seedanceDirector','loop','group','output']},
+        {id:'imageGen', fallback:'图片 / 合成', types:['generator','storyboard','storyboardGrid','msgen','png','imageExtend','panorama']},
         {id:'videoGen', fallback:'视频', types:['video','sd2Video','dreaminaImage','dreaminaVideo']},
         {id:'workflow', fallback:'工作流 / AI', types:['llm','comfy','rh']}
     ]);

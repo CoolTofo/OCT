@@ -22,6 +22,7 @@
         shotPacing:'auto',
         promptLanguage:'zh',
         useAiPlanning:true,
+        reviewStrictness:'strict',
         imageLimit:IMAGE_LIMIT
     });
 
@@ -544,11 +545,150 @@ ${negative}
         ].join('\n');
     }
 
+    function assetAuditLines(draft){
+        const assets = draft?.allAssets || draft?.assets || [];
+        return assets.length
+            ? assets.map(asset => `- ${asset.tag}${asset.included === false ? '（未参与正式映射）' : ''}：${asset.role || asset.name}；文件：${asset.name || asset.sourceLabel || asset.tag}`).join('\n')
+            : '- 无';
+    }
+
+    function buildReviewPrompt(options={}){
+        const draft = options.draft || buildPrompt(options);
+        const node = options.node || {};
+        const prompt = cleanText(options.prompt);
+        const phase = cleanText(options.phase) || '初审';
+        return [
+            `任务：${phase}。你是流帧心法 Agent 的严格审核员，只审核并指出可执行修复意见，不重新生成全文。`,
+            '请结合剧本、素材映射、Seedance 2.0 提示词指南和流帧心法连续性要求审核。',
+            '必须重点检查：',
+            '1. 剧情因果：前一镜头站立，后一镜头不能无理由变成趴地起身；不能跳过必要动作承接。',
+            '2. 人物连续：身份、服装、道具、姿态、动作起势/承接/落点、视线方向必须前后一致。',
+            '3. 走位与空间：左右关系、前后距离、进出画方向、镜头轴线、人物与场景位置不能互相矛盾。',
+            '4. 镜头逻辑：景别变化要有动机；每个镜头只保留一种主运镜；禁止乱切、重复模板和机械平均时间码。',
+            '5. 素材映射：正式提示词必须准确引用 @image1/@image2/@video1/@audio1，不能写模糊的“参考图/素材图”。',
+            '6. 台词/音效：中文台词必须保留原文、标点和顺序，并放入合理的镜头时间段。',
+            '7. Seedance 约束：主体定义清楚、动作细到肢体部位、负面约束完整、避免固定 0-3/3-7/7-10 分段模板。',
+            '8. 多图顺序：group 内和画布输入顺序已在素材映射中确定，审核时不得重新编号，只检查是否被正确使用。',
+            '',
+            '输出必须是严格 JSON，不要 Markdown，不要解释。字段固定为：',
+            '{"pass":boolean,"blockingIssues":["..."],"warnings":["..."],"continuityMap":{"characters":["..."],"space":["..."],"props":["..."],"motion":["..."]},"fixInstructions":["..."]}',
+            'pass 只有在没有阻塞问题时才为 true；blockingIssues 必须写具体镜头或时间码的问题；fixInstructions 必须可直接指导重写。',
+            '',
+            '节点设置：',
+            `时长：${numberValue(node.duration, DEFAULTS.duration, 4, 15)}秒`,
+            `比例：${cleanText(node.aspectRatio) || DEFAULTS.aspectRatio}`,
+            `帧率：${numberValue(node.fps, DEFAULTS.fps, 1, 120)}fps`,
+            `审核强度：${cleanText(node.reviewStrictness) || DEFAULTS.reviewStrictness}`,
+            '',
+            '素材映射候选：',
+            assetAuditLines(draft),
+            '',
+            '剧本 / 用户需求：',
+            draft.userText || cleanText(node.briefText) || '未填写',
+            '',
+            '待审核提示词：',
+            prompt || draft.prompt || ''
+        ].join('\n');
+    }
+
+    function buildRevisionPrompt(options={}){
+        const draft = options.draft || buildPrompt(options);
+        const node = options.node || {};
+        const prompt = cleanText(options.prompt);
+        const review = options.review || {};
+        const blocking = (review.blockingIssues || []).join('\n- ');
+        const warnings = (review.warnings || []).join('\n- ');
+        const fixes = (review.fixInstructions || []).join('\n- ');
+        return [
+            '任务：根据严格审核意见，自动修复流帧心法电影镜头提示词。',
+            '你必须保留素材编号、台词原文、画面比例、时长、帧率和最终结构；只修复逻辑冲突、走位冲突、空间关系冲突、时间节奏模板化和 Seedance 不友好表达。',
+            '禁止新增审核报告，禁止解释过程，最终只输出修复后的完整提示词。',
+            '修复重点：',
+            '- 前后镜头姿态必须有动作承接，不能站立后突然趴地起身。',
+            '- 人物走位、视线方向、左右关系、镜头轴线、道具位置必须连续。',
+            '- 每个镜头只指定一种主运镜，时间码不得机械等分。',
+            '- 多图引用必须准确使用 @imageN，不得改编号。',
+            '- 台词必须保留原文、标点和顺序。',
+            '',
+            '审核阻塞问题：',
+            blocking ? `- ${blocking}` : '- 无',
+            '',
+            '审核警告：',
+            warnings ? `- ${warnings}` : '- 无',
+            '',
+            '修复指令：',
+            fixes ? `- ${fixes}` : '- 根据审核结果提升连续性和可生成性。',
+            '',
+            '素材映射候选：',
+            assetAuditLines(draft),
+            '',
+            '剧本 / 用户需求：',
+            draft.userText || cleanText(node.briefText) || '未填写',
+            '',
+            '待修复提示词：',
+            prompt || draft.prompt || '',
+            '',
+            '最终输出必须包含这些一级标题：模式、素材映射、镜头策略、正式提示词、摄影风格、负面约束、生成设置。不要输出解释或 Markdown 代码块。'
+        ].join('\n');
+    }
+
+    function cleanReviewList(value){
+        if(Array.isArray(value)) return value.map(item => cleanText(item)).filter(Boolean);
+        const text = cleanText(value);
+        return text ? [text] : [];
+    }
+
+    function parseReviewJson(raw){
+        const text = cleanText(raw);
+        if(!text) throw new Error('empty review');
+        const unfenced = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+        try { return JSON.parse(unfenced); } catch(_err) {}
+        const start = unfenced.indexOf('{');
+        const end = unfenced.lastIndexOf('}');
+        if(start >= 0 && end > start) return JSON.parse(unfenced.slice(start, end + 1));
+        throw new Error('invalid review json');
+    }
+
+    function normalizeReviewResult(raw){
+        const text = cleanText(raw);
+        try {
+            const parsed = parseReviewJson(text);
+            const blockingIssues = cleanReviewList(parsed.blockingIssues);
+            const warnings = cleanReviewList(parsed.warnings);
+            const fixInstructions = cleanReviewList(parsed.fixInstructions);
+            const continuityMap = parsed.continuityMap && typeof parsed.continuityMap === 'object' && !Array.isArray(parsed.continuityMap)
+                ? parsed.continuityMap
+                : {};
+            return {
+                pass:Boolean(parsed.pass) && !blockingIssues.length,
+                blockingIssues,
+                warnings,
+                continuityMap,
+                fixInstructions,
+                raw:text,
+                parseError:false
+            };
+        } catch(err) {
+            return {
+                pass:false,
+                blockingIssues:['审核格式异常，无法可靠判断是否通过。'],
+                warnings:[text || err.message || '审核模型未返回内容。'],
+                continuityMap:{},
+                fixInstructions:['按严格连续性清单重新检查并修复前后镜头动作、人物走位、空间关系和素材引用。'],
+                raw:text,
+                parseError:true
+            };
+        }
+    }
+
     global.CanvasFlowFrame = Object.freeze({
         DEFAULTS,
         MODE_LABELS,
         buildPrompt,
         buildLLMUserPrompt,
+        buildReviewPrompt,
+        buildRevisionPrompt,
+        normalizeReviewResult,
         promptTimeRanges,
         uniformTimingIssue,
         repairUniformTimecodes

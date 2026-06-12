@@ -289,6 +289,34 @@ def _local_outputs(text: str) -> List[str]:
     return outputs
 
 
+def _local_outputs_for_submit_id(submit_id: str) -> List[str]:
+    safe_id = (submit_id or "").strip()
+    if not safe_id or not re.fullmatch(r"[A-Za-z0-9_-]+", safe_id):
+        return []
+    output_dir = media_store.output_storage("output")[0]
+    candidates = glob(os.path.join(output_dir, f"{safe_id}*"))
+    outputs = []
+    seen = set()
+    for path in sorted(candidates, key=os.path.getmtime):
+        ext = os.path.splitext(path)[1].lower()
+        abs_path = os.path.abspath(path)
+        if ext in IMAGE_EXTS | VIDEO_EXTS and os.path.exists(abs_path) and abs_path not in seen:
+            seen.add(abs_path)
+            outputs.append(abs_path)
+    return outputs
+
+
+async def _localize_cli_outputs(text: str, submit_id: str = "") -> Tuple[List[str], List[str]]:
+    paths = []
+    seen = set()
+    for path in [*_local_outputs(text), *_local_outputs_for_submit_id(submit_id)]:
+        abs_path = os.path.abspath(path)
+        if abs_path not in seen:
+            seen.add(abs_path)
+            paths.append(abs_path)
+    return await _localize_outputs(_media_urls(text), paths)
+
+
 def _copy_local_output(path: str) -> str:
     existing_url = media_store.asset_url_from_path(path)
     if existing_url:
@@ -385,6 +413,23 @@ def _dreamina_failed_status(text: str) -> bool:
     ])
 
 
+def _dreamina_transient_query_error(text: str) -> bool:
+    status_text = (text or "").lower()
+    return any(flag in status_text for flag in [
+        "context deadline exceeded",
+        "client.timeout",
+        "timed out",
+        "timeout",
+        "awaiting headers",
+        "reading body",
+        "connection reset",
+        "i/o timeout",
+        "temporary",
+        "temporarily",
+        "get_history_by_ids",
+    ])
+
+
 async def _query_until_outputs(cli: str, submit_id: str, wait_seconds: int) -> Tuple[List[str], List[str], str, str, str]:
     loop = asyncio.get_running_loop()
     started = loop.time()
@@ -404,7 +449,7 @@ async def _query_until_outputs(cli: str, submit_id: str, wait_seconds: int) -> T
             last_stdout = proc.stdout or ""
             last_stderr = proc.stderr or ""
             combined = "\n".join([last_stdout, last_stderr])
-            images, videos = await _localize_outputs(_media_urls(combined), _local_outputs(combined))
+            images, videos = await _localize_cli_outputs(combined, submit_id)
             if images or videos:
                 return images, videos, last_stdout, last_stderr, "succeeded"
             if _dreamina_failed_status(combined):
@@ -429,10 +474,56 @@ async def run_dreamina_cli(payload: DreaminaRunRequest) -> Dict[str, Any]:
     stderr = proc.stderr or ""
     combined = "\n".join([stdout, stderr])
     if proc.returncode != 0:
+        submit_id = _extract_submit_id(combined) or _extract_latest_log_submit_id()
+        images, videos = await _localize_cli_outputs(combined, submit_id)
+        if images or videos:
+            return {
+                "status": "succeeded",
+                "mode": mode,
+                "images": images,
+                "videos": videos,
+                "submit_id": submit_id,
+                "message": "",
+                "request": {
+                    "mode": mode,
+                    "inputs": len(local_inputs),
+                    "command": [args[0], args[1]],
+                },
+                "raw": {
+                    "returncode": proc.returncode,
+                    "stdout": stdout[-4000:],
+                    "stderr": stderr[-4000:],
+                    "query_stdout": "",
+                    "query_stderr": "",
+                    "query_status": "succeeded",
+                },
+            }
+        if submit_id and _dreamina_transient_query_error(combined):
+            return {
+                "status": "pending",
+                "mode": mode,
+                "images": [],
+                "videos": [],
+                "submit_id": submit_id,
+                "message": f"Dreamina task is still pending. submit_id={submit_id}",
+                "request": {
+                    "mode": mode,
+                    "inputs": len(local_inputs),
+                    "command": [args[0], args[1]],
+                },
+                "raw": {
+                    "returncode": proc.returncode,
+                    "stdout": stdout[-4000:],
+                    "stderr": stderr[-4000:],
+                    "query_stdout": "",
+                    "query_stderr": stderr[-4000:] or stdout[-4000:],
+                    "query_status": "transient-query-error",
+                },
+            }
         raise HTTPException(status_code=502, detail=(stderr or stdout or "Dreamina CLI failed.")[:1200])
 
-    images, videos = await _localize_outputs(_media_urls(combined), _local_outputs(combined))
     submit_id = _extract_submit_id(combined) or _extract_latest_log_submit_id()
+    images, videos = await _localize_cli_outputs(combined, submit_id)
     query_stdout = ""
     query_stderr = ""
     query_status = ""
@@ -484,19 +575,20 @@ async def run_dreamina_cli(payload: DreaminaRunRequest) -> Dict[str, Any]:
 
 async def query_dreamina_media(submit_id: str, kind: str = "image", cli_path: str = "", timeout: int = 300) -> Dict[str, Any]:
     cli = _clean_cli_path(cli_path)
-    proc = await _query_result(cli, submit_id, timeout)
+    try:
+        proc = await _query_result(cli, submit_id, timeout)
+    except subprocess.TimeoutExpired:
+        return {
+            "status": "pending",
+            "submit_id": submit_id,
+            "kind": kind,
+            "message": "Dreamina query_result timed out; continuing to wait.",
+            "raw": {"returncode": None, "stdout": "", "stderr": f"query_result timed out after {timeout} seconds"},
+        }
     stdout = proc.stdout or ""
     stderr = proc.stderr or ""
     combined = "\n".join([stdout, stderr])
-    if proc.returncode != 0:
-        return {
-            "status": "failed",
-            "submit_id": submit_id,
-            "kind": kind,
-            "error": (stderr or stdout or "Dreamina query_result failed.")[:1200],
-            "raw": {"returncode": proc.returncode, "stdout": stdout[-4000:], "stderr": stderr[-4000:]},
-        }
-    images, videos = await _localize_outputs(_media_urls(combined), _local_outputs(combined))
+    images, videos = await _localize_cli_outputs(combined, submit_id)
     outputs = videos if str(kind or "").lower() == "video" else images or videos
     if outputs:
         return {
@@ -508,12 +600,34 @@ async def query_dreamina_media(submit_id: str, kind: str = "image", cli_path: st
             "urls": outputs,
             "raw": {"returncode": proc.returncode, "stdout": stdout[-4000:], "stderr": stderr[-4000:]},
         }
-    status_text = combined.lower()
-    status = "failed" if any(flag in status_text for flag in ["fail", "error", "invalid"]) else "pending"
+    if _dreamina_failed_status(combined):
+        return {
+            "status": "failed",
+            "submit_id": submit_id,
+            "kind": kind,
+            "error": (stderr or stdout or "Dreamina task failed.")[:1200],
+            "raw": {"returncode": proc.returncode, "stdout": stdout[-4000:], "stderr": stderr[-4000:]},
+        }
+    if _dreamina_transient_query_error(combined):
+        return {
+            "status": "pending",
+            "submit_id": submit_id,
+            "kind": kind,
+            "message": "Dreamina query_result temporarily failed; continuing to wait.",
+            "raw": {"returncode": proc.returncode, "stdout": stdout[-4000:], "stderr": stderr[-4000:]},
+        }
+    if proc.returncode != 0:
+        return {
+            "status": "failed",
+            "submit_id": submit_id,
+            "kind": kind,
+            "error": (stderr or stdout or "Dreamina query_result failed.")[:1200],
+            "raw": {"returncode": proc.returncode, "stdout": stdout[-4000:], "stderr": stderr[-4000:]},
+        }
     return {
-        "status": status,
+        "status": "pending",
         "submit_id": submit_id,
         "kind": kind,
-        "message": "Dreamina task has no media yet." if status == "pending" else "Dreamina task failed or returned no media.",
+        "message": "Dreamina task has no media yet.",
         "raw": {"returncode": proc.returncode, "stdout": stdout[-4000:], "stderr": stderr[-4000:]},
     }

@@ -267,6 +267,13 @@ class CanvasSaveRequest(BaseModel):
     base_updated_at: int = 0
 
 
+class CanvasViewportSaveRequest(BaseModel):
+    viewport: Dict[str, Any] = {}
+    settings: Dict[str, Any] = {}
+    client_id: str = ""
+    base_updated_at: int = 0
+
+
 class CanvasAssetCheckRequest(BaseModel):
     urls: List[str] = []
 
