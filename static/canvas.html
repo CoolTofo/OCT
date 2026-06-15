@@ -360,6 +360,9 @@
         .template-drawer-head { flex:0 0 auto; padding:16px; border-bottom:1px solid var(--line); display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
         .template-drawer-title { font-size:13px; font-weight:900; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
         .template-drawer-sub { margin-top:4px; font-size:11px; line-height:1.45; color:var(--faint); font-weight:700; }
+        .template-drawer-actions { display:flex; align-items:center; gap:6px; flex:0 0 auto; }
+        .template-drawer-manage { height:34px; padding:0 10px; border-radius:10px; border:1px solid var(--line-2); background:var(--card-solid); color:var(--text); display:flex; align-items:center; gap:6px; font-size:11px; font-weight:900; }
+        .template-drawer-manage:hover { border-color:var(--strong); color:var(--strong); }
         .template-drawer-search { margin:12px 16px 0; height:34px; border:1px solid var(--line); border-radius:12px; background:var(--soft); color:var(--text); padding:0 11px; font-size:12px; font-weight:750; outline:none; }
         .template-drawer-list { flex:1; min-height:0; overflow:auto; padding:12px 16px 16px; display:flex; flex-direction:column; gap:9px; }
         .template-card { border:1px solid var(--line); background:var(--soft); border-radius:12px; padding:11px; display:flex; flex-direction:column; gap:7px; cursor:grab; }
@@ -395,6 +398,10 @@
         .template-manager-title { font-size:14px; font-weight:900; color:var(--text); }
         .template-manager-sub { margin-top:4px; color:var(--muted); font-size:11px; line-height:1.45; font-weight:700; }
         .template-manager-body { flex:1; min-height:0; overflow:auto; padding:14px 16px 16px; display:flex; flex-direction:column; gap:12px; }
+        .template-manager-notice { display:none; padding:8px 10px; border-radius:11px; border:1px solid var(--line); background:var(--soft); color:var(--muted); font-size:11px; font-weight:800; line-height:1.4; }
+        .template-manager-notice.show { display:block; }
+        .template-manager-notice.error { color:#dc2626; border-color:#fecaca; background:#fff7f7; }
+        .template-manager-notice.success { color:#047857; border-color:#bbf7d0; background:#f0fdf4; }
         .template-form { display:flex; flex-direction:column; gap:8px; padding:11px; border:1px solid var(--line); border-radius:14px; background:var(--soft); }
         .template-form input,.template-form textarea { width:100%; border:1px solid var(--line); border-radius:10px; background:var(--card-solid); color:var(--text); padding:8px 10px; font-size:12px; font-weight:750; outline:none; }
         .template-form textarea { min-height:78px; resize:vertical; line-height:1.45; }
@@ -11295,6 +11302,13 @@
                 });
             return promptTemplatesLoading;
         }
+        function invalidatePromptTemplates(){
+            promptTemplatesCache = null;
+            promptTemplatesLoading = null;
+        }
+        function notifyPromptTemplatesChanged(){
+            window.dispatchEvent(new CustomEvent('prompt-templates-updated'));
+        }
         function appendPromptTextToNode(node, text){
             const content = String(text || '').trim();
             if(!node || !content) return false;
@@ -11368,7 +11382,9 @@
             }
         }
         function closePromptTemplatePanel(){
-            document.getElementById('promptTemplatePanel')?.remove();
+            const panel = document.getElementById('promptTemplatePanel');
+            if(panel?._templateUpdateHandler) window.removeEventListener('prompt-templates-updated', panel._templateUpdateHandler);
+            panel?.remove();
         }
         async function openPromptTemplatePanel(){
             closePromptTemplatePanel();
@@ -11439,13 +11455,20 @@
                         <div class="template-drawer-title">模板库</div>
                         <div class="template-drawer-sub">选择会填入当前提示词节点；也可以拖到画板生成新的 Prompt 节点。</div>
                     </div>
-                    <button type="button" data-template-close class="preview-icon-btn" style="width:34px;height:34px"><i data-lucide="x" class="w-4 h-4"></i></button>
+                    <div class="template-drawer-actions">
+                        <button type="button" data-template-manage class="template-drawer-manage" title="新增、编辑、删除模板"><i data-lucide="settings-2" class="w-4 h-4"></i><span>管理</span></button>
+                        <button type="button" data-template-close class="preview-icon-btn" style="width:34px;height:34px"><i data-lucide="x" class="w-4 h-4"></i></button>
+                    </div>
                 </div>
                 <input data-template-search class="template-drawer-search" placeholder="搜索模板 / 分类 / 标签">
                 <div data-template-list class="template-drawer-list"></div>
             `;
             document.body.appendChild(drawer);
             drawer.querySelector('[data-template-close]').onclick = closePromptTemplatePanel;
+            drawer.querySelector('[data-template-manage]').onclick = e => {
+                e.stopPropagation();
+                openPromptTemplateManager();
+            };
             const search = drawer.querySelector('[data-template-search]');
             const list = drawer.querySelector('[data-template-list]');
             list.innerHTML = '<div style="font-size:12px;color:#94a3b8;padding:18px">正在加载模板...</div>';
@@ -11487,10 +11510,18 @@
                     };
                 });
             };
-            try {
-                const templates = await loadPromptTemplates();
+            const refreshDrawerList = async (force=false) => {
+                list.innerHTML = '<div style="font-size:12px;color:#94a3b8;padding:18px">正在加载模板...</div>';
+                const templates = await loadPromptTemplates(force);
                 renderTemplateList(templates);
                 search.oninput = () => renderTemplateList(templates);
+            };
+            drawer._templateUpdateHandler = () => refreshDrawerList(true).catch(err => {
+                list.innerHTML = `<div style="font-size:12px;color:#ef4444;padding:18px">${escapeHtml(err.message || '模板库加载失败')}</div>`;
+            });
+            window.addEventListener('prompt-templates-updated', drawer._templateUpdateHandler);
+            try {
+                await refreshDrawerList();
             } catch(err) {
                 list.innerHTML = `<div style="font-size:12px;color:#ef4444;padding:18px">${escapeHtml(err.message || '模板库加载失败')}</div>`;
             }
@@ -12163,6 +12194,7 @@
                             <button type="submit" class="primary">保存预设</button>
                         </div>
                     </form>
+                    <div class="template-manager-notice" data-template-manager-notice></div>
                     <div class="template-manager-list" data-template-manager-list></div>
                 </div>
             `;
@@ -12170,6 +12202,7 @@
             panel.querySelector('[data-template-manager-close]').onclick = closePromptTemplateManager;
             const form = panel.querySelector('[data-template-form]');
             const list = panel.querySelector('[data-template-manager-list]');
+            const notice = panel.querySelector('[data-template-manager-notice]');
             const fields = {
                 id:panel.querySelector('[data-template-id]'),
                 name:panel.querySelector('[data-template-name]'),
@@ -12178,6 +12211,11 @@
                 positive:panel.querySelector('[data-template-positive]'),
                 negative:panel.querySelector('[data-template-negative]'),
             };
+            const setNotice = (message='', kind='') => {
+                if(!notice) return;
+                notice.textContent = message;
+                notice.className = `template-manager-notice${message ? ' show' : ''}${kind ? ` ${kind}` : ''}`;
+            };
             const clearForm = () => {
                 fields.id.value = '';
                 fields.name.value = '';
@@ -12185,6 +12223,7 @@
                 fields.tags.value = '';
                 fields.positive.value = '';
                 fields.negative.value = '';
+                setNotice('');
             };
             const fillForm = item => {
                 fields.id.value = item.builtin ? '' : (item.id || '');
@@ -12234,11 +12273,18 @@
                     btn.onclick = async () => {
                         const item = templates.find(t => String(t.id) === String(btn.dataset.managerDelete));
                         if(!item || !confirm(`删除模板「${item.name || item.id}」？`)) return;
-                        const resp = await fetch(`/api/prompt-templates/${encodeURIComponent(item.id)}`, {method:'DELETE'});
-                        if(!resp.ok) throw new Error(await responseErrorMessage(resp, '删除模板失败'));
-                        promptTemplatesCache = null;
-                        await refreshList();
-                        render();
+                        try {
+                            setNotice('正在删除模板...');
+                            const resp = await fetch(`/api/prompt-templates/${encodeURIComponent(item.id)}`, {method:'DELETE'});
+                            if(!resp.ok) throw new Error(await responseErrorMessage(resp, '删除模板失败'));
+                            invalidatePromptTemplates();
+                            await refreshList();
+                            notifyPromptTemplatesChanged();
+                            render();
+                            setNotice('模板已删除。', 'success');
+                        } catch(err) {
+                            setNotice(err.message || '删除模板失败', 'error');
+                        }
                     };
                 });
             };
@@ -12256,15 +12302,22 @@
                     params:{}
                 };
                 if(!payload.name || !payload.positive){
-                    alert('名称和正向提示词不能为空。');
+                    setNotice('名称和正向提示词不能为空。', 'error');
                     return;
                 }
-                const resp = await fetch('/api/prompt-templates', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
-                if(!resp.ok) throw new Error(await responseErrorMessage(resp, '保存模板失败'));
-                promptTemplatesCache = null;
-                clearForm();
-                await refreshList();
-                render();
+                try {
+                    setNotice('正在保存模板...');
+                    const resp = await fetch('/api/prompt-templates', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+                    if(!resp.ok) throw new Error(await responseErrorMessage(resp, '保存模板失败'));
+                    invalidatePromptTemplates();
+                    clearForm();
+                    await refreshList();
+                    notifyPromptTemplatesChanged();
+                    render();
+                    setNotice('模板已保存。', 'success');
+                } catch(err) {
+                    setNotice(err.message || '保存模板失败', 'error');
+                }
             };
             clearForm();
             try {
