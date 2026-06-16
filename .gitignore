@@ -36,6 +36,11 @@ dist_clean/
 dist_migration/
 *.zip
 
+# Local helper scripts/docs
+更新GitHub最新版.bat
+换电脑使用说明.txt
+上传到GitHub.bat
+
 # OS/editor noise
 .DS_Store
 Thumbs.db

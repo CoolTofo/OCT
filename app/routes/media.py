@@ -12,9 +12,9 @@ from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse, Response
 from PIL import Image, ImageOps
 
-from app import media_store
+from app import media_store, media_url_import
 from app.paths import STATIC_DIR
-from app.schemas import PngComposeRequest
+from app.schemas import AiUrlImportRequest, PngComposeRequest
 
 
 def create_router(
@@ -200,6 +200,65 @@ def create_router(
         if not path:
             raise HTTPException(status_code=404, detail="Local media file not found")
         return {"file": media_file_payload(url, os.path.basename(path), path)}
+
+    @router.post("/api/ai/import-urls")
+    async def import_ai_reference_urls(payload: AiUrlImportRequest):
+        urls = media_url_import.unique_urls(payload.urls)[:media_url_import.MAX_IMPORT_URLS]
+        if not urls:
+            raise HTTPException(status_code=400, detail="No media URLs provided.")
+
+        files = []
+        errors = []
+        library = media_store.load_asset_library() if payload.add_to_library else None
+        library_items = []
+        for url in urls:
+            try:
+                imported = await media_url_import.import_media_url(url)
+                final_url = imported.url
+                preview_url = final_url
+                transcode_error = ""
+                media_kind = media_store.media_kind_for_path(imported.path) or "image"
+                if media_kind in {"video", "audio"}:
+                    try:
+                        preview_path = media_store.ensure_browser_media(imported.path)
+                        preview_url = media_store.asset_url_from_path(preview_path) or final_url
+                    except Exception as exc:
+                        transcode_error = str(exc)
+                file_payload = media_file_payload(final_url, imported.name, imported.path, {
+                    "url": final_url,
+                    "source_url": final_url,
+                    "preview_url": preview_url,
+                    "name": imported.name,
+                    "type": imported.content_type or media_store.content_type_for_path(imported.path),
+                    "source_type": imported.content_type or media_store.content_type_for_path(imported.path),
+                    "media_kind": media_kind,
+                    "remote_url": imported.source_url,
+                    "original_url": imported.source_url,
+                    "transcoded": bool(preview_url and preview_url != final_url),
+                    "transcode_error": transcode_error,
+                })
+                files.append(file_payload)
+                if library is not None:
+                    item = media_url_import.add_image_to_import_library(
+                        library,
+                        imported.path,
+                        imported.name,
+                        payload.category_id,
+                    )
+                    if item:
+                        library_items.append(item)
+            except Exception as exc:
+                errors.append({"url": url, "error": str(exc)})
+
+        if library is not None and library_items:
+            media_store.save_asset_library(library)
+
+        return {
+            "files": files,
+            "errors": errors,
+            "library_items": library_items,
+            "library": library if library_items else None,
+        }
 
     @router.post("/api/ai/convert-jpg")
     async def convert_ai_reference_to_jpg(payload: dict):

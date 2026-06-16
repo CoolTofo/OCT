@@ -229,6 +229,11 @@
         .media-video-preview { position:relative; width:100%; min-height:156px; display:flex; align-items:center; justify-content:center; border-radius:16px; background:#0f172a; overflow:hidden; }
         .media-video-preview video { width:100%; max-height:260px; background:#0f172a; }
         .media-kind-badge { position:absolute; left:10px; top:10px; padding:4px 7px; border-radius:999px; background:rgba(15,23,42,.72); color:#fff; font-size:10px; font-weight:900; letter-spacing:.06em; pointer-events:none; }
+        .video-frame-actions { position:absolute; top:9px; right:9px; display:flex; gap:5px; z-index:2; }
+        .video-frame-btn { height:24px; min-width:42px; padding:0 7px; border-radius:999px; border:1px solid rgba(255,255,255,.36); background:rgba(15,23,42,.72); color:#fff; display:flex; align-items:center; justify-content:center; gap:4px; font-size:10px; font-weight:900; line-height:1; backdrop-filter:blur(10px); }
+        .video-frame-btn:hover { background:rgba(255,255,255,.94); color:#0f172a; }
+        .video-frame-btn:disabled { opacity:.58; cursor:wait; }
+        .video-frame-btn i { width:12px; height:12px; stroke-width:2.4; }
         .media-playback-error { position:absolute; inset:auto 10px 10px 10px; padding:8px 10px; border-radius:12px; background:rgba(15,23,42,.82); color:#fff; font-size:11px; font-weight:800; line-height:1.4; text-align:center; }
         .media-playback-error.hidden { display:none; }
         .media-file-preview { width:100%; min-height:156px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; border-radius:16px; background:var(--soft); border:1px solid var(--line); color:var(--muted); font-size:11px; font-weight:800; }
@@ -1358,6 +1363,7 @@
     <script src="/static/canvas-seedance-agent-rules.js?v=20260611-seedance-director-rules"></script>
     <script src="/static/canvas-seedance-agent.js?v=20260611-seedance-director-agent"></script>
     <script src="/static/canvas-linked-clones.js?v=20260609-linked-clones"></script>
+    <script src="/static/canvas-video-frame.js?v=20260615-video-frame-extract"></script>
     <script>
         function refreshIcons(){
             if(!window.lucide || refreshIcons._queued) return;
@@ -6200,6 +6206,84 @@
             const data = await fetch('/api/ai/upload', {method:'POST', body:form}).then(r=>r.json());
             return data.files || [];
         }
+        function videoFrameFileName(node, edge){
+            const raw = String(node?.name || outputImageName(node?.url || '') || 'video').trim();
+            const base = (raw.split(/[\\/]/).pop() || 'video').replace(/\.[^.]+$/, '').replace(/[^\w\u4e00-\u9fa5.-]+/g, '_').replace(/^_+|_+$/g, '') || 'video';
+            return `${base}_${edge === 'last' ? 'last_frame' : 'first_frame'}.png`;
+        }
+        function paddedRect(rect, pad=0){
+            return {
+                x:Number(rect?.x || 0) - pad,
+                y:Number(rect?.y || 0) - pad,
+                w:Number(rect?.w || 0) + pad * 2,
+                h:Number(rect?.h || 0) + pad * 2,
+            };
+        }
+        function nodePointIsOccupied(point, size, ignoreIds=[]){
+            const ignored = new Set((ignoreIds || []).map(String));
+            const candidate = paddedRect({x:point.x, y:point.y, w:size.w, h:size.h}, 18);
+            const measure = createNodeRectMeasurer();
+            return (nodes || []).some(existing => {
+                if(!existing?.id || ignored.has(String(existing.id))) return false;
+                return rectsIntersect(candidate, paddedRect(measure(existing), 12));
+            });
+        }
+        function findFreeNodePointNear(base, size, ignoreIds=[]){
+            const xStep = Math.max(280, Number(size?.w || 260) + 36);
+            const yStep = Math.max(360, Number(size?.h || 336) + 36);
+            const rows = [0, 1, -1, 2, -2, 3, -3, 4];
+            for(let col = 0; col < 6; col += 1){
+                for(const row of rows){
+                    const point = {x:base.x + col * xStep, y:base.y + row * yStep};
+                    if(!nodePointIsOccupied(point, size, ignoreIds)) return point;
+                }
+            }
+            return base;
+        }
+        function videoFrameNodePoint(node, edge){
+            const sourceRect = measuredNodeRect(node);
+            const size = defaultNodeSize('image');
+            const base = {
+                x:Number(sourceRect.x || 0) + Math.max(300, Number(sourceRect.w || 260) + 42),
+                y:Number(sourceRect.y || 0) + (edge === 'last' ? Math.max(360, Number(size.h || 336) + 32) : 0),
+            };
+            return findFreeNodePointNear(base, size, [node?.id]);
+        }
+        async function extractVideoFrameToImageNode(nodeId, edge='first'){
+            const node = nodes.find(n => n.id === nodeId);
+            if(!node || node.type !== 'image' || !node.url || (!isVideoUrl(node.url) && node.mediaKind !== 'video')) return;
+            if(node.frameExtractBusy) return;
+            node.frameExtractBusy = edge === 'last' ? 'last' : 'first';
+            refreshNodes([node.id]);
+            try {
+                const playbackUrl = mediaPlaybackUrl(node.previewUrl || node.url);
+                const extractor = window.CanvasVideoFrame?.extractFrameFromUrl;
+                if(!extractor) throw new Error('视频抽帧模块未加载');
+                const frame = await extractor(playbackUrl, {edge, fallbackDuration:Number(node.mediaDuration || 0)});
+                const files = await uploadImageBlobs([{blob:frame.blob, name:videoFrameFileName(node, edge)}]);
+                const file = files[0];
+                if(!file?.url) throw new Error('视频帧上传失败');
+                pushUndo();
+                const imageNode = {id:uid('img'), type:'image', ...videoFrameNodePoint(node, edge)};
+                applyMediaFileToImageNode(imageNode, file);
+                imageNode.name = file.name || videoFrameFileName(node, edge);
+                imageNode.compressJpg = false;
+                imageNode.compressedJpg = false;
+                imageNode.sourceVideoNodeId = node.id;
+                imageNode.sourceVideoFrame = edge === 'last' ? 'last' : 'first';
+                imageNode.sourceVideoFrameTime = Number(frame.time || 0);
+                nodes.push(imageNode);
+                selected.clear();
+                selected.add(imageNode.id);
+                node.frameExtractBusy = '';
+                render();
+                scheduleSave();
+            } catch(err) {
+                showErrorModal(err.message || '视频帧提取失败', edge === 'last' ? '提取尾帧' : '提取首帧');
+                node.frameExtractBusy = '';
+                refreshNodes([node.id]);
+            }
+        }
         async function applyImageCrop(){
             if(!cropState) return;
             const node = nodes.find(n => n.id === cropState.nodeId);
@@ -6711,13 +6795,18 @@
             if(node.type === 'image') {
                 if(node.url) {
                     const missing = isMissingAssetUrl(node.url);
-                    const video = isVideoUrl(node.url);
-                    const audio = isAudioUrl(node.url);
+                    const video = isVideoUrl(node.url) || node.mediaKind === 'video';
+                    const audio = isAudioUrl(node.url) || node.mediaKind === 'audio';
                     const playbackUrl = mediaPlaybackUrl(node.previewUrl || node.url);
+                    const frameBusy = video ? String(node.frameExtractBusy || '') : '';
+                    const frameActionsHtml = video ? `<div class="video-frame-actions">
+                        <button type="button" class="video-frame-btn" data-video-frame="first" title="提取首帧并生成图片节点" ${frameBusy ? 'disabled' : ''}><i data-lucide="skip-back" class="w-3 h-3"></i><span>${frameBusy === 'first' ? '提取中' : '首帧'}</span></button>
+                        <button type="button" class="video-frame-btn" data-video-frame="last" title="提取尾帧并生成图片节点" ${frameBusy ? 'disabled' : ''}><i data-lucide="skip-forward" class="w-3 h-3"></i><span>${frameBusy === 'last' ? '提取中' : '尾帧'}</span></button>
+                    </div>` : '';
                     const mediaHtml = missing
                         ? missingAssetHtml(node.url)
                         : video
-                            ? `<div class="media-video-preview"><video src="${escapeAttr(playbackUrl)}" draggable="false" muted playsinline preload="metadata" controls></video><span class="media-kind-badge">VIDEO</span><div class="media-playback-error hidden">编码无法直接播放，正在使用转码预览；如仍失败请安装 FFmpeg 后重新上传</div></div>`
+                            ? `<div class="media-video-preview"><video src="${escapeAttr(playbackUrl)}" draggable="false" muted playsinline preload="metadata" controls></video><span class="media-kind-badge">VIDEO</span>${frameActionsHtml}<div class="media-playback-error hidden">编码无法直接播放，正在使用转码预览；如仍失败请安装 FFmpeg 后重新上传</div></div>`
                             : audio
                                 ? `<div class="media-file-preview"><i data-lucide="file-audio" class="w-8 h-8"></i><span>AUDIO</span><audio src="${escapeAttr(playbackUrl)}" controls preload="metadata"></audio><div class="media-playback-error hidden">音频编码无法播放</div></div>`
                                 : `<img src="${escapeAttr(node.url)}" draggable="false" loading="lazy" decoding="async">`;
@@ -6877,6 +6966,16 @@
                         };
                     }
                     const loadedVideo = body.querySelector('video');
+                    body.querySelectorAll('.video-frame-btn').forEach(btn => {
+                        ['mousedown','click','dblclick'].forEach(eventName => {
+                            btn.addEventListener(eventName, e => e.stopPropagation());
+                        });
+                        btn.onclick = e => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            extractVideoFrameToImageNode(node.id, btn.dataset.videoFrame || 'first');
+                        };
+                    });
                     if(loadedVideo) loadedVideo.onloadedmetadata = () => {
                         const nextDuration = Number.isFinite(loadedVideo.duration) && loadedVideo.duration > 0
                             ? Number(loadedVideo.duration.toFixed(1))

@@ -54,6 +54,7 @@ from app.routes import dreamina_cli as dreamina_cli_routes
 from app.routes import media as media_routes
 from app.routes import modelscope_angle as modelscope_angle_routes
 from app.routes import modelscope_image as modelscope_image_routes
+from app.routes import ai_sites as ai_site_routes
 from app.routes import online_image as online_image_routes
 from app.routes import prompt_templates as prompt_template_routes
 from app.routes import provider_models as provider_model_routes
@@ -508,6 +509,10 @@ app.include_router(online_image_routes.create_router({
 }))
 
 app.include_router(prompt_template_routes.create_router({
+    "DATA_DIR": DATA_DIR,
+}))
+
+app.include_router(ai_site_routes.create_router({
     "DATA_DIR": DATA_DIR,
 }))
 

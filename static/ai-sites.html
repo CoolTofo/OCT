@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 网站</title>
+    <link rel="icon" href="/static/october-cabin-logo.webp" type="image/webp">
+    <script src="/static/theme.js?v=20260516-theme-sync"></script>
+    <script src="/static/manga-assistant-fill-helper.js?v=20260615-fill-helper"></script>
+    <script src="/static/manga-assistant-material-helper.js?v=20260615-material-helper"></script>
+    <link rel="stylesheet" href="/static/oct-ui.css?v=20260528-brand-align">
+    <style>
+        :root {
+            --bg:#f6f8fb;
+            --panel:#ffffff;
+            --line:#e5eaf1;
+            --line-2:#d8e0ea;
+            --text:#172033;
+            --muted:#69778d;
+            --faint:#9aa8ba;
+            --soft:#f8fafc;
+            --ink:#101828;
+            --shadow:0 14px 34px rgba(15,23,42,.08);
+            --radius:8px;
+        }
+        body.theme-dark {
+            --bg:#0b1018;
+            --panel:#111827;
+            --line:#253145;
+            --line-2:#334155;
+            --text:#e5edf7;
+            --muted:#a8b3c4;
+            --faint:#748195;
+            --soft:#0f172a;
+            --ink:#f8fafc;
+            --shadow:0 18px 46px rgba(0,0,0,.34);
+        }
+        * { box-sizing:border-box; }
+        body { margin:0; min-height:100vh; background:var(--bg); color:var(--text); font-family:Inter, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; }
+        button, input, textarea, select { font:inherit; }
+        .page { min-height:100vh; padding:22px; }
+        .shell { display:grid; grid-template-columns:260px minmax(0,1fr); gap:16px; max-width:1420px; margin:0 auto; }
+        .side, .main { min-width:0; background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); }
+        .side { position:sticky; top:22px; align-self:start; max-height:calc(100vh - 44px); overflow:auto; padding:14px; }
+        .main { padding:16px; }
+        .title { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:12px; }
+        h1 { margin:0; font-size:18px; letter-spacing:0; }
+        .sub { margin-top:4px; color:var(--muted); font-size:12px; line-height:1.45; font-weight:700; }
+        .field { display:flex; flex-direction:column; gap:6px; margin-bottom:10px; }
+        .label { color:var(--muted); font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:.08em; }
+        input, textarea, select { width:100%; border:1px solid var(--line-2); background:var(--soft); color:var(--text); border-radius:7px; outline:none; padding:9px 10px; font-size:12px; font-weight:700; }
+        textarea { min-height:64px; resize:vertical; line-height:1.45; }
+        input:focus, textarea:focus, select:focus { border-color:#111827; background:var(--panel); }
+        body.theme-dark input:focus, body.theme-dark textarea:focus, body.theme-dark select:focus { border-color:#e5edf7; }
+        .btn { min-height:34px; border:1px solid var(--line-2); background:var(--panel); color:var(--text); border-radius:7px; padding:0 11px; display:inline-flex; align-items:center; justify-content:center; gap:6px; cursor:pointer; font-size:12px; font-weight:850; transition:background .15s,border-color .15s,color .15s; }
+        .btn:hover { border-color:#111827; background:var(--soft); }
+        body.theme-dark .btn:hover { border-color:#e5edf7; }
+        .btn.primary { background:var(--ink); border-color:var(--ink); color:var(--panel); }
+        .btn.danger { color:#ef4444; }
+        .btn:disabled { opacity:.48; cursor:not-allowed; }
+        .actions { display:flex; flex-wrap:wrap; gap:8px; }
+        .quick { display:grid; grid-template-columns:1fr; gap:8px; margin-bottom:14px; }
+        .divider { height:1px; background:var(--line); margin:14px 0; }
+        .tabs { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:14px; }
+        .tab { height:30px; padding:0 10px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--muted); font-size:12px; font-weight:850; cursor:pointer; }
+        .tab.active { background:var(--ink); color:var(--panel); border-color:var(--ink); }
+        .toolbar { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px; margin-bottom:14px; }
+        .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(250px, 1fr)); gap:10px; }
+        .site { border:1px solid var(--line); background:var(--panel); border-radius:var(--radius); padding:12px; min-width:0; display:flex; flex-direction:column; gap:10px; }
+        .site-head { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+        .site-name { min-width:0; font-size:14px; font-weight:900; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .site-url { min-width:0; color:var(--muted); font-size:11px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .badge { height:22px; padding:0 8px; border-radius:999px; background:var(--soft); border:1px solid var(--line); color:var(--muted); font-size:10px; font-weight:900; display:inline-flex; align-items:center; white-space:nowrap; }
+        .tags { display:flex; flex-wrap:wrap; gap:5px; min-height:22px; }
+        .desc { color:var(--muted); font-size:12px; line-height:1.45; min-height:18px; }
+        .site-actions { display:flex; gap:7px; margin-top:auto; }
+        .site-actions .btn { flex:1; min-width:0; }
+        .empty { border:1px dashed var(--line-2); border-radius:var(--radius); padding:28px; text-align:center; color:var(--muted); font-size:13px; font-weight:800; }
+        .notice { min-height:20px; margin-top:8px; color:var(--muted); font-size:12px; line-height:1.45; font-weight:750; }
+        .notice.error { color:#ef4444; }
+        .notice.success { color:#16a34a; }
+        .helper-note { padding:9px 10px; border:1px dashed var(--line-2); border-radius:7px; background:var(--soft); color:var(--muted); font-size:11.5px; line-height:1.45; font-weight:750; }
+        @media (max-width:900px) {
+            .page { padding:14px; }
+            .shell { grid-template-columns:1fr; }
+            .side { position:static; max-height:none; }
+            .toolbar { grid-template-columns:1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="shell">
+            <aside class="side">
+                <div class="title">
+                    <div>
+                        <h1>AI 网站</h1>
+                        <div class="sub">整理自 AI 漫剧助手插件：AI 站点集合、提示词填充脚本和自定义网站管理。</div>
+                    </div>
+                </div>
+
+                <div class="quick">
+                    <button class="btn" id="openFilteredBtn" type="button">打开当前筛选</button>
+                </div>
+
+                <div class="field">
+                    <div class="label">填充文本</div>
+                    <textarea id="fillText" placeholder="把要发送到外部网站的提示词放这里，再在站点卡片里复制填充脚本"></textarea>
+                    <div class="helper-note">浏览器网页不能直接控制其它标签页。这里会按漫剧助手插件规则生成脚本，你打开目标网站后粘贴到控制台运行，或保存为书签脚本使用。</div>
+                </div>
+
+                <div class="field">
+                    <div class="label">素材 URL 导入</div>
+                    <textarea id="importUrls" placeholder="把素材采集脚本复制出的图片 URL 粘贴到这里，一行一个"></textarea>
+                    <div class="actions">
+                        <button class="btn primary" type="button" id="importUrlsBtn">导入素材库</button>
+                        <button class="btn" type="button" id="clearImportUrlsBtn">清空 URL</button>
+                    </div>
+                    <div class="helper-note">LibLib / Oiioii 的素材采集脚本会复制 URL 列表；粘贴到这里后，会下载到本地并保存进素材库的“漫剧助手导入”分类。</div>
+                    <div class="notice" id="importNotice"></div>
+                </div>
+
+                <div class="field">
+                    <div class="label">搜索</div>
+                    <input id="searchInput" placeholder="搜索名称 / 标签 / 链接">
+                </div>
+                <div class="field">
+                    <div class="label">分类</div>
+                    <select id="categoryFilter"></select>
+                </div>
+
+                <div class="divider"></div>
+
+                <form id="siteForm">
+                    <input type="hidden" id="siteId">
+                    <div class="field">
+                        <div class="label">名称</div>
+                        <input id="siteTitle" required maxlength="80" placeholder="例如：新 AI 工具">
+                    </div>
+                    <div class="field">
+                        <div class="label">网址</div>
+                        <input id="siteUrl" required maxlength="500" placeholder="https://example.com">
+                    </div>
+                    <div class="field">
+                        <div class="label">分类</div>
+                        <select id="siteCategory"></select>
+                    </div>
+                    <div class="field">
+                        <div class="label">标签</div>
+                        <input id="siteTags" placeholder="用逗号分隔">
+                    </div>
+                    <div class="field">
+                        <div class="label">说明</div>
+                        <textarea id="siteDescription" placeholder="这个网站主要用来做什么"></textarea>
+                    </div>
+                    <div class="actions">
+                        <button class="btn primary" type="submit" id="saveBtn">保存网站</button>
+                        <button class="btn" type="button" id="clearBtn">清空</button>
+                    </div>
+                    <div class="notice" id="notice"></div>
+                </form>
+            </aside>
+
+            <main class="main">
+                <div class="title">
+                    <div>
+                        <h1 id="listTitle">全部网站</h1>
+                        <div class="sub" id="listSub">可直接打开，也可以把常用站点加入自定义列表。</div>
+                    </div>
+                </div>
+                <div class="toolbar">
+                    <div class="tabs" id="tabs"></div>
+                    <button class="btn" type="button" id="refreshBtn">刷新</button>
+                </div>
+                <div class="grid" id="siteGrid"></div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        const categories = [
+            ['all', '全部'],
+            ['common', '常用'],
+            ['reasoning', '推理 / 对话'],
+            ['image', '出图'],
+            ['video', '视频'],
+            ['canvas', '画布'],
+            ['voice', '配音'],
+            ['tool', '工具'],
+        ];
+        let sites = [];
+        let activeCategory = 'all';
+
+        const els = {
+            tabs: document.getElementById('tabs'),
+            grid: document.getElementById('siteGrid'),
+            search: document.getElementById('searchInput'),
+            categoryFilter: document.getElementById('categoryFilter'),
+            siteCategory: document.getElementById('siteCategory'),
+            form: document.getElementById('siteForm'),
+            siteId: document.getElementById('siteId'),
+            siteTitle: document.getElementById('siteTitle'),
+            siteUrl: document.getElementById('siteUrl'),
+            siteTags: document.getElementById('siteTags'),
+            siteDescription: document.getElementById('siteDescription'),
+            fillText: document.getElementById('fillText'),
+            importUrls: document.getElementById('importUrls'),
+            importUrlsBtn: document.getElementById('importUrlsBtn'),
+            clearImportUrlsBtn: document.getElementById('clearImportUrlsBtn'),
+            importNotice: document.getElementById('importNotice'),
+            notice: document.getElementById('notice'),
+            listTitle: document.getElementById('listTitle'),
+            listSub: document.getElementById('listSub'),
+        };
+
+        function escapeHtml(value){
+            return String(value || '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+        }
+        function categoryLabel(id){
+            return (categories.find(item => item[0] === id) || [id, id])[1];
+        }
+        function setNotice(text='', type=''){
+            els.notice.textContent = text;
+            els.notice.className = `notice ${type || ''}`.trim();
+        }
+        function setImportNotice(text='', type=''){
+            els.importNotice.textContent = text;
+            els.importNotice.className = `notice ${type || ''}`.trim();
+        }
+        function openUrls(urls){
+            const unique = [...new Set((urls || []).filter(Boolean))];
+            unique.forEach((url, index) => {
+                setTimeout(() => window.open(url, '_blank', 'noopener,noreferrer'), index * 120);
+            });
+        }
+        async function copyText(text, label='内容'){
+            if(!text) return;
+            await navigator.clipboard.writeText(text);
+            setNotice(`${label}已复制。`, 'success');
+        }
+        function extractImportUrls(text){
+            const matches = String(text || '').match(/https?:\/\/[^\s"'<>`]+|data:(?:image|video|audio)\/[a-zA-Z0-9.+-]+;base64,[A-Za-z0-9+/=]+/g) || [];
+            return [...new Set(matches.map(url => url.replace(/[),;，。]+$/g, '').trim()).filter(Boolean))];
+        }
+        async function importMaterialUrls(){
+            const urls = extractImportUrls(els.importUrls.value);
+            if(!urls.length){
+                setImportNotice('请先粘贴素材采集脚本复制出的 URL。', 'error');
+                return;
+            }
+            els.importUrlsBtn.disabled = true;
+            els.importUrlsBtn.textContent = '导入中...';
+            setImportNotice(`正在导入 ${urls.length} 个素材...`);
+            try {
+                const data = await fetch('/api/ai/import-urls', {
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({urls, add_to_library:true}),
+                }).then(async r => {
+                    const payload = await r.json().catch(() => ({}));
+                    if(!r.ok) throw new Error(payload.detail || '素材导入失败');
+                    return payload;
+                });
+                const okCount = (data.files || []).length;
+                const itemCount = (data.library_items || []).length;
+                const errors = data.errors || [];
+                const type = okCount ? 'success' : 'error';
+                const firstError = errors[0]?.error ? `；首个失败：${errors[0].error}` : '';
+                setImportNotice(`已导入 ${okCount} 个文件，${itemCount} 个图片已加入素材库；失败 ${errors.length} 个${firstError}`, type);
+            } catch(err) {
+                setImportNotice(err.message || '素材导入失败', 'error');
+            } finally {
+                els.importUrlsBtn.disabled = false;
+                els.importUrlsBtn.textContent = '导入素材库';
+            }
+        }
+        function filteredSites(){
+            const query = els.search.value.trim().toLowerCase();
+            const category = activeCategory === 'all' ? els.categoryFilter.value : activeCategory;
+            return sites.filter(site => {
+                const categoryOk = !category || category === 'all' || site.category === category;
+                const haystack = [site.title, site.url, site.description, ...(site.tags || [])].join(' ').toLowerCase();
+                return categoryOk && (!query || haystack.includes(query));
+            });
+        }
+        function renderCategoryOptions(){
+            const html = categories.map(([id, label]) => `<option value="${id}">${escapeHtml(label)}</option>`).join('');
+            els.categoryFilter.innerHTML = html;
+            els.siteCategory.innerHTML = categories.filter(([id]) => id !== 'all').map(([id, label]) => `<option value="${id}">${escapeHtml(label)}</option>`).join('');
+        }
+        function renderTabs(){
+            els.tabs.innerHTML = categories.map(([id, label]) => `<button type="button" class="tab ${activeCategory === id ? 'active' : ''}" data-category="${escapeHtml(id)}">${escapeHtml(label)}</button>`).join('');
+            els.tabs.querySelectorAll('.tab').forEach(btn => {
+                btn.onclick = () => {
+                    activeCategory = btn.dataset.category || 'all';
+                    els.categoryFilter.value = activeCategory;
+                    render();
+                };
+            });
+        }
+        function render(){
+            renderTabs();
+            const items = filteredSites();
+            const title = activeCategory === 'all' ? '全部网站' : categoryLabel(activeCategory);
+            els.listTitle.textContent = title;
+            els.listSub.textContent = `${items.length} 个网站 · 内置网站不可删除，自定义网站可编辑`;
+            els.grid.innerHTML = items.length ? items.map(site => siteCard(site)).join('') : '<div class="empty">没有匹配的网站</div>';
+            bindSiteActions();
+        }
+        function siteCard(site){
+            const tags = (site.tags || []).map(tag => `<span class="badge">${escapeHtml(tag)}</span>`).join('');
+            const fillRule = window.MangaAssistantFillHelper?.ruleForSite(site);
+            const materialRule = window.MangaAssistantMaterialHelper?.ruleForSite(site);
+            const fillBadge = fillRule ? `<span class="badge">填充：${fillRule.kind === 'chat' ? '对话' : '提示词'}</span>` : '';
+            const materialBadge = materialRule ? `<span class="badge">素材采集</span>` : '';
+            const fillButtons = fillRule
+                ? `<button class="btn" type="button" data-copy-fill="${escapeHtml(site.id)}">复制填充脚本</button>
+                   <button class="btn" type="button" data-copy-bookmarklet="${escapeHtml(site.id)}">书签脚本</button>`
+                : '';
+            const materialButtons = materialRule
+                ? `<button class="btn" type="button" data-copy-material="${escapeHtml(site.id)}">素材采集脚本</button>
+                   <button class="btn" type="button" data-copy-material-bookmarklet="${escapeHtml(site.id)}">采集书签</button>`
+                : '';
+            return `<article class="site" data-site-id="${escapeHtml(site.id)}">
+                <div class="site-head">
+                    <div style="min-width:0">
+                        <div class="site-name" title="${escapeHtml(site.title)}">${escapeHtml(site.title)}</div>
+                        <div class="site-url" title="${escapeHtml(site.url)}">${escapeHtml(site.url)}</div>
+                    </div>
+                    <span class="badge">${escapeHtml(categoryLabel(site.category))}</span>
+                </div>
+                <div class="desc">${escapeHtml(site.description || (site.builtin ? '来自 AI 漫剧助手插件支持站点。' : '自定义网站。'))}</div>
+                <div class="tags">${fillBadge}${materialBadge}${tags}</div>
+                <div class="site-actions">
+                    <button class="btn primary" type="button" data-open="${escapeHtml(site.id)}">打开</button>
+                    <button class="btn" type="button" data-edit="${escapeHtml(site.id)}">${site.builtin ? '复制' : '编辑'}</button>
+                    <button class="btn danger" type="button" data-delete="${escapeHtml(site.id)}" ${site.builtin ? 'disabled' : ''}>删除</button>
+                </div>
+                ${fillButtons ? `<div class="site-actions">${fillButtons}</div>` : ''}
+                ${materialButtons ? `<div class="site-actions">${materialButtons}</div>` : ''}
+            </article>`;
+        }
+        function bindSiteActions(){
+            els.grid.querySelectorAll('[data-open]').forEach(btn => {
+                btn.onclick = () => {
+                    const site = sites.find(item => item.id === btn.dataset.open);
+                    if(site?.url) openUrls([site.url]);
+                };
+            });
+            els.grid.querySelectorAll('[data-edit]').forEach(btn => {
+                btn.onclick = () => fillForm(sites.find(item => item.id === btn.dataset.edit));
+            });
+            els.grid.querySelectorAll('[data-delete]').forEach(btn => {
+                btn.onclick = async () => {
+                    const site = sites.find(item => item.id === btn.dataset.delete);
+                    if(!site || site.builtin) return;
+                    if(!confirm(`删除 ${site.title}？`)) return;
+                    await fetch(`/api/ai-sites/${encodeURIComponent(site.id)}`, {method:'DELETE'}).then(async r => {
+                        if(!r.ok) throw new Error((await r.json().catch(() => ({}))).detail || '删除失败');
+                    });
+                    setNotice('网站已删除。', 'success');
+                    await loadSites();
+                };
+            });
+            els.grid.querySelectorAll('[data-copy-fill]').forEach(btn => {
+                btn.onclick = async () => {
+                    const site = sites.find(item => item.id === btn.dataset.copyFill);
+                    const text = els.fillText.value.trim();
+                    if(!text){ setNotice('请先填写“填充文本”。', 'error'); return; }
+                    const script = window.MangaAssistantFillHelper?.buildConsoleScript(text, site);
+                    await copyText(script, '控制台填充脚本');
+                };
+            });
+            els.grid.querySelectorAll('[data-copy-bookmarklet]').forEach(btn => {
+                btn.onclick = async () => {
+                    const site = sites.find(item => item.id === btn.dataset.copyBookmarklet);
+                    const text = els.fillText.value.trim();
+                    if(!text){ setNotice('请先填写“填充文本”。', 'error'); return; }
+                    const script = window.MangaAssistantFillHelper?.buildBookmarklet(text, site);
+                    await copyText(script, '书签脚本');
+                };
+            });
+            els.grid.querySelectorAll('[data-copy-material]').forEach(btn => {
+                btn.onclick = async () => {
+                    const site = sites.find(item => item.id === btn.dataset.copyMaterial);
+                    const script = window.MangaAssistantMaterialHelper?.collectorScript(site);
+                    await copyText(script, '素材采集脚本');
+                };
+            });
+            els.grid.querySelectorAll('[data-copy-material-bookmarklet]').forEach(btn => {
+                btn.onclick = async () => {
+                    const site = sites.find(item => item.id === btn.dataset.copyMaterialBookmarklet);
+                    const script = window.MangaAssistantMaterialHelper?.bookmarklet(site);
+                    await copyText(script, '素材采集书签脚本');
+                };
+            });
+        }
+        function fillForm(site){
+            if(!site) return;
+            els.siteId.value = site.builtin ? '' : site.id;
+            els.siteTitle.value = site.title || '';
+            els.siteUrl.value = site.url || '';
+            els.siteCategory.value = site.category || 'tool';
+            els.siteTags.value = (site.tags || []).join(', ');
+            els.siteDescription.value = site.description || '';
+            setNotice(site.builtin ? '已复制内置网站，保存后会成为你的自定义网站。' : '正在编辑自定义网站。', 'success');
+        }
+        function clearForm(){
+            els.siteId.value = '';
+            els.siteTitle.value = '';
+            els.siteUrl.value = '';
+            els.siteCategory.value = 'tool';
+            els.siteTags.value = '';
+            els.siteDescription.value = '';
+            setNotice('');
+        }
+        async function loadSites(){
+            const data = await fetch('/api/ai-sites').then(async r => {
+                if(!r.ok) throw new Error((await r.json().catch(() => ({}))).detail || '网站库加载失败');
+                return r.json();
+            });
+            sites = data.sites || [];
+            render();
+        }
+        els.form.onsubmit = async event => {
+            event.preventDefault();
+            setNotice('保存中...');
+            const payload = {
+                id: els.siteId.value.trim(),
+                title: els.siteTitle.value.trim(),
+                url: els.siteUrl.value.trim(),
+                category: els.siteCategory.value,
+                description: els.siteDescription.value.trim(),
+                tags: els.siteTags.value.split(/[,，]/).map(s => s.trim()).filter(Boolean),
+            };
+            try {
+                await fetch('/api/ai-sites', {
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify(payload),
+                }).then(async r => {
+                    if(!r.ok) throw new Error((await r.json().catch(() => ({}))).detail || '保存失败');
+                    return r.json();
+                });
+                clearForm();
+                setNotice('网站已保存。', 'success');
+                await loadSites();
+            } catch(err) {
+                setNotice(err.message || '保存失败', 'error');
+            }
+        };
+        document.getElementById('clearBtn').onclick = clearForm;
+        document.getElementById('refreshBtn').onclick = loadSites;
+        document.getElementById('openFilteredBtn').onclick = () => openUrls(filteredSites().map(site => site.url));
+        els.importUrlsBtn.onclick = importMaterialUrls;
+        els.clearImportUrlsBtn.onclick = () => {
+            els.importUrls.value = '';
+            setImportNotice('');
+        };
+        els.search.oninput = render;
+        els.categoryFilter.onchange = () => {
+            activeCategory = els.categoryFilter.value || 'all';
+            render();
+        };
+        renderCategoryOptions();
+        loadSites().catch(err => {
+            els.grid.innerHTML = `<div class="empty">${escapeHtml(err.message || '网站库加载失败')}</div>`;
+        });
+    </script>
+</body>
+</html>

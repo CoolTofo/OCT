@@ -208,6 +208,22 @@ class PromptTemplatePayload(BaseModel):
     tags: List[str] = []
 
 
+class AiSitePayload(BaseModel):
+    id: str = ""
+    title: str = Field(min_length=1, max_length=80)
+    url: str = Field(min_length=1, max_length=500)
+    category: str = "tool"
+    description: str = ""
+    tags: List[str] = []
+    sort: int = 0
+
+
+class AiUrlImportRequest(BaseModel):
+    urls: List[str] = []
+    category_id: str = ""
+    add_to_library: bool = True
+
+
 class ImageExtendRequest(BaseModel):
     prompt: str = Field(default="", max_length=ONLINE_IMAGE_PROMPT_MAX_LENGTH)
     image: AIReference

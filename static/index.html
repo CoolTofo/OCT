@@ -1326,6 +1326,33 @@
                     </span>
                     <span class="nav-text" data-i18n="nav.gpt">GPT 对话</span>
                 </button>
+                <button class="nav-item" data-tooltip="AI 网站" onclick="switchUI(this, 'ai-sites')">
+                    <span class="nav-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 5h18"/>
+                            <path d="M7 12h10"/>
+                            <path d="M5 19h14"/>
+                            <circle cx="5" cy="5" r="1"/>
+                            <circle cx="19" cy="5" r="1"/>
+                            <circle cx="7" cy="12" r="1"/>
+                            <circle cx="17" cy="12" r="1"/>
+                            <circle cx="5" cy="19" r="1"/>
+                            <circle cx="19" cy="19" r="1"/>
+                        </svg>
+                    </span>
+                    <span class="nav-text">AI 网站</span>
+                </button>
+                <button class="nav-item" data-tooltip="提示词库" onclick="switchUI(this, 'prompt-templates')">
+                    <span class="nav-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                            <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5z"/>
+                            <path d="M8 6h8"/>
+                            <path d="M8 10h6"/>
+                        </svg>
+                    </span>
+                    <span class="nav-text">提示词库</span>
+                </button>
                 <button class="nav-item" data-tooltip="无限画布" onclick="switchUI(this, 'canvas')">
                     <span class="nav-icon">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -1420,6 +1447,8 @@
             <iframe id="frame-runninghub" data-src="/static/runninghub.html?v=20260604-rh-media-inputs" scrolling="yes" loading="lazy"></iframe>
             <iframe id="frame-sd2-prompt" data-src="/static/sd2-prompt.html?v=20260525-sd2-prompt" scrolling="yes" loading="lazy"></iframe>
             <iframe id="frame-gpt-chat" data-src="/static/gpt-chat.html?v=20260514-provider-chat-models" scrolling="yes" loading="lazy"></iframe>
+            <iframe id="frame-ai-sites" data-src="/static/ai-sites.html?v=20260615-ai-sites" scrolling="yes" loading="lazy"></iframe>
+            <iframe id="frame-prompt-templates" data-src="/static/prompt-templates.html?v=20260615-template-manager" scrolling="yes" loading="lazy"></iframe>
             <iframe id="frame-canvas" data-src="/static/canvas.html?v=20260604-rh-media-inputs" scrolling="yes" loading="lazy"></iframe>
             <iframe id="frame-api-settings" data-src="/static/api-settings.html?v=20260524-seedance-mentions" scrolling="yes" loading="lazy"></iframe>
             <iframe id="frame-comfyui-settings" data-src="/static/comfyui-settings.html?v=20260519-random-number-active-wrap" scrolling="yes" loading="lazy"></iframe>
@@ -1632,7 +1661,7 @@
         localStorage.setItem("client_id", CID);
         const ACTIVE_PAGE_KEY = 'studio_active_page';
         const DEFAULT_PAGE_ID = 'klein';
-        const PAGE_IDS = ['zimage','enhance','klein','angle','online','video','motion-transfer','runninghub','sd2-prompt','gpt-chat','canvas','api-settings','comfyui-settings'];
+        const PAGE_IDS = ['zimage','enhance','klein','angle','online','video','motion-transfer','runninghub','sd2-prompt','gpt-chat','ai-sites','prompt-templates','canvas','api-settings','comfyui-settings'];
         const OCT_UI_HREF = '/static/oct-ui.css?v=20260528-brand-align';
 
         function applyOctUiToFrame(iframe) {

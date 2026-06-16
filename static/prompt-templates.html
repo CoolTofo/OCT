@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/static/october-cabin-logo.webp" type="image/webp">
+    <title>提示词库 · 十月文化</title>
+    <script>
+        (function(){
+            try {
+                var theme = localStorage.getItem('studio_theme') || localStorage.getItem('canvas_theme') || 'light';
+                if(theme === 'dark') document.documentElement.classList.add('theme-dark');
+            } catch(e) {}
+        })();
+    </script>
+    <script src="/static/theme.js?v=20260516-theme-sync"></script>
+    <link rel="stylesheet" href="/static/oct-ui.css?v=20260528-brand-align">
+    <style>
+        :root {
+            --bg:#f5f7fb;
+            --panel:#ffffff;
+            --soft:#f8fafc;
+            --text:#111827;
+            --muted:#7b8798;
+            --line:#e5eaf2;
+            --ink:#111827;
+            --ink-soft:#f1f5f9;
+            --good:#10b981;
+            --danger:#ef4444;
+            --shadow:0 18px 42px rgba(15, 23, 42, .08);
+        }
+        html.theme-dark {
+            --bg:#0d1118;
+            --panel:#141a24;
+            --soft:#0f1520;
+            --text:#e5e7eb;
+            --muted:#8b96aa;
+            --line:#263142;
+            --ink:#eef2ff;
+            --ink-soft:#20293a;
+            --shadow:0 18px 44px rgba(0, 0, 0, .32);
+        }
+        * { box-sizing:border-box; }
+        body {
+            margin:0;
+            min-height:100vh;
+            background:var(--bg);
+            color:var(--text);
+            font-family:Inter, "Microsoft YaHei", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+        button, input, textarea, select { font:inherit; }
+        button { cursor:pointer; }
+        .page { padding:26px; }
+        .topbar {
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:16px;
+            max-width:1480px;
+            margin:0 auto 16px;
+        }
+        .title h1 { margin:0; font-size:22px; font-weight:900; letter-spacing:.01em; }
+        .title p { margin:5px 0 0; color:var(--muted); font-size:13px; font-weight:700; }
+        .actions { display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+        .layout {
+            max-width:1480px;
+            margin:0 auto;
+            display:grid;
+            grid-template-columns:minmax(300px, 390px) minmax(0, 1fr);
+            gap:16px;
+            align-items:start;
+        }
+        .panel {
+            background:var(--panel);
+            border:1px solid var(--line);
+            border-radius:16px;
+            box-shadow:var(--shadow);
+            overflow:hidden;
+        }
+        .panel-head {
+            padding:14px;
+            border-bottom:1px solid var(--line);
+            display:grid;
+            gap:10px;
+            background:rgba(255,255,255,.42);
+        }
+        html.theme-dark .panel-head { background:rgba(255,255,255,.02); }
+        .search-row { display:grid; grid-template-columns:minmax(0, 1fr) 120px; gap:8px; }
+        .field, textarea, select {
+            width:100%;
+            border:1px solid var(--line);
+            border-radius:10px;
+            background:var(--soft);
+            color:var(--text);
+            outline:none;
+            min-height:38px;
+            padding:9px 11px;
+            font-size:13px;
+            font-weight:700;
+        }
+        textarea {
+            resize:vertical;
+            line-height:1.55;
+            font-family:"Microsoft YaHei", Inter, system-ui, sans-serif;
+            font-weight:600;
+        }
+        .field:focus, textarea:focus, select:focus { border-color:#94a3b8; background:var(--panel); }
+        .template-list {
+            max-height:calc(100vh - 178px);
+            overflow:auto;
+            padding:10px;
+            display:grid;
+            gap:8px;
+        }
+        .template-card {
+            width:100%;
+            border:1px solid var(--line);
+            border-radius:12px;
+            background:var(--soft);
+            color:var(--text);
+            text-align:left;
+            padding:10px;
+            display:grid;
+            gap:6px;
+            transition:border-color .15s ease, background .15s ease, transform .15s ease;
+        }
+        .template-card:hover { border-color:#b8c3d4; transform:translateY(-1px); }
+        .template-card.active { border-color:#111827; background:var(--panel); }
+        html.theme-dark .template-card.active { border-color:#cbd5e1; }
+        .card-title { display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:13px; font-weight:900; }
+        .card-title span:first-child { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .badge {
+            display:inline-flex;
+            align-items:center;
+            height:20px;
+            padding:0 7px;
+            border-radius:999px;
+            background:var(--ink-soft);
+            color:var(--muted);
+            font-size:10px;
+            font-weight:900;
+            white-space:nowrap;
+        }
+        .badge.builtin { color:#0f766e; background:rgba(16,185,129,.12); }
+        html.theme-dark .badge.builtin { color:#6ee7b7; }
+        .card-meta { color:var(--muted); font-size:11px; font-weight:800; display:flex; gap:6px; flex-wrap:wrap; }
+        .card-scene {
+            color:var(--muted);
+            font-size:12px;
+            line-height:1.45;
+            max-height:3em;
+            overflow:hidden;
+        }
+        .editor { padding:16px; display:grid; gap:14px; }
+        .form-grid { display:grid; grid-template-columns:1fr 160px; gap:10px; }
+        .section-label {
+            margin:0 0 6px;
+            font-size:11px;
+            color:var(--muted);
+            font-weight:900;
+            text-transform:uppercase;
+            letter-spacing:.08em;
+        }
+        .editor textarea[name="positive"] { min-height:260px; }
+        .editor textarea[name="negative"] { min-height:110px; }
+        .editor textarea[name="scene"] { min-height:76px; }
+        .button {
+            border:1px solid var(--line);
+            border-radius:10px;
+            background:var(--panel);
+            color:var(--text);
+            height:38px;
+            padding:0 13px;
+            font-size:13px;
+            font-weight:900;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:7px;
+        }
+        .button.primary { background:#111827; border-color:#111827; color:#fff; }
+        html.theme-dark .button.primary { background:#e5e7eb; border-color:#e5e7eb; color:#111827; }
+        .button.danger { color:#b91c1c; border-color:rgba(239,68,68,.35); background:rgba(239,68,68,.07); }
+        .button:disabled { opacity:.48; cursor:not-allowed; }
+        .button-row { display:flex; flex-wrap:wrap; gap:8px; }
+        .status {
+            min-height:22px;
+            font-size:12px;
+            font-weight:800;
+            color:var(--muted);
+        }
+        .status.good { color:var(--good); }
+        .status.bad { color:var(--danger); }
+        .empty {
+            padding:22px 14px;
+            text-align:center;
+            color:var(--muted);
+            font-size:13px;
+            font-weight:800;
+        }
+        @media (max-width:980px) {
+            .page { padding:16px; }
+            .topbar { align-items:flex-start; flex-direction:column; }
+            .actions { justify-content:flex-start; }
+            .layout { grid-template-columns:1fr; }
+            .template-list { max-height:360px; }
+            .form-grid { grid-template-columns:1fr; }
+        }
+    </style>
+</head>
+<body>
+    <main class="page">
+        <header class="topbar">
+            <div class="title">
+                <h1>提示词库</h1>
+                <p id="countText">正在加载模板</p>
+            </div>
+            <div class="actions">
+                <button class="button" type="button" id="reloadBtn">刷新</button>
+                <button class="button" type="button" id="importDocxBtn">导入 Word</button>
+                <button class="button primary" type="button" id="newBtn">新增模板</button>
+                <input id="importDocxInput" type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden>
+            </div>
+        </header>
+
+        <section class="layout">
+            <aside class="panel">
+                <div class="panel-head">
+                    <div class="search-row">
+                        <input class="field" id="searchInput" type="search" placeholder="搜索名称 / 标签 / 内容">
+                        <select id="categoryFilter">
+                            <option value="">全部分类</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="template-list" id="templateList"></div>
+            </aside>
+
+            <section class="panel">
+                <form class="editor" id="templateForm">
+                    <input type="hidden" name="id">
+                    <div class="form-grid">
+                        <label>
+                            <p class="section-label">名称</p>
+                            <input class="field" name="name" maxlength="120" required placeholder="模板名称">
+                        </label>
+                        <label>
+                            <p class="section-label">分类</p>
+                            <input class="field" name="category" placeholder="custom">
+                        </label>
+                    </div>
+                    <label>
+                        <p class="section-label">适用场景</p>
+                        <textarea name="scene" placeholder="这个模板适合什么画面或任务"></textarea>
+                    </label>
+                    <label>
+                        <p class="section-label">正向提示词</p>
+                        <textarea name="positive" required placeholder="写入完整正向提示词"></textarea>
+                    </label>
+                    <label>
+                        <p class="section-label">负向提示词</p>
+                        <textarea name="negative" placeholder="不希望出现的内容"></textarea>
+                    </label>
+                    <label>
+                        <p class="section-label">标签</p>
+                        <input class="field" name="tags" placeholder="用逗号分隔，例如：Seedance, 电影感, 角色">
+                    </label>
+                    <div class="button-row">
+                        <button class="button primary" type="submit" id="saveBtn">保存模板</button>
+                        <button class="button" type="button" id="duplicateBtn">另存为自定义</button>
+                        <button class="button" type="button" id="copyPositiveBtn">复制正向</button>
+                        <button class="button" type="button" id="copyFullBtn">复制完整</button>
+                        <button class="button danger" type="button" id="deleteBtn">删除模板</button>
+                    </div>
+                    <div class="status" id="statusText"></div>
+                </form>
+            </section>
+        </section>
+    </main>
+
+    <script>
+        const state = {
+            templates: [],
+            selectedId: '',
+            selectedTemplate: null,
+            categories: [],
+        };
+
+        const els = {
+            countText: document.getElementById('countText'),
+            list: document.getElementById('templateList'),
+            form: document.getElementById('templateForm'),
+            search: document.getElementById('searchInput'),
+            category: document.getElementById('categoryFilter'),
+            status: document.getElementById('statusText'),
+            saveBtn: document.getElementById('saveBtn'),
+            duplicateBtn: document.getElementById('duplicateBtn'),
+            deleteBtn: document.getElementById('deleteBtn'),
+        };
+
+        function escapeHtml(value){
+            return String(value ?? '').replace(/[&<>"']/g, ch => ({
+                '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+            }[ch]));
+        }
+
+        function tagsFromText(value){
+            return String(value || '')
+                .split(/[,，\n]/)
+                .map(tag => tag.trim())
+                .filter(Boolean);
+        }
+
+        function tagText(tags){
+            return Array.isArray(tags) ? tags.join(', ') : '';
+        }
+
+        function status(text, kind=''){
+            els.status.textContent = text || '';
+            els.status.className = `status ${kind || ''}`.trim();
+        }
+
+        async function fetchJSON(url, options){
+            const resp = await fetch(url, options);
+            const data = await resp.json().catch(() => ({}));
+            if(!resp.ok) throw new Error(data.detail || data.error || `请求失败：${resp.status}`);
+            return data;
+        }
+
+        async function loadTemplates(keepSelection=true){
+            status('正在加载模板');
+            const data = await fetchJSON('/api/prompt-templates');
+            state.templates = Array.isArray(data.templates) ? data.templates : [];
+            state.categories = [...new Set(state.templates.map(item => item.category || 'custom'))].sort();
+            renderCategories();
+            renderList();
+            if(keepSelection && state.selectedId && state.templates.some(item => item.id === state.selectedId)){
+                selectTemplate(state.selectedId);
+            } else if(state.templates.length) {
+                selectTemplate(state.templates[0].id);
+            } else {
+                newTemplate();
+            }
+            status('模板已加载', 'good');
+        }
+
+        function renderCategories(){
+            const current = els.category.value;
+            els.category.innerHTML = '<option value="">全部分类</option>' + state.categories.map(cat => (
+                `<option value="${escapeHtml(cat)}">${escapeHtml(cat)}</option>`
+            )).join('');
+            els.category.value = state.categories.includes(current) ? current : '';
+        }
+
+        function filteredTemplates(){
+            const q = els.search.value.trim().toLowerCase();
+            const category = els.category.value;
+            return state.templates.filter(item => {
+                if(category && item.category !== category) return false;
+                if(!q) return true;
+                const haystack = [
+                    item.name, item.category, item.scene, item.positive, item.negative,
+                    ...(item.tags || [])
+                ].join('\n').toLowerCase();
+                return haystack.includes(q);
+            });
+        }
+
+        function renderList(){
+            const items = filteredTemplates();
+            els.countText.textContent = `${state.templates.length} 个模板，${items.length} 个可见`;
+            if(!items.length){
+                els.list.innerHTML = '<div class="empty">没有匹配的模板</div>';
+                return;
+            }
+            els.list.innerHTML = items.map(item => {
+                const active = item.id === state.selectedId ? ' active' : '';
+                const badge = item.builtin ? '<span class="badge builtin">内置</span>' : '<span class="badge">自定义</span>';
+                const tags = (item.tags || []).slice(0, 4).map(tag => `<span>${escapeHtml(tag)}</span>`).join('');
+                return `<button class="template-card${active}" type="button" data-id="${escapeHtml(item.id)}" title="${escapeHtml(item.name || '')}">
+                    <div class="card-title"><span>${escapeHtml(item.name || '未命名模板')}</span>${badge}</div>
+                    <div class="card-meta"><span>${escapeHtml(item.category || 'custom')}</span>${tags}</div>
+                    <div class="card-scene">${escapeHtml(item.scene || item.positive || '')}</div>
+                </button>`;
+            }).join('');
+            els.list.querySelectorAll('.template-card').forEach(btn => {
+                btn.onclick = () => selectTemplate(btn.dataset.id);
+            });
+        }
+
+        function selectTemplate(id){
+            const item = state.templates.find(t => t.id === id);
+            if(!item) return;
+            state.selectedId = id;
+            state.selectedTemplate = item;
+            const f = els.form.elements;
+            f.id.value = item.id || '';
+            f.name.value = item.name || '';
+            f.category.value = item.category || 'custom';
+            f.scene.value = item.scene || '';
+            f.positive.value = item.positive || '';
+            f.negative.value = item.negative || '';
+            f.tags.value = tagText(item.tags);
+            els.saveBtn.textContent = item.builtin ? '另存为自定义' : '保存模板';
+            els.deleteBtn.disabled = Boolean(item.builtin);
+            els.duplicateBtn.disabled = false;
+            renderList();
+            status(item.builtin ? '内置模板不会被覆盖，可以另存为自定义后修改。' : '正在编辑自定义模板');
+        }
+
+        function newTemplate(){
+            state.selectedId = '';
+            state.selectedTemplate = null;
+            const f = els.form.elements;
+            f.id.value = '';
+            f.name.value = '';
+            f.category.value = 'custom';
+            f.scene.value = '';
+            f.positive.value = '';
+            f.negative.value = '';
+            f.tags.value = '';
+            els.saveBtn.textContent = '保存模板';
+            els.deleteBtn.disabled = true;
+            els.duplicateBtn.disabled = true;
+            renderList();
+            status('新模板');
+        }
+
+        function payloadFromForm(forceNew=false){
+            const f = els.form.elements;
+            const selected = state.selectedTemplate || {};
+            return {
+                id: forceNew || selected.builtin ? '' : String(f.id.value || ''),
+                name: String(f.name.value || '').trim(),
+                category: String(f.category.value || 'custom').trim() || 'custom',
+                scene: String(f.scene.value || '').trim(),
+                positive: String(f.positive.value || '').trim(),
+                negative: String(f.negative.value || '').trim(),
+                params: selected.params && typeof selected.params === 'object' ? selected.params : {},
+                tags: tagsFromText(f.tags.value),
+            };
+        }
+
+        async function saveTemplate(forceNew=false){
+            const payload = payloadFromForm(forceNew);
+            if(!payload.name || !payload.positive){
+                status('名称和正向提示词不能为空', 'bad');
+                return;
+            }
+            status('正在保存模板');
+            const data = await fetchJSON('/api/prompt-templates', {
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify(payload),
+            });
+            state.selectedId = data.template?.id || '';
+            await loadTemplates(true);
+            status('模板已保存', 'good');
+        }
+
+        async function deleteTemplate(){
+            const item = state.selectedTemplate;
+            if(!item || item.builtin) return;
+            if(!confirm(`删除模板「${item.name}」？`)) return;
+            status('正在删除模板');
+            await fetchJSON(`/api/prompt-templates/${encodeURIComponent(item.id)}`, {method:'DELETE'});
+            state.selectedId = '';
+            await loadTemplates(false);
+            status('模板已删除', 'good');
+        }
+
+        async function importDocxFile(file){
+            if(!file) return;
+            if(!/\.docx$/i.test(file.name || '')){
+                status('请上传 .docx Word 文档', 'bad');
+                return;
+            }
+            status('正在导入 Word 提示词');
+            const form = new FormData();
+            form.append('file', file);
+            const resp = await fetch('/api/prompt-templates/import-docx', {method:'POST', body:form});
+            const data = await resp.json().catch(() => ({}));
+            if(!resp.ok) throw new Error(data.detail || data.error || `导入失败：${resp.status}`);
+            state.selectedId = data.templates?.[0]?.id || state.selectedId;
+            await loadTemplates(true);
+            status(`已导入 ${data.count || 0} 个模板`, 'good');
+        }
+
+        function fullTemplateText(){
+            const f = els.form.elements;
+            const parts = [
+                f.scene.value.trim() ? `适用场景：\n${f.scene.value.trim()}` : '',
+                f.positive.value.trim() ? `正向提示词：\n${f.positive.value.trim()}` : '',
+                f.negative.value.trim() ? `负向提示词：\n${f.negative.value.trim()}` : '',
+            ].filter(Boolean);
+            return parts.join('\n\n');
+        }
+
+        async function copyText(text, label){
+            const value = String(text || '').trim();
+            if(!value){
+                status('没有可复制的内容', 'bad');
+                return;
+            }
+            try {
+                await navigator.clipboard.writeText(value);
+            } catch(err) {
+                const area = document.createElement('textarea');
+                area.value = value;
+                document.body.appendChild(area);
+                area.select();
+                document.execCommand('copy');
+                area.remove();
+            }
+            status(`${label}已复制`, 'good');
+        }
+
+        els.form.onsubmit = event => {
+            event.preventDefault();
+            saveTemplate(false).catch(err => status(err.message || '保存失败', 'bad'));
+        };
+        document.getElementById('newBtn').onclick = newTemplate;
+        document.getElementById('reloadBtn').onclick = () => loadTemplates(true).catch(err => status(err.message || '加载失败', 'bad'));
+        document.getElementById('importDocxBtn').onclick = () => document.getElementById('importDocxInput').click();
+        document.getElementById('importDocxInput').onchange = event => {
+            const file = event.target.files?.[0];
+            importDocxFile(file).catch(err => status(err.message || '导入失败', 'bad')).finally(() => {
+                event.target.value = '';
+            });
+        };
+        document.getElementById('duplicateBtn').onclick = () => saveTemplate(true).catch(err => status(err.message || '另存失败', 'bad'));
+        document.getElementById('deleteBtn').onclick = () => deleteTemplate().catch(err => status(err.message || '删除失败', 'bad'));
+        document.getElementById('copyPositiveBtn').onclick = () => copyText(els.form.elements.positive.value, '正向提示词');
+        document.getElementById('copyFullBtn').onclick = () => copyText(fullTemplateText(), '完整模板');
+        els.search.oninput = renderList;
+        els.category.onchange = renderList;
+
+        loadTemplates(false).catch(err => status(err.message || '加载失败', 'bad'));
+    </script>
+</body>
+</html>
