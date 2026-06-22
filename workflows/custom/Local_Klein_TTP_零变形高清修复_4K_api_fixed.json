@@ -1,0 +1,473 @@
+{
+  "21": {
+    "inputs": {
+      "samples": [
+        "32",
+        0
+      ],
+      "vae": [
+        "45",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAEDecode"
+    }
+  },
+  "23": {
+    "inputs": {
+      "vae": [
+        "45",
+        0
+      ]
+    },
+    "class_type": "LCSLoadData",
+    "_meta": {
+      "title": "LCSLoadData"
+    }
+  },
+  "24": {
+    "inputs": {
+      "image": [
+        "37",
+        0
+      ]
+    },
+    "class_type": "easy imageBatchToImageList",
+    "_meta": {
+      "title": "easy imageBatchToImageList"
+    }
+  },
+  "25": {
+    "inputs": {
+      "a": [
+        "33",
+        0
+      ],
+      "b": [
+        "33",
+        1
+      ],
+      "value": "max(a,b)"
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "SimpleMath+"
+    }
+  },
+  "27": {
+    "inputs": {
+      "filename_prefix": "Klein"
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "SaveImage"
+    }
+  },
+  "31": {
+    "inputs": {
+      "image": [
+        "54",
+        0
+      ]
+    },
+    "class_type": "GetImageSize",
+    "_meta": {
+      "title": "GetImageSize"
+    }
+  },
+  "32": {
+    "inputs": {
+      "model": [
+        "38",
+        0
+      ],
+      "positive": [
+        "40",
+        0
+      ],
+      "negative": [
+        "39",
+        0
+      ],
+      "latent_image": [
+        "40",
+        1
+      ],
+      "seed": 25354105406319,
+      "steps": 4,
+      "cfg": 1,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  },
+  "33": {
+    "inputs": {
+      "image": [
+        "37",
+        0
+      ]
+    },
+    "class_type": "GetImageSize",
+    "_meta": {
+      "title": "GetImageSize"
+    }
+  },
+  "34": {
+    "inputs": {
+      "image": [
+        "54",
+        0
+      ],
+      "width_factor": 2,
+      "height_factor": 2,
+      "overlap_rate": 0.2
+    },
+    "class_type": "TTP_Tile_image_size",
+    "_meta": {
+      "title": "TTP_Tile_image_size"
+    }
+  },
+  "35": {
+    "inputs": {
+      "image": [
+        "54",
+        0
+      ],
+      "tile_width": [
+        "34",
+        0
+      ],
+      "tile_height": [
+        "34",
+        1
+      ]
+    },
+    "class_type": "TTP_Image_Tile_Batch",
+    "_meta": {
+      "title": "TTP_Image_Tile_Batch"
+    }
+  },
+  "37": {
+    "inputs": {
+      "image": [
+        "35",
+        0
+      ],
+      "aspect_ratio": "original",
+      "proportional_width": 1,
+      "proportional_height": 1,
+      "fit": "fill",
+      "method": "lanczos",
+      "round_to_multiple": "16",
+      "scale_to_side": "None",
+      "scale_to_length": 1024,
+      "background_color": "#000000"
+    },
+    "class_type": "LayerUtility: ImageScaleByAspectRatio V2",
+    "_meta": {
+      "title": "LayerUtility: ImageScaleByAspectRatio V2"
+    }
+  },
+  "38": {
+    "inputs": {
+      "lcs_data": [
+        "23",
+        0
+      ],
+      "vae": [
+        "45",
+        0
+      ],
+      "reference_image": [
+        "24",
+        0
+      ],
+      "mode": "auto",
+      "intensity": 0.8
+    },
+    "class_type": "LCSColorAnchor",
+    "_meta": {
+      "title": "LCSColorAnchor"
+    }
+  },
+  "39": {
+    "inputs": {
+      "conditioning": [
+        "40",
+        0
+      ]
+    },
+    "class_type": "ConditioningZeroOut",
+    "_meta": {
+      "title": "ConditioningZeroOut"
+    }
+  },
+  "40": {
+    "inputs": {
+      "clip": [
+        "44",
+        0
+      ],
+      "vae": [
+        "45",
+        0
+      ],
+      "image1": [
+        "24",
+        0
+      ],
+      "prompt": "High definition, 4K, Add realistic details to the corrupted image, Restore high frequence details from the corrupted image, \n\n\n",
+      "ref_longest_edge": [
+        "25",
+        0
+      ]
+    },
+    "class_type": "Flux2KleinEditTextEncode_EditUtils",
+    "_meta": {
+      "title": "Flux2KleinEditTextEncode_EditUtils"
+    }
+  },
+  "41": {
+    "inputs": {
+      "image_ref": [
+        "54",
+        0
+      ],
+      "image_target": [
+        "52",
+        0
+      ],
+      "method": "wavelet",
+      "image_output": "Preview",
+      "save_prefix": "ComfyUI"
+    },
+    "class_type": "easy imageColorMatch",
+    "_meta": {
+      "title": "easy imageColorMatch"
+    }
+  },
+  "42": {
+    "inputs": {
+      "unet_name": "Flux2-Klein-9B-True-v2-bf16.safetensors",
+      "weight_dtype": "fp8_e4m3fn"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "UNETLoader"
+    }
+  },
+  "44": {
+    "inputs": {
+      "clip_name": "qwen_3_8b.safetensors",
+      "type": "flux2",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "CLIPLoader"
+    }
+  },
+  "45": {
+    "inputs": {
+      "vae_name": "flux2-vae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "VAELoader"
+    }
+  },
+  "46": {
+    "inputs": {
+      "a": [
+        "31",
+        1
+      ],
+      "expression": "(a+1279)//1280+int(a%1280==0)"
+    },
+    "class_type": "MathExpression|pysssss",
+    "_meta": {
+      "title": "纵向分块计算"
+    }
+  },
+  "47": {
+    "inputs": {
+      "a": [
+        "31",
+        0
+      ],
+      "expression": "(a+1279)//1280+int(a%1280==0)"
+    },
+    "class_type": "MathExpression|pysssss",
+    "_meta": {
+      "title": "横线分块计算"
+    }
+  },
+  "49": {
+    "inputs": {
+      "image": "pasted/image (28).png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "OCT_Load Image"
+    }
+  },
+  "50": {
+    "inputs": {
+      "images": [
+        "21",
+        0
+      ]
+    },
+    "class_type": "easy imageListToImageBatch",
+    "_meta": {
+      "title": "easy imageListToImageBatch"
+    }
+  },
+  "51": {
+    "inputs": {
+      "image": [
+        "50",
+        0
+      ],
+      "original_size": [
+        "37",
+        2
+      ],
+      "scale": 1,
+      "method": "lanczos",
+      "scale_by": "by_scale",
+      "scale_by_length": 1024
+    },
+    "class_type": "LayerUtility: ImageScaleRestore V2",
+    "_meta": {
+      "title": "LayerUtility: ImageScaleRestore V2"
+    }
+  },
+  "52": {
+    "inputs": {
+      "tiles": [
+        "51",
+        0
+      ],
+      "positions": [
+        "35",
+        1
+      ],
+      "original_size": [
+        "35",
+        2
+      ],
+      "grid_size": [
+        "35",
+        3
+      ],
+      "padding": 64
+    },
+    "class_type": "TTP_Image_Assy",
+    "_meta": {
+      "title": "TTP_Image_Assy"
+    }
+  },
+  "53": {
+    "inputs": {
+      "image_b": [
+        "49",
+        0
+      ],
+      "rgthree_comparer": {
+        "images": [
+          {
+            "name": "A",
+            "selected": true,
+            "url": "/api/view?filename=rgthree.compare._temp_rhpky_00003_.png&type=temp&subfolder=&rand=0.7810894171426332"
+          },
+          {
+            "name": "B",
+            "selected": true,
+            "url": "/api/view?filename=rgthree.compare._temp_rhpky_00004_.png&type=temp&subfolder=&rand=0.738387982459012"
+          }
+        ]
+      }
+    },
+    "class_type": "Image Comparer (rgthree)",
+    "_meta": {
+      "title": "Image Comparer (rgthree)"
+    }
+  },
+  "54": {
+    "inputs": {
+      "image": [
+        "49",
+        0
+      ],
+      "aspect_ratio": "original",
+      "proportional_width": 1,
+      "proportional_height": 1,
+      "fit": "fill",
+      "method": "lanczos",
+      "round_to_multiple": "8",
+      "scale_to_side": "longest",
+      "scale_to_length": [
+        "59",
+        0
+      ],
+      "background_color": "#000000"
+    },
+    "class_type": "LayerUtility: ImageScaleByAspectRatio V2",
+    "_meta": {
+      "title": "LayerUtility: ImageScaleByAspectRatio V2"
+    }
+  },
+  "57": {
+    "inputs": {
+      "lora_name": "f2k_9B_lcs_consist_20260415.safetensors",
+      "strength_model": [
+        "71",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "LoraLoaderModelOnly"
+    }
+  },
+  "59": {
+    "inputs": {
+      "value": 3840
+    },
+    "class_type": "INTConstant",
+    "_meta": {
+      "title": "OCT_修改尺寸"
+    }
+  },
+  "71": {
+    "inputs": {
+      "value": 0.2
+    },
+    "class_type": "Float",
+    "_meta": {
+      "title": "OCTInput_SameModle"
+    }
+  },
+  "72": {
+    "inputs": {
+      "images": [
+        "41",
+        0
+      ],
+      "filename_prefix": "ComfyUI"
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "SaveImage"
+    }
+  }
+}

@@ -40,6 +40,7 @@ dist_migration/
 更新GitHub最新版.bat
 换电脑使用说明.txt
 上传到GitHub.bat
+count_lines.py
 
 # OS/editor noise
 .DS_Store

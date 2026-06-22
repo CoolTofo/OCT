@@ -202,7 +202,7 @@
         "17",
         1
       ],
-      "seed": 833990270008537,
+      "seed": 574613568105377,
       "steps": 8,
       "cfg": 1,
       "sampler_name": "euler",
@@ -406,7 +406,7 @@
   },
   "52": {
     "inputs": {
-      "image": "ComfyUI_00190_.png",
+      "image": "NMW.jpg",
       "upload": "image"
     },
     "class_type": "LoadImage",
@@ -416,7 +416,7 @@
   },
   "53": {
     "inputs": {
-      "text1": "把图1的人物融入图2白色区域内，并补全场景和光影",
+      "text1": "把图1的角色融入图2白色区域内，并补全场景和光影",
       "text2": "",
       "separator": ",",
       "text3": ""
@@ -473,7 +473,10 @@
         "60",
         1
       ],
-      "invert_mask": false,
+      "invert_mask": [
+        "164",
+        0
+      ],
       "grow": 18,
       "blur": 0,
       "low_limit": 0,
@@ -571,7 +574,7 @@
   },
   "64": {
     "inputs": {
-      "image": "5月14日.jpg",
+      "image": "clipspace/clipspace-painted-masked-1781689708829.png [input]",
       "upload": "image"
     },
     "class_type": "LoadImage",
@@ -614,7 +617,7 @@
         "70",
         0
       ],
-      "strength": 2,
+      "strength": 1,
       "start_percent": 0,
       "end_percent": 0.7
     },
@@ -644,8 +647,14 @@
         1
       ],
       "invert_mask": false,
-      "grow": 6,
-      "blur": 4
+      "grow": [
+        "165",
+        0
+      ],
+      "blur": [
+        "166",
+        0
+      ]
     },
     "class_type": "LayerMask: MaskGrow",
     "_meta": {
@@ -655,8 +664,8 @@
   "73": {
     "inputs": {
       "masks": [
-        "163",
-        0
+        "64",
+        1
       ]
     },
     "class_type": "Mask Fill Holes",
@@ -718,30 +727,31 @@
       "title": "easy cleanGpuUsed"
     }
   },
-  "161": {
+  "164": {
     "inputs": {
-      "image": "4月15日 (1)(1).mp4_20260420_150927.840.jpg",
-      "upload": "image"
+      "value": false
     },
-    "class_type": "LoadImage",
+    "class_type": "easy boolean",
     "_meta": {
-      "title": "OCTInput_图3"
+      "title": "OCTInput_InvertMask"
     }
   },
-  "163": {
+  "165": {
     "inputs": {
-      "image": [
-        "161",
-        0
-      ],
-      "red": 255,
-      "green": 255,
-      "blue": 255,
-      "threshold": 0
+      "value": 18
     },
-    "class_type": "MaskFromColor+",
+    "class_type": "PrimitiveInt",
     "_meta": {
-      "title": "MaskFromColor+"
+      "title": "OCTInput_MaskGrow"
+    }
+  },
+  "166": {
+    "inputs": {
+      "value": 10
+    },
+    "class_type": "PrimitiveInt",
+    "_meta": {
+      "title": "OCTInput_MaskBlur"
     }
   }
 }

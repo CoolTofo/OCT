@@ -2,6 +2,7 @@
 
 import json
 import os
+import re
 import shutil
 import urllib.parse
 import urllib.request
@@ -74,6 +75,79 @@ def get_comfy_history(comfy_address, prompt_id):
             return json.loads(response.read())
     except Exception as e:
         return {}
+
+
+def normalize_comfy_class_name(class_type: Any) -> str:
+    return re.sub(r"[^a-z0-9]+", "", str(class_type or "").lower())
+
+
+def comfy_output_node_class(workflow: Dict[str, Any], node_id: Any) -> str:
+    if not isinstance(workflow, dict):
+        return ""
+    node = workflow.get(str(node_id))
+    if not isinstance(node, dict):
+        return ""
+    return normalize_comfy_class_name(node.get("class_type") or "")
+
+
+def comfy_is_preview_output_class(class_name: str) -> bool:
+    return class_name in {
+        "previewimage",
+        "saveimagewebsocket",
+    } or "preview" in class_name
+
+
+def comfy_is_final_image_output_class(class_name: str) -> bool:
+    return class_name in {
+        "saveimage",
+        "saveimagewithalpha",
+        "saveanimatedwebp",
+        "saveanimatedpng",
+        "savewebpimage",
+    } or (class_name.startswith("save") and "image" in class_name)
+
+
+def preferred_history_output_node_ids(history_data: Dict[str, Any], workflow: Dict[str, Any]) -> list[str]:
+    outputs = (history_data or {}).get("outputs") or {}
+    if not isinstance(outputs, dict):
+        return []
+
+    node_ids = [str(node_id) for node_id, node_output in outputs.items() if isinstance(node_output, dict)]
+    if not node_ids:
+        return []
+
+    image_node_ids = []
+    final_image_node_ids = []
+    preview_image_node_ids = []
+    other_node_ids = []
+
+    for node_id in node_ids:
+        node_output = outputs.get(node_id) or outputs.get(int(node_id)) or {}
+        if not isinstance(node_output, dict):
+            continue
+        has_images = bool(node_output.get("images"))
+        class_name = comfy_output_node_class(workflow, node_id)
+        if has_images:
+            image_node_ids.append(node_id)
+            if comfy_is_final_image_output_class(class_name):
+                final_image_node_ids.append(node_id)
+            elif comfy_is_preview_output_class(class_name):
+                preview_image_node_ids.append(node_id)
+        else:
+            other_node_ids.append(node_id)
+
+    if final_image_node_ids:
+        chosen_image_nodes = final_image_node_ids
+    elif image_node_ids:
+        non_preview = [node_id for node_id in image_node_ids if node_id not in preview_image_node_ids]
+        chosen_image_nodes = non_preview or image_node_ids
+    else:
+        chosen_image_nodes = []
+
+    preferred = []
+    preferred.extend(chosen_image_nodes)
+    preferred.extend(node_id for node_id in other_node_ids if node_id not in preferred)
+    return preferred
 
 def describe_comfy_failure(history_data):
     status = (history_data or {}).get("status") or {}

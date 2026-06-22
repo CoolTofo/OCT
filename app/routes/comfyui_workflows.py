@@ -121,9 +121,14 @@ def create_router(generate_callable) -> APIRouter:
             mapping = converter.convert(args)
             api_prompt = comfy_workflows.read_json_file(api_output)
             body_ratio_fixes = comfy_api_prompt.repair_body_ratio_mapper_api_values(api_prompt)
-            if body_ratio_fixes:
+            flux_resolution_fixes = comfy_api_prompt.repair_flux_latent_resolution_steps(api_prompt)
+            if body_ratio_fixes or flux_resolution_fixes:
                 comfy_workflows.write_json_file(api_output, api_prompt)
-                mapping.setdefault("post_convert_api_repair", {})["body_ratio_mapper"] = body_ratio_fixes
+                post_convert_repair = mapping.setdefault("post_convert_api_repair", {})
+                if body_ratio_fixes:
+                    post_convert_repair["body_ratio_mapper"] = body_ratio_fixes
+                if flux_resolution_fixes:
+                    post_convert_repair["flux_latent_resolution_steps"] = flux_resolution_fixes
                 comfy_workflows.write_json_file(mapping_output, mapping)
             body_ratio_issues = comfy_api_prompt.validate_body_ratio_mapper_api_values(api_prompt)
             if body_ratio_issues:
@@ -291,7 +296,10 @@ def create_router(generate_callable) -> APIRouter:
                 continue
             if field.id in payload.fields:
                 value = payload.fields[field.id]
-                if field.type in ("number", "slider"):
+                field_type = str(field.type or "").lower()
+                if field_type in {"text", "textarea", "string"} and value in (None, "") and field.default not in (None, ""):
+                    value = field.default
+                elif field.type in ("number", "slider"):
                     try:
                         value = float(value) if (field.step and field.step < 1) else int(float(value))
                     except Exception:

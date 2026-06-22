@@ -95,22 +95,11 @@ def filter_node_info_by_fields(node_info: List[Dict[str, Any]] | None, raw_field
     return kept, dropped
 
 
-def is_unresolved_string_format_placeholder(value: Any, field: Dict[str, Any] | None) -> bool:
-    field = field or {}
-    class_type = str(field.get("classType") or field.get("class_type") or "").strip().lower()
-    field_name = str(field.get("fieldName") or field.get("field_name") or "").strip().lower()
-    if "stringformat" not in class_type or field_name not in {"f_string", "format", "text"}:
-        return False
-    text = str(value or "").strip()
-    default = str(field.get("default", "") or "").strip()
-    if default and text != default:
-        return False
-    return re.fullmatch(r"\{\s*[A-Za-z_][A-Za-z0-9_]*\s*\}", text) is not None
-
-
 def coerce_value(value: Any, field: Dict[str, Any] | None, use_default_for_empty: bool = True) -> Any:
-    if is_unresolved_string_format_placeholder(value, field):
-        return ""
     if value == "" and not use_default_for_empty:
+        field_type = fields.clean_field_type((field or {}).get("type"))
+        default = (field or {}).get("default", "")
+        if field_type in {"text", "textarea"} and default not in (None, ""):
+            return default
         return ""
     return fields.coerce_value(value, field)

@@ -1,0 +1,54 @@
+{
+  "profile": "generic",
+  "main_output_node_id": "312",
+  "output_mode": "all",
+  "workflow_output": "D:\\Program Files\\OCT\\data\\comfyui_exports\\Flux.2_Klein_细节增强_api_fixed.workflow.json",
+  "api_output": "D:\\Program Files\\OCT\\workflows\\custom\\Flux.2_Klein_细节增强_api_fixed.json",
+  "api_input": "D:\\Program Files\\OCT\\data\\comfyui_exports\\_api_input_5df99386c8f846fe99dfbf4448960723.json",
+  "normalize_legacy_widgets": {
+    "changes": []
+  },
+  "compatible_custom_nodes": {
+    "converted": []
+  },
+  "strip_reroute_nodes": {
+    "removed": 0,
+    "rewired": [],
+    "unresolved": []
+  },
+  "flatten_set_get": {
+    "converted": [],
+    "skipped": []
+  },
+  "frontend_switches": {
+    "converted": [],
+    "skipped": []
+  },
+  "body_ratio_mapper_widget_values": {
+    "changes": []
+  },
+  "api_value_overlay": {
+    "updated": [
+      {
+        "node_id": "363",
+        "class_type": "Float",
+        "inputs": [
+          "value"
+        ]
+      }
+    ],
+    "skipped": []
+  },
+  "body_ratio_mapper_api_repair": {
+    "changes": []
+  },
+  "body_ratio_mapper_api_validation": {
+    "issues": []
+  },
+  "validation": {
+    "nodes": 23,
+    "links": 29,
+    "bad_links": 0,
+    "residual_ui_nodes": []
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "title": "单图编辑",
+  "fields": [
+    {
+      "id": "374.image",
+      "node": "374",
+      "input": "image",
+      "name": "OCTInput_Image / image",
+      "nodeTitle": "OCTInput_Image",
+      "classType": "LoadImage",
+      "type": "image",
+      "default": "ai_ref_0138583cbad7.png",
+      "options": [],
+      "random_enabled": false,
+      "locked": true,
+      "min": null,
+      "max": null,
+      "step": null
+    },
+    {
+      "id": "547.prompt",
+      "node": "547",
+      "input": "prompt",
+      "name": "OCTInput_Prompt / prompt",
+      "nodeTitle": "OCTInput_Prompt",
+      "classType": "CR Prompt Text",
+      "type": "textarea",
+      "default": "",
+      "options": [],
+      "random_enabled": false,
+      "locked": true,
+      "min": null,
+      "max": null,
+      "step": null
+    },
+    {
+      "id": "556.value",
+      "node": "556",
+      "input": "value",
+      "name": "OCTInput_Step / value",
+      "nodeTitle": "OCTInput_Step",
+      "classType": "PrimitiveInt",
+      "type": "number",
+      "default": 6,
+      "min": 0.0,
+      "max": 12.0,
+      "step": 1.0,
+      "options": [],
+      "random_enabled": false,
+      "locked": false
+    }
+  ],
+  "mini_cards": {}
+}

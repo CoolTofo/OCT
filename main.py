@@ -110,6 +110,7 @@ coerce_comfy_bool = comfy_api_prompt.coerce_bool
 is_comfy_api_helper_node = comfy_api_prompt.is_api_helper_node
 resolve_comfy_api_helper_value = comfy_api_prompt.resolve_api_helper_value
 fold_comfy_api_helper_nodes = comfy_api_prompt.fold_api_helper_nodes
+repair_flux_latent_resolution_steps = comfy_api_prompt.repair_flux_latent_resolution_steps
 repair_body_ratio_mapper_api_values = comfy_api_prompt.repair_body_ratio_mapper_api_values
 validate_body_ratio_mapper_api_values = comfy_api_prompt.validate_body_ratio_mapper_api_values
 
@@ -659,6 +660,7 @@ app.include_router(local_generate_routes.create_router({
     "get_active_comfyui_instances": get_active_comfyui_instances,
     "repair_body_ratio_mapper_api_values": repair_body_ratio_mapper_api_values,
     "validate_body_ratio_mapper_api_values": validate_body_ratio_mapper_api_values,
+    "repair_flux_latent_resolution_steps": repair_flux_latent_resolution_steps,
     "strip_comfy_reroute_nodes": strip_comfy_reroute_nodes,
     "fold_comfy_api_helper_nodes": fold_comfy_api_helper_nodes,
     "get_comfy_history": get_comfy_history,

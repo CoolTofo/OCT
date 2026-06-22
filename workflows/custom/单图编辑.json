@@ -1,0 +1,234 @@
+{
+  "371": {
+    "inputs": {
+      "model": [
+        "373",
+        0
+      ],
+      "clip": [
+        "372",
+        1
+      ],
+      "vae": [
+        "372",
+        2
+      ],
+      "image1": [
+        "381",
+        0
+      ],
+      "positive_prompt": [
+        "547",
+        0
+      ],
+      "width": [
+        "381",
+        3
+      ],
+      "height": [
+        "381",
+        4
+      ],
+      "steps": [
+        "556",
+        0
+      ],
+      "negative_prompt": "Describe the key features of the input image (color, shape, size, texture, objects, background), then explain how the user's text instruction should alter or modify the image. Generate a new image that meets the user's requirements while maintaining consistency with the original input where appropriate.",
+      "generation_mode": "图生图 image-to-image",
+      "batch_size": 1,
+      "seed": 627187527549366,
+      "cfg": 1,
+      "sampler_name": "er_sde",
+      "scheduler": "beta57",
+      "denoise": 1,
+      "auraflow_shift": 3,
+      "cfg_norm_strength": 1,
+      "enable_clean_gpu_memory": true,
+      "enable_clean_cpu_memory_after_finish": true,
+      "enable_sound_notification": true,
+      "auto_save_output_folder": "",
+      "output_filename_prefix": "auto_save",
+      "instruction": "Describe the key features of the input image (color, shape, size, texture, objects, background), then explain how the user's text instruction should alter or modify the image. Generate a new image that meets the user's requirements while maintaining consistency with the original input where appropriate."
+    },
+    "class_type": "QwenImageIntegratedKSampler",
+    "_meta": {
+      "title": "QwenImageIntegratedKSampler"
+    }
+  },
+  "372": {
+    "inputs": {
+      "ckpt_name": "QWEN\\Qwen-Rapid-AIO-NSFW-v13.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "CheckpointLoaderSimple"
+    }
+  },
+  "373": {
+    "inputs": {
+      "model": [
+        "372",
+        0
+      ],
+      "lora_name": "qwen\\Qwen-Image-Edit-F2P.safetensors",
+      "strength_model": 0.25
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "LoraLoaderModelOnly"
+    }
+  },
+  "374": {
+    "inputs": {
+      "image": "ai_ref_0138583cbad7.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "OCTInput_Image"
+    }
+  },
+  "375": {
+    "inputs": {
+      "image_a": [
+        "381",
+        0
+      ],
+      "image_b": [
+        "371",
+        0
+      ],
+      "rgthree_comparer": {
+        "images": [
+          {
+            "name": "A",
+            "selected": true,
+            "url": "/api/view?filename=rgthree.compare._temp_cdtbo_00001_.png&type=temp&subfolder=&rand=0.44393254976933927"
+          },
+          {
+            "name": "B",
+            "selected": true,
+            "url": "/api/view?filename=rgthree.compare._temp_cdtbo_00002_.png&type=temp&subfolder=&rand=0.45908370970927304"
+          }
+        ]
+      }
+    },
+    "class_type": "Image Comparer (rgthree)",
+    "_meta": {
+      "title": "Image Comparer (rgthree)"
+    }
+  },
+  "376": {
+    "inputs": {
+      "reel_1": [
+        "378",
+        0
+      ],
+      "font_file": "Alibaba-PuHuiTi-Heavy.ttf",
+      "font_size": 30,
+      "border": 8,
+      "color_theme": "light"
+    },
+    "class_type": "LayerUtility: ImageReelComposit",
+    "_meta": {
+      "title": "LayerUtility: ImageReelComposit"
+    }
+  },
+  "377": {
+    "inputs": {
+      "images": [
+        "376",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "PreviewImage"
+    }
+  },
+  "378": {
+    "inputs": {
+      "image1": [
+        "381",
+        0
+      ],
+      "image2": [
+        "371",
+        0
+      ],
+      "image1_text": "original",
+      "image2_text": "Final Effect",
+      "image3_text": "",
+      "image4_text": "",
+      "reel_height": 1024,
+      "border": 32
+    },
+    "class_type": "LayerUtility: ImageReel",
+    "_meta": {
+      "title": "LayerUtility: ImageReel"
+    }
+  },
+  "379": {
+    "inputs": {
+      "images": [
+        "371",
+        0
+      ],
+      "filename_prefix": "Work-Fisher"
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "SaveImage"
+    }
+  },
+  "380": {
+    "inputs": {
+      "value": 1536
+    },
+    "class_type": "INTConstant",
+    "_meta": {
+      "title": "整数常量"
+    }
+  },
+  "381": {
+    "inputs": {
+      "image": [
+        "374",
+        0
+      ],
+      "scale_to_length": [
+        "380",
+        0
+      ],
+      "aspect_ratio": "original",
+      "proportional_width": 1,
+      "proportional_height": 1,
+      "fit": "letterbox",
+      "method": "lanczos",
+      "round_to_multiple": "8",
+      "scale_to_side": "longest",
+      "background_color": "#000000"
+    },
+    "class_type": "LayerUtility: ImageScaleByAspectRatio V2",
+    "_meta": {
+      "title": "LayerUtility: ImageScaleByAspectRatio V2"
+    }
+  },
+  "547": {
+    "inputs": {
+      "prompt": "人物衣服变成红色"
+    },
+    "class_type": "CR Prompt Text",
+    "_meta": {
+      "title": "OCTInput_Prompt"
+    }
+  },
+  "556": {
+    "inputs": {
+      "value": 6
+    },
+    "class_type": "PrimitiveInt",
+    "_meta": {
+      "title": "OCTInput_Step"
+    }
+  }
+}

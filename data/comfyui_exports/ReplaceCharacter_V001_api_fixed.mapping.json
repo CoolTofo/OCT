@@ -1,0 +1,416 @@
+{
+  "profile": "generic",
+  "main_output_node_id": "312",
+  "output_mode": "all",
+  "workflow_output": "D:\\Program Files\\OCT\\data\\comfyui_exports\\ReplaceCharacter_V001_api_fixed.workflow.json",
+  "api_output": "D:\\Program Files\\OCT\\workflows\\custom\\ReplaceCharacter_V001_api_fixed.json",
+  "api_input": "D:\\Program Files\\OCT\\data\\comfyui_exports\\_api_input_b650bc13e45949cb8fbbded2a16dd5fa.json",
+  "normalize_legacy_widgets": {
+    "changes": []
+  },
+  "compatible_custom_nodes": {
+    "converted": [
+      {
+        "node_id": "59",
+        "from": "ImageCompositeMaskedWithSwitch",
+        "to": "ImageCompositeMasked",
+        "removed_inputs": []
+      }
+    ]
+  },
+  "strip_reroute_nodes": {
+    "removed": 26,
+    "rewired": [
+      {
+        "link_id": "4",
+        "from": [
+          15,
+          0
+        ],
+        "to": [
+          64,
+          0
+        ]
+      },
+      {
+        "link_id": "5",
+        "from": [
+          48,
+          0
+        ],
+        "to": [
+          52,
+          0
+        ]
+      },
+      {
+        "link_id": "14",
+        "from": [
+          26,
+          0
+        ],
+        "to": [
+          22,
+          0
+        ]
+      },
+      {
+        "link_id": "15",
+        "from": [
+          27,
+          0
+        ],
+        "to": [
+          24,
+          0
+        ]
+      },
+      {
+        "link_id": "17",
+        "from": [
+          30,
+          0
+        ],
+        "to": [
+          53,
+          0
+        ]
+      },
+      {
+        "link_id": "19",
+        "from": [
+          46,
+          0
+        ],
+        "to": [
+          33,
+          0
+        ]
+      },
+      {
+        "link_id": "24",
+        "from": [
+          29,
+          0
+        ],
+        "to": [
+          24,
+          0
+        ]
+      },
+      {
+        "link_id": "28",
+        "from": [
+          23,
+          0
+        ],
+        "to": [
+          22,
+          0
+        ]
+      },
+      {
+        "link_id": "29",
+        "from": [
+          25,
+          0
+        ],
+        "to": [
+          24,
+          0
+        ]
+      },
+      {
+        "link_id": "30",
+        "from": [
+          27,
+          0
+        ],
+        "to": [
+          24,
+          0
+        ]
+      },
+      {
+        "link_id": "31",
+        "from": [
+          28,
+          0
+        ],
+        "to": [
+          24,
+          0
+        ]
+      },
+      {
+        "link_id": "34",
+        "from": [
+          31,
+          0
+        ],
+        "to": [
+          52,
+          0
+        ]
+      },
+      {
+        "link_id": "41",
+        "from": [
+          45,
+          0
+        ],
+        "to": [
+          40,
+          0
+        ]
+      },
+      {
+        "link_id": "43",
+        "from": [
+          38,
+          0
+        ],
+        "to": [
+          37,
+          0
+        ]
+      },
+      {
+        "link_id": "48",
+        "from": [
+          32,
+          0
+        ],
+        "to": [
+          52,
+          0
+        ]
+      },
+      {
+        "link_id": "49",
+        "from": [
+          44,
+          0
+        ],
+        "to": [
+          64,
+          0
+        ]
+      },
+      {
+        "link_id": "52",
+        "from": [
+          43,
+          0
+        ],
+        "to": [
+          64,
+          0
+        ]
+      },
+      {
+        "link_id": "53",
+        "from": [
+          13,
+          0
+        ],
+        "to": [
+          40,
+          0
+        ]
+      },
+      {
+        "link_id": "54",
+        "from": [
+          34,
+          0
+        ],
+        "to": [
+          33,
+          0
+        ]
+      },
+      {
+        "link_id": "56",
+        "from": [
+          47,
+          0
+        ],
+        "to": [
+          52,
+          0
+        ]
+      },
+      {
+        "link_id": "60",
+        "from": [
+          35,
+          0
+        ],
+        "to": [
+          36,
+          0
+        ]
+      },
+      {
+        "link_id": "61",
+        "from": [
+          39,
+          0
+        ],
+        "to": [
+          37,
+          0
+        ]
+      },
+      {
+        "link_id": "63",
+        "from": [
+          56,
+          0
+        ],
+        "to": [
+          40,
+          0
+        ]
+      },
+      {
+        "link_id": "64",
+        "from": [
+          16,
+          0
+        ],
+        "to": [
+          40,
+          0
+        ]
+      },
+      {
+        "link_id": "70",
+        "from": [
+          14,
+          0
+        ],
+        "to": [
+          64,
+          0
+        ]
+      },
+      {
+        "link_id": "78",
+        "from": [
+          50,
+          0
+        ],
+        "to": [
+          49,
+          0
+        ]
+      },
+      {
+        "link_id": "79",
+        "from": [
+          28,
+          0
+        ],
+        "to": [
+          24,
+          0
+        ]
+      },
+      {
+        "link_id": "80",
+        "from": [
+          51,
+          0
+        ],
+        "to": [
+          70,
+          0
+        ]
+      }
+    ],
+    "unresolved": []
+  },
+  "flatten_set_get": {
+    "converted": [],
+    "skipped": []
+  },
+  "frontend_switches": {
+    "converted": [],
+    "skipped": []
+  },
+  "body_ratio_mapper_widget_values": {
+    "changes": []
+  },
+  "api_value_overlay": {
+    "updated": [
+      {
+        "node_id": "7",
+        "class_type": "ImageScaleToTotalPixels",
+        "inputs": [
+          "resolution_steps"
+        ]
+      },
+      {
+        "node_id": "40",
+        "class_type": "Int",
+        "inputs": [
+          "value"
+        ]
+      },
+      {
+        "node_id": "150",
+        "class_type": "RAMCleanup",
+        "inputs": [
+          "clean_file_cache",
+          "clean_processes",
+          "clean_dlls",
+          "retry_times"
+        ]
+      },
+      {
+        "node_id": "151",
+        "class_type": "VRAMCleanup",
+        "inputs": [
+          "offload_model",
+          "offload_cache"
+        ]
+      },
+      {
+        "node_id": "164",
+        "class_type": "easy boolean",
+        "inputs": [
+          "value"
+        ]
+      },
+      {
+        "node_id": "165",
+        "class_type": "PrimitiveInt",
+        "inputs": [
+          "value"
+        ]
+      },
+      {
+        "node_id": "166",
+        "class_type": "PrimitiveInt",
+        "inputs": [
+          "value"
+        ]
+      }
+    ],
+    "skipped": []
+  },
+  "body_ratio_mapper_api_repair": {
+    "changes": []
+  },
+  "body_ratio_mapper_api_validation": {
+    "issues": []
+  },
+  "validation": {
+    "nodes": 47,
+    "links": 63,
+    "bad_links": 0,
+    "residual_ui_nodes": []
+  }
+}

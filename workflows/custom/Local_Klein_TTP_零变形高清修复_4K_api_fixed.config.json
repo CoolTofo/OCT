@@ -1,0 +1,70 @@
+{
+  "title": "Local_Klein_TTP_零变形高清修复_4K",
+  "fields": [
+    {
+      "id": "40.prompt",
+      "node": "40",
+      "input": "prompt",
+      "name": "Flux2KleinEditTextEncode_EditUtils / prompt",
+      "nodeTitle": "Flux2KleinEditTextEncode_EditUtils",
+      "classType": "Flux2KleinEditTextEncode_EditUtils",
+      "type": "textarea",
+      "default": "High definition, 4K, Add realistic details to the corrupted image, Restore high frequence details from the corrupted image, \n\n\n",
+      "options": [],
+      "random_enabled": false,
+      "locked": true,
+      "min": null,
+      "max": null,
+      "step": null
+    },
+    {
+      "id": "49.image",
+      "node": "49",
+      "input": "image",
+      "name": "OCT_Load Image / image",
+      "nodeTitle": "OCT_Load Image",
+      "classType": "LoadImage",
+      "type": "image",
+      "default": "pasted/image (28).png",
+      "options": [],
+      "random_enabled": false,
+      "locked": true,
+      "min": null,
+      "max": null,
+      "step": null
+    },
+    {
+      "id": "59.value",
+      "node": "59",
+      "input": "value",
+      "name": "OCT_修改尺寸 / value",
+      "nodeTitle": "OCT_修改尺寸",
+      "classType": "INTConstant",
+      "type": "number",
+      "default": 3840,
+      "min": 0.0,
+      "max": 7680.0,
+      "step": 1.0,
+      "options": [],
+      "random_enabled": false,
+      "locked": false
+    },
+    {
+      "id": "71.value",
+      "node": "71",
+      "input": "value",
+      "name": "OCTInput_SameModle / value",
+      "nodeTitle": "OCTInput_SameModle",
+      "classType": "Float",
+      "type": "number",
+      "default": 0.2,
+      "min": 0.0,
+      "max": 10.0,
+      "step": 0.1,
+      "options": [],
+      "random_enabled": false,
+      "locked": false
+    }
+  ],
+  "mini_cards": {}
+}

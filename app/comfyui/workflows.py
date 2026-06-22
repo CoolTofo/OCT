@@ -136,12 +136,20 @@ def detect_comfy_export_profile(workflow_data: Dict[str, Any], requested: str) -
 
 def infer_workflow_field_type(value: Any, input_name: str, class_type: str = "") -> str:
     key = f"{input_name or ''} {class_type or ''}".lower()
+    input_key = str(input_name or "").lower()
+    class_key = str(class_type or "").lower()
+    if input_key == "rgthree_comparer" or "image comparer" in class_key:
+        return "ignored"
+    if "layerutility: imagereel" in class_key and re.fullmatch(r"image\d+_text", input_key):
+        return "ignored"
     if isinstance(value, bool):
         return "boolean"
     if isinstance(value, (int, float)) and not isinstance(value, bool):
         return "slider" if re.search(r"strength|cfg|denoise|scale|weight|ratio|rate", key) else "number"
     if isinstance(value, list) and all(isinstance(item, (str, int, float, bool)) for item in value):
         return "dropdown"
+    if re.search(r"(?:^|[_\-.])(text|prompt|caption|positive|negative)(?:$|[_\-.])", input_key):
+        return "textarea"
     if re.search(r"\b(audio|sound|music|voice)\b|\.((mp3|wav|ogg|m4a|flac|aac|wma|opus|aiff|aif|amr))$", key):
         return "audio"
     if re.search(r"\b(video|movie)\b|\.((mp4|webm|mov|m4v|mkv|avi|wmv|flv|mpg|mpeg))$", key):
@@ -185,6 +193,14 @@ def lock_essential_comfy_fields(fields: List[Dict[str, Any]]) -> List[Dict[str, 
     return locked
 
 
+def is_stale_locked_comfy_media_field(field: Dict[str, Any]) -> bool:
+    field_type = str(field.get("type") or "").lower()
+    return (
+        field.get("locked") is True
+        and field_type in {"image", "video", "audio"}
+    )
+
+
 def is_comfy_link(value):
     return isinstance(value, list) and len(value) == 2 and isinstance(value[0], str) and str(value[0]).isdigit()
 
@@ -226,6 +242,9 @@ def repair_comfy_workflow_config(workflow: Dict[str, Any], config: Dict[str, Any
                 changed = True
             repaired.append(merged)
         else:
+            if is_stale_locked_comfy_media_field(field):
+                changed = True
+                continue
             repaired.append(field)
 
     for key, field in essential_by_key.items():
@@ -254,6 +273,8 @@ def extract_api_prompt_fields(workflow: Dict[str, Any]) -> List[Dict[str, Any]]:
             if class_type == "LoadImage" and input_name == "upload":
                 continue
             field_type = infer_workflow_field_type(value, input_name, class_type)
+            if field_type == "ignored":
+                continue
             options = [str(item) for item in value] if field_type == "dropdown" and isinstance(value, list) else []
             default_value = options[0] if options else ("" if isinstance(value, (dict, list)) else value)
             field: Dict[str, Any] = {

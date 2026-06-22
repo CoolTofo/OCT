@@ -202,6 +202,40 @@ def fold_api_helper_nodes(workflow: Any) -> int:
     return len(helper_ids)
 
 
+def repair_flux_latent_resolution_steps(workflow: Any, minimum_step: int = 16):
+    if not isinstance(workflow, dict):
+        return []
+
+    has_flux_latent = any(
+        normalize_class_name(node_class(node)) in {"flux2scheduler", "emptyflux2latentimage"}
+        for node in workflow.values()
+    )
+    if not has_flux_latent:
+        return []
+
+    fixes = []
+    for node_id, node in workflow.items():
+        if normalize_class_name(node_class(node)) != "imagescaletototalpixels":
+            continue
+        inputs = node.get("inputs") if isinstance(node, dict) else None
+        if not isinstance(inputs, dict):
+            continue
+        try:
+            current = int(float(inputs.get("resolution_steps", 1)))
+        except (TypeError, ValueError):
+            current = 1
+        if current >= minimum_step:
+            continue
+        inputs["resolution_steps"] = minimum_step
+        fixes.append({
+            "node_id": str(node_id),
+            "input": "resolution_steps",
+            "from": current,
+            "to": minimum_step,
+        })
+    return fixes
+
+
 def repair_body_ratio_mapper_api_values(workflow: Any):
     if not isinstance(workflow, dict):
         return []

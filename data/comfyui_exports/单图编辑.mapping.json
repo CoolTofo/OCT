@@ -1,0 +1,171 @@
+{
+  "profile": "generic",
+  "main_output_node_id": "312",
+  "output_mode": "all",
+  "workflow_output": "D:\\Program Files\\OCT\\data\\comfyui_exports\\单图编辑.workflow.json",
+  "api_output": "D:\\Program Files\\OCT\\workflows\\custom\\单图编辑.json",
+  "api_input": "D:\\Program Files\\OCT\\data\\comfyui_exports\\_api_input_9c7c90c629f2456eb33166757213153c.json",
+  "normalize_legacy_widgets": {
+    "changes": []
+  },
+  "compatible_custom_nodes": {
+    "converted": []
+  },
+  "strip_reroute_nodes": {
+    "removed": 3,
+    "rewired": [
+      {
+        "link_id": "679",
+        "from": [
+          382,
+          0
+        ],
+        "to": [
+          381,
+          0
+        ]
+      },
+      {
+        "link_id": "680",
+        "from": [
+          382,
+          0
+        ],
+        "to": [
+          381,
+          0
+        ]
+      },
+      {
+        "link_id": "681",
+        "from": [
+          383,
+          0
+        ],
+        "to": [
+          381,
+          0
+        ]
+      },
+      {
+        "link_id": "683",
+        "from": [
+          384,
+          0
+        ],
+        "to": [
+          371,
+          0
+        ]
+      }
+    ],
+    "unresolved": []
+  },
+  "flatten_set_get": {
+    "converted": [],
+    "skipped": []
+  },
+  "frontend_switches": {
+    "converted": [],
+    "skipped": []
+  },
+  "body_ratio_mapper_widget_values": {
+    "changes": []
+  },
+  "api_value_overlay": {
+    "updated": [
+      {
+        "node_id": "371",
+        "class_type": "QwenImageIntegratedKSampler",
+        "inputs": [
+          "negative_prompt",
+          "generation_mode",
+          "batch_size",
+          "seed",
+          "cfg",
+          "sampler_name",
+          "scheduler",
+          "denoise",
+          "auraflow_shift",
+          "cfg_norm_strength",
+          "enable_clean_gpu_memory",
+          "enable_clean_cpu_memory_after_finish",
+          "enable_sound_notification",
+          "auto_save_output_folder",
+          "output_filename_prefix",
+          "instruction"
+        ]
+      },
+      {
+        "node_id": "372",
+        "class_type": "CheckpointLoaderSimple",
+        "inputs": [
+          "ckpt_name"
+        ]
+      },
+      {
+        "node_id": "373",
+        "class_type": "LoraLoaderModelOnly",
+        "inputs": [
+          "lora_name",
+          "strength_model"
+        ]
+      },
+      {
+        "node_id": "374",
+        "class_type": "LoadImage",
+        "inputs": [
+          "image"
+        ]
+      },
+      {
+        "node_id": "375",
+        "class_type": "Image Comparer (rgthree)",
+        "inputs": [
+          "rgthree_comparer"
+        ]
+      },
+      {
+        "node_id": "379",
+        "class_type": "SaveImage",
+        "inputs": [
+          "filename_prefix"
+        ]
+      },
+      {
+        "node_id": "381",
+        "class_type": "LayerUtility: ImageScaleByAspectRatio V2",
+        "inputs": [
+          "aspect_ratio",
+          "proportional_width",
+          "proportional_height",
+          "fit",
+          "method",
+          "round_to_multiple",
+          "scale_to_side",
+          "background_color"
+        ]
+      },
+      {
+        "node_id": "556",
+        "class_type": "PrimitiveInt",
+        "inputs": [
+          "value"
+        ]
+      }
+    ],
+    "skipped": []
+  },
+  "body_ratio_mapper_api_repair": {
+    "changes": []
+  },
+  "body_ratio_mapper_api_validation": {
+    "issues": []
+  },
+  "validation": {
+    "nodes": 13,
+    "links": 18,
+    "bad_links": 0,
+    "residual_ui_nodes": []
+  }
+}

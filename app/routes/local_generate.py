@@ -14,6 +14,7 @@ from typing import Any, Dict
 import requests
 from fastapi import APIRouter
 
+from app.comfyui.runtime import preferred_history_output_node_ids
 from app.schemas import GenerateRequest
 
 router = APIRouter()
@@ -125,6 +126,10 @@ def generate(req: GenerateRequest):
         if body_ratio_issues:
             raise Exception(f"BodyRatioMapper API values are invalid after repair: {body_ratio_issues}")
 
+        flux_resolution_fixes = repair_flux_latent_resolution_steps(workflow)
+        if flux_resolution_fixes:
+            print(f"Repaired Flux latent resolution steps before prompt submit: {flux_resolution_fixes}")
+
         removed_reroutes = strip_comfy_reroute_nodes(workflow)
         if removed_reroutes:
             print(f"Removed {removed_reroutes} ComfyUI reroute nodes before prompt submit.")
@@ -160,8 +165,10 @@ def generate(req: GenerateRequest):
         local_urls = []
         current_timestamp = time.time()
         if 'outputs' in history_data:
-            for node_id in history_data['outputs']:
-                node_output = history_data['outputs'][node_id]
+            for node_id in preferred_history_output_node_ids(history_data, workflow):
+                node_output = history_data['outputs'].get(node_id) or history_data['outputs'].get(int(node_id)) or {}
+                if not isinstance(node_output, dict):
+                    continue
                 if 'images' in node_output:
                     for img in node_output['images']:
                         prefix = f"{req.type}_{int(current_timestamp)}_"

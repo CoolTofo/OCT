@@ -1,0 +1,54 @@
+{
+  "title": "Flux.2_Klein_细节增强_api_fixed",
+  "fields": [
+    {
+      "id": "278.image",
+      "node": "278",
+      "input": "image",
+      "name": "OCTInput_image1 / image",
+      "nodeTitle": "OCTInput_image1",
+      "classType": "LoadImage",
+      "type": "image",
+      "default": "NMW.jpg",
+      "options": [],
+      "random_enabled": false,
+      "locked": true,
+      "min": null,
+      "max": null,
+      "step": null
+    },
+    {
+      "id": "352.text",
+      "node": "352",
+      "input": "text",
+      "name": "OCTInput_prompt / text",
+      "nodeTitle": "OCTInput_prompt",
+      "classType": "CR Text",
+      "type": "textarea",
+      "default": "realistic，将画面变为真实的照片",
+      "options": [],
+      "random_enabled": false,
+      "locked": true,
+      "min": null,
+      "max": null,
+      "step": null
+    },
+    {
+      "id": "363.value",
+      "node": "363",
+      "input": "value",
+      "name": "OCTInput_ModeStr / value",
+      "nodeTitle": "OCTInput_ModeStr",
+      "classType": "Float",
+      "type": "number",
+      "default": 1,
+      "min": 0.0,
+      "max": 10.0,
+      "step": 1.0,
+      "options": [],
+      "random_enabled": false,
+      "locked": false
+    }
+  ],
+  "mini_cards": {}
+}

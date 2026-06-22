@@ -398,6 +398,35 @@
         .tool-btn.active,.node-palette-tool.active { color:var(--text); border-color:var(--strong); background:rgba(99,102,241,.12); }
         .node-palette-tool.cascade-drag-active { color:#2563eb; background:#eff6ff; border-color:#93c5fd; box-shadow:0 0 0 2px rgba(59,130,246,.08); }
         .theme-dark .node-palette-tool.cascade-drag-active { color:#bfdbfe; background:rgba(37,99,235,.18); border-color:rgba(147,197,253,.42); }
+        .asset-library-panel { position:fixed; left:292px; top:96px; bottom:22px; z-index:84; width:min(340px, calc(100vw - 324px)); min-width:280px; display:none; flex-direction:column; overflow:hidden; border:1px solid var(--line); border-radius:16px; background:rgba(255,255,255,.96); box-shadow:0 22px 70px rgba(15,23,42,.16); backdrop-filter:blur(18px); pointer-events:auto; }
+        .asset-library-panel.open { display:flex; }
+        .asset-library-head { flex:0 0 auto; padding:13px 14px; border-bottom:1px solid var(--line); display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+        .asset-library-title { color:var(--text); font-size:13px; font-weight:900; letter-spacing:0; }
+        .asset-library-sub { margin-top:3px; color:var(--muted); font-size:11px; line-height:1.35; font-weight:750; }
+        .asset-library-close { width:30px; height:30px; flex:0 0 auto; border-radius:10px; border:1px solid transparent; background:transparent; color:var(--muted); display:flex; align-items:center; justify-content:center; }
+        .asset-library-close:hover { border-color:var(--line); background:var(--soft); color:var(--text); }
+        .asset-library-controls { flex:0 0 auto; display:grid; grid-template-columns:1fr repeat(3, 32px); gap:6px; padding:10px 12px; border-bottom:1px solid var(--line); }
+        .asset-library-controls select { min-width:0; height:32px; border:1px solid var(--line); border-radius:10px; background:var(--card-solid); color:var(--text); padding:0 9px; font-size:11.5px; font-weight:800; outline:none; }
+        .asset-library-icon-btn { height:32px; border-radius:10px; border:1px solid var(--line); background:var(--card-solid); color:var(--muted); display:flex; align-items:center; justify-content:center; }
+        .asset-library-icon-btn:hover { color:var(--text); border-color:var(--line-2); background:var(--soft); }
+        .asset-library-notice { display:none; margin:10px 12px 0; padding:8px 10px; border:1px solid var(--line); border-radius:11px; background:var(--soft); color:var(--muted); font-size:11px; font-weight:800; line-height:1.35; }
+        .asset-library-notice.show { display:block; }
+        .asset-library-notice.error { color:#dc2626; border-color:#fecaca; background:#fff7f7; }
+        .asset-library-notice.success { color:#047857; border-color:#bbf7d0; background:#f0fdf4; }
+        .asset-library-grid { flex:1; min-height:0; overflow:auto; padding:12px; display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); align-content:start; gap:9px; scrollbar-width:thin; }
+        .asset-library-item { min-width:0; border:1px solid var(--line); border-radius:12px; background:var(--soft); overflow:hidden; cursor:grab; }
+        .asset-library-item:active { cursor:grabbing; }
+        .asset-library-item.missing { opacity:.62; cursor:default; }
+        .asset-library-thumb { width:100%; aspect-ratio:1 / .76; object-fit:cover; display:block; background:#f8fafc; border-bottom:1px solid var(--line); }
+        .asset-library-missing { color:#ef4444; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:900; }
+        .asset-library-meta { padding:7px; display:flex; flex-direction:column; gap:6px; }
+        .asset-library-name { min-width:0; color:var(--text); font-size:11px; font-weight:850; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .asset-library-actions { display:grid; grid-template-columns:1fr repeat(3, 26px); gap:4px; }
+        .asset-library-add { height:26px; border-radius:8px; border:1px solid var(--line-2); background:var(--card-solid); color:var(--text); font-size:10.5px; font-weight:850; }
+        .asset-library-mini { width:26px; height:26px; border-radius:8px; border:1px solid var(--line); background:var(--card-solid); color:var(--muted); display:flex; align-items:center; justify-content:center; }
+        .asset-library-mini:hover,.asset-library-add:hover { color:var(--strong); border-color:var(--strong); }
+        .asset-library-add:disabled,.asset-library-mini:disabled { opacity:.45; cursor:not-allowed; color:var(--muted); border-color:var(--line); }
+        .asset-library-empty { grid-column:1 / -1; min-height:160px; border:1px dashed var(--line-2); border-radius:12px; color:var(--muted); background:var(--soft); display:flex; align-items:center; justify-content:center; padding:18px; text-align:center; font-size:11.5px; line-height:1.5; font-weight:800; }
         .template-manager { position:fixed; left:88px; top:22px; bottom:22px; z-index:1000; width:min(430px, calc(100vw - 118px)); background:var(--card-solid); border:1px solid var(--line); border-radius:20px; box-shadow:0 24px 80px rgba(15,23,42,.18); display:flex; flex-direction:column; overflow:hidden; }
         .template-manager-head { padding:16px; border-bottom:1px solid var(--line); display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
         .template-manager-title { font-size:14px; font-weight:900; color:var(--text); }
@@ -1134,6 +1163,7 @@
                 <div id="nodePaletteList" class="node-palette-list"></div>
                 <div class="node-palette-tools" aria-label="画布设置">
                     <button class="node-palette-tool" type="button" onclick="openPromptTemplatePanel()" title="模板库" aria-label="模板库"><i data-lucide="library" class="w-4 h-4"></i></button>
+                    <button id="assetLibrarySideBtn" class="node-palette-tool" type="button" onclick="toggleCanvasAssetLibrary()" title="资产库" aria-label="资产库"><i data-lucide="archive" class="w-4 h-4"></i></button>
                     <button class="node-palette-tool" type="button" onclick="autoArrangeCanvasNodes()" title="整理节点：有选中时只整理选中节点" aria-label="整理节点：有选中时只整理选中节点"><i data-lucide="layout-dashboard" class="w-4 h-4"></i></button>
                     <button class="node-palette-tool" type="button" onclick="createOrganizeFrameFromSelection()" title="整理框" aria-label="整理框"><i data-lucide="box-select" class="w-4 h-4"></i></button>
                     <button id="linkVisibilitySideBtn" class="node-palette-tool" type="button" onclick="toggleLinkVisibilityMode()" title="连线：全部显示" aria-label="连线：全部显示"><i data-lucide="git-branch" class="w-4 h-4"></i></button>
@@ -1177,6 +1207,23 @@
             <div id="nodeOutputMenu" class="create-menu"></div>
             <div id="nodeActionMenu" class="create-menu node-action-menu"></div>
             <div id="imageNodeMenu" class="create-menu"></div>
+            <div id="assetLibraryPanel" class="asset-library-panel" onclick="event.stopPropagation()">
+                <div class="asset-library-head">
+                    <div>
+                        <div class="asset-library-title">资产库</div>
+                        <div class="asset-library-sub">保存本地图片，跨画布拖回或添加为图片节点。</div>
+                    </div>
+                    <button class="asset-library-close" type="button" onclick="toggleCanvasAssetLibrary(false)" title="关闭" aria-label="关闭"><i data-lucide="x" class="w-4 h-4"></i></button>
+                </div>
+                <div class="asset-library-controls">
+                    <select id="assetLibraryCategorySelect" aria-label="资产库分类"></select>
+                    <button id="assetLibraryAddCategoryBtn" class="asset-library-icon-btn" type="button" title="新建分类" aria-label="新建分类"><i data-lucide="folder-plus" class="w-4 h-4"></i></button>
+                    <button id="assetLibraryRenameCategoryBtn" class="asset-library-icon-btn" type="button" title="重命名分类" aria-label="重命名分类"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+                    <button id="assetLibraryDeleteCategoryBtn" class="asset-library-icon-btn" type="button" title="删除分类" aria-label="删除分类"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>
+                <div id="assetLibraryNotice" class="asset-library-notice"></div>
+                <div id="assetLibraryGrid" class="asset-library-grid"></div>
+            </div>
             <div id="world" class="world">
                 <svg id="links" class="links"></svg>
                 <div id="linkControls" class="link-controls"></div>
@@ -1355,6 +1402,7 @@
     </div>
 
     <script src="/static/canvas-node-registry.js?v=20260610-node-palette-flow-frame"></script>
+    <script src="/static/canvas-asset-library.js?v=20260617-asset-library"></script>
     <script src="/static/canvas-organize-frames.js?v=20260609-organize-frame-members"></script>
     <script src="/static/canvas-group-order.js?v=20260609-group-visual-order"></script>
     <script src="/static/canvas-flow-frame.js?v=20260610-flow-frame-cinema"></script>
@@ -1434,6 +1482,14 @@
         const nodeOutputMenu = document.getElementById('nodeOutputMenu');
         const nodeActionMenu = document.getElementById('nodeActionMenu');
         const imageNodeMenu = document.getElementById('imageNodeMenu');
+        const assetLibraryPanel = document.getElementById('assetLibraryPanel');
+        const assetLibrarySideBtn = document.getElementById('assetLibrarySideBtn');
+        const assetLibraryCategorySelect = document.getElementById('assetLibraryCategorySelect');
+        const assetLibraryAddCategoryBtn = document.getElementById('assetLibraryAddCategoryBtn');
+        const assetLibraryRenameCategoryBtn = document.getElementById('assetLibraryRenameCategoryBtn');
+        const assetLibraryDeleteCategoryBtn = document.getElementById('assetLibraryDeleteCategoryBtn');
+        const assetLibraryNotice = document.getElementById('assetLibraryNotice');
+        const assetLibraryGrid = document.getElementById('assetLibraryGrid');
         const selectionBox = document.getElementById('selectionBox');
         const selectionHub = document.getElementById('selectionHub');
         const gateStatus = document.getElementById('gateStatus');
@@ -1498,6 +1554,10 @@
         let linkCreateState = null;
         let internalDrag = false;
         let promptTemplatesCache = null;
+        let canvasAssetLibrary = {categories:[]};
+        let canvasAssetLibraryOpen = false;
+        let canvasAssetLibraryCategoryId = '';
+        let canvasAssetExists = {};
         let promptTemplatesLoading = null;
         let draggingPromptTemplate = null;
         let promptTemplatePointerDrag = null;
@@ -3458,6 +3518,47 @@
             if(cropState) syncImageEditOverflow();
         });
         backToManagerBtn.addEventListener('click', returnToCanvasManager);
+        assetLibraryCategorySelect?.addEventListener('change', () => {
+            canvasAssetLibraryCategoryId = assetLibraryCategorySelect.value || '';
+            renderCanvasAssetLibrary();
+        });
+        assetLibraryAddCategoryBtn?.addEventListener('click', async event => {
+            event.stopPropagation();
+            const name = prompt('新建资产分类', '图片');
+            if(name === null) return;
+            try {
+                const data = await window.CanvasAssetLibrary.createCategory((name || '').trim() || '图片');
+                canvasAssetLibraryCategoryId = data.category?.id || canvasAssetLibraryCategoryId;
+                setCanvasAssetLibraryFromResponse(data);
+            } catch(err) {
+                setAssetLibraryNotice(err.message || '新建分类失败', 'error');
+            }
+        });
+        assetLibraryRenameCategoryBtn?.addEventListener('click', async event => {
+            event.stopPropagation();
+            const cat = activeCanvasAssetCategory();
+            if(!cat) return;
+            const name = prompt('分类名称', cat.name || '图片');
+            if(name === null) return;
+            try {
+                const data = await window.CanvasAssetLibrary.renameCategory(cat.id, (name || '').trim() || cat.name || '图片');
+                setCanvasAssetLibraryFromResponse(data);
+            } catch(err) {
+                setAssetLibraryNotice(err.message || '重命名分类失败', 'error');
+            }
+        });
+        assetLibraryDeleteCategoryBtn?.addEventListener('click', async event => {
+            event.stopPropagation();
+            const cat = activeCanvasAssetCategory();
+            if(!cat || !confirm(`删除分类“${cat.name || '图片'}”？分类里的资产也会从列表移除。`)) return;
+            try {
+                const data = await window.CanvasAssetLibrary.deleteCategory(cat.id);
+                canvasAssetLibraryCategoryId = '';
+                setCanvasAssetLibraryFromResponse(data);
+            } catch(err) {
+                setAssetLibraryNotice(err.message || '删除分类失败', 'error');
+            }
+        });
 
         function addNode(node){
             if(!ensureCanvas()) return;
@@ -4556,8 +4657,13 @@
             const node = nodes.find(n => n.id === nodeId);
             if(!node || node.type !== 'image') return;
             closeCreateMenu();
+            const mediaUrl = imageNodeReferenceUrl(node);
+            const canDownload = Boolean(mediaUrl && !isMissingAssetUrl(mediaUrl));
+            const canSaveAsset = Boolean(mediaUrl && window.CanvasAssetLibrary?.isLocalMediaUrl(mediaUrl) && window.CanvasAssetLibrary?.isImageMediaUrl(mediaUrl));
             imageNodeMenu.innerHTML = `
                 <button class="menu-btn" data-image-replace="${escapeAttr(nodeId)}"><i data-lucide="image-plus" class="w-4 h-4"></i><span>替换</span></button>
+                <button class="menu-btn" data-image-download="${escapeAttr(nodeId)}" ${canDownload ? '' : 'disabled'}><i data-lucide="download" class="w-4 h-4"></i><span>下载</span></button>
+                <button class="menu-btn" data-image-save-asset="${escapeAttr(nodeId)}" ${canSaveAsset ? '' : 'disabled'}><i data-lucide="archive" class="w-4 h-4"></i><span>保存到资产库</span></button>
                 <div class="menu-divider"></div>
                 ${nodeActionMenuHtml()}
             `;
@@ -4568,6 +4674,18 @@
                 e.stopPropagation();
                 closeImageNodeMenu();
                 pickImageForNode(nodeId);
+            };
+            const downloadBtn = imageNodeMenu.querySelector('[data-image-download]');
+            if(downloadBtn) downloadBtn.onclick = e => {
+                e.stopPropagation();
+                if(mediaUrl) downloadUrl(mediaUrl, node.name || outputDownloadName(mediaUrl)).catch(err => alert(err.message || '下载失败'));
+                closeImageNodeMenu();
+            };
+            const saveAssetBtn = imageNodeMenu.querySelector('[data-image-save-asset]');
+            if(saveAssetBtn) saveAssetBtn.onclick = e => {
+                e.stopPropagation();
+                saveCanvasImageToAssetLibrary(mediaUrl, node.name || outputImageName(mediaUrl)).catch(err => alert(err.message || '保存到资产库失败'));
+                closeImageNodeMenu();
             };
             bindNodeActionMenu(imageNodeMenu, screenToWorld(clientX, clientY));
             refreshIcons();
@@ -4588,6 +4706,7 @@
                 <div class="menu-divider"></div>
                 <div class="menu-section-title">${tr('canvas.outputFileActions')}</div>
                 <button class="menu-btn" data-output-download="${escapeAttr(nodeId)}" ${downloadableCount ? '' : 'disabled'}><i data-lucide="download" class="w-4 h-4"></i><span>${tr('canvas.outputDownloadAllImages')}</span></button>
+                <button class="menu-btn" data-output-save-assets="${escapeAttr(nodeId)}" ${downloadableCount ? '' : 'disabled'}><i data-lucide="archive" class="w-4 h-4"></i><span>保存图片到资产库</span></button>
             `;
             const menuWidth = 260;
             imageNodeMenu.style.left = `${Math.max(10, Math.min(window.innerWidth - menuWidth - 10, clientX))}px`;
@@ -4612,6 +4731,14 @@
                 downloadBtn.onclick = e => {
                     e.stopPropagation();
                     downloadOutputNodeImages(nodeId);
+                    closeImageNodeMenu();
+                };
+            }
+            const saveAssetsBtn = imageNodeMenu.querySelector('[data-output-save-assets]');
+            if(saveAssetsBtn){
+                saveAssetsBtn.onclick = e => {
+                    e.stopPropagation();
+                    saveOutputNodeImagesToAssetLibrary(nodeId).catch(err => alert(err.message || '保存到资产库失败'));
                     closeImageNodeMenu();
                 };
             }
@@ -4835,6 +4962,197 @@
                 };
             });
             refreshIcons();
+        }
+        function canvasAssetCategories(){
+            return window.CanvasAssetLibrary?.imageCategories(canvasAssetLibrary) || [];
+        }
+        function activeCanvasAssetCategory(){
+            return window.CanvasAssetLibrary?.activeImageCategory(canvasAssetLibrary, canvasAssetLibraryCategoryId)
+                || canvasAssetCategories()[0]
+                || null;
+        }
+        function setAssetLibraryNotice(message='', kind=''){
+            if(!assetLibraryNotice) return;
+            assetLibraryNotice.textContent = message || '';
+            assetLibraryNotice.className = `asset-library-notice${message ? ' show' : ''}${kind ? ` ${kind}` : ''}`;
+        }
+        async function loadCanvasAssetLibrary(){
+            if(!window.CanvasAssetLibrary) return;
+            try {
+                canvasAssetLibrary = await window.CanvasAssetLibrary.fetchLibrary();
+                if(!activeCanvasAssetCategory()) canvasAssetLibraryCategoryId = '';
+                if(!canvasAssetLibraryCategoryId) canvasAssetLibraryCategoryId = activeCanvasAssetCategory()?.id || '';
+                await checkCanvasAssetLibraryAssets();
+                renderCanvasAssetLibrary();
+            } catch(err) {
+                setAssetLibraryNotice(err.message || '资产库加载失败', 'error');
+            }
+        }
+        async function checkCanvasAssetLibraryAssets(){
+            const urls = [...new Set(canvasAssetCategories().flatMap(cat => (cat.items || []).map(item => item.url).filter(Boolean)))];
+            canvasAssetExists = {};
+            if(!urls.length) return;
+            try {
+                const res = await fetch('/api/canvas-assets/check', {
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({urls})
+                });
+                if(res.ok){
+                    const data = await res.json();
+                    canvasAssetExists = data.exists || {};
+                }
+            } catch(_) {
+                canvasAssetExists = {};
+            }
+        }
+        function setCanvasAssetLibraryFromResponse(data){
+            canvasAssetLibrary = data?.library || canvasAssetLibrary || {categories:[]};
+            if(!activeCanvasAssetCategory()) canvasAssetLibraryCategoryId = '';
+            if(!canvasAssetLibraryCategoryId) canvasAssetLibraryCategoryId = activeCanvasAssetCategory()?.id || '';
+            if(data?.item?.url) canvasAssetExists[data.item.url] = true;
+            renderCanvasAssetLibrary();
+        }
+        function toggleCanvasAssetLibrary(open=!canvasAssetLibraryOpen){
+            canvasAssetLibraryOpen = !!open;
+            assetLibraryPanel?.classList.toggle('open', canvasAssetLibraryOpen);
+            assetLibrarySideBtn?.classList.toggle('active', canvasAssetLibraryOpen);
+            if(canvasAssetLibraryOpen) loadCanvasAssetLibrary();
+            refreshIcons();
+        }
+        function renderCanvasAssetLibrary(){
+            if(!assetLibraryGrid || !assetLibraryCategorySelect) return;
+            const cats = canvasAssetCategories();
+            if(!cats.some(cat => cat.id === canvasAssetLibraryCategoryId)) canvasAssetLibraryCategoryId = cats[0]?.id || '';
+            assetLibraryCategorySelect.innerHTML = cats.map(cat =>
+                `<option value="${escapeAttr(cat.id)}" ${cat.id === canvasAssetLibraryCategoryId ? 'selected' : ''}>${escapeHtml(cat.name || '图片')}</option>`
+            ).join('');
+            const cat = activeCanvasAssetCategory();
+            const items = cat?.items || [];
+            assetLibraryGrid.innerHTML = items.length ? items.map(item => {
+                const exists = canvasAssetExists[item.url] !== false;
+                return `
+                <div class="asset-library-item ${exists ? '' : 'missing'}" draggable="${exists ? 'true' : 'false'}" data-asset-id="${escapeAttr(item.id)}" data-asset-url="${escapeAttr(item.url)}" data-asset-name="${escapeAttr(item.name || 'asset')}" data-asset-missing="${exists ? '' : '1'}">
+                    ${exists ? `<img class="asset-library-thumb" src="${escapeAttr(item.url)}" alt="">` : '<div class="asset-library-thumb asset-library-missing">文件缺失</div>'}
+                    <div class="asset-library-meta">
+                        <div class="asset-library-name" title="${escapeAttr(item.name || '')}">${escapeHtml(item.name || 'asset')}</div>
+                        <div class="asset-library-actions">
+                            <button class="asset-library-add" type="button" data-asset-add="${escapeAttr(item.id)}" ${exists ? '' : 'disabled'}>添加</button>
+                            <button class="asset-library-mini" type="button" data-asset-download="${escapeAttr(item.id)}" title="下载" aria-label="下载" ${exists ? '' : 'disabled'}><i data-lucide="download" class="w-3.5 h-3.5"></i></button>
+                            <button class="asset-library-mini" type="button" data-asset-rename="${escapeAttr(item.id)}" title="重命名" aria-label="重命名"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+                            <button class="asset-library-mini" type="button" data-asset-delete="${escapeAttr(item.id)}" title="删除" aria-label="删除"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                        </div>
+                    </div>
+                </div>
+            `}).join('') : `<div class="asset-library-empty">这个分类还没有图片。右键图片节点或 Output 节点，选择“保存到资产库”。</div>`;
+            bindCanvasAssetLibraryEvents();
+            refreshIcons();
+        }
+        function canvasAssetItemById(itemId){
+            return canvasAssetCategories()
+                .flatMap(cat => cat.items || [])
+                .find(item => item.id === itemId) || null;
+        }
+        function canvasAssetDragPayload(item){
+            return JSON.stringify({url:item?.url || '', name:item?.name || outputImageName(item?.url || '')});
+        }
+        function bindCanvasAssetLibraryEvents(){
+            if(!assetLibraryGrid) return;
+            assetLibraryGrid.querySelectorAll('.asset-library-item').forEach(el => {
+                const item = {id:el.dataset.assetId, url:el.dataset.assetUrl, name:el.dataset.assetName};
+                el.addEventListener('dragstart', e => {
+                    if(!item.url) return;
+                    e.dataTransfer.effectAllowed = 'copy';
+                    e.dataTransfer.setData('application/x-canvas-asset', canvasAssetDragPayload(item));
+                    e.dataTransfer.setData('text/uri-list', item.url);
+                    e.dataTransfer.setData('text/plain', item.url);
+                });
+            });
+            assetLibraryGrid.querySelectorAll('[data-asset-add]').forEach(btn => {
+                btn.onclick = e => {
+                    e.stopPropagation();
+                    const item = canvasAssetItemById(btn.dataset.assetAdd);
+                    if(item?.url) createImageCardFromUrl(item.url, defaultPoint(-80, 20), item.name || outputImageName(item.url));
+                };
+            });
+            assetLibraryGrid.querySelectorAll('[data-asset-download]').forEach(btn => {
+                btn.onclick = e => {
+                    e.stopPropagation();
+                    const item = canvasAssetItemById(btn.dataset.assetDownload);
+                    if(item?.url) downloadUrl(item.url, item.name || outputDownloadName(item.url)).catch(err => setAssetLibraryNotice(err.message || '下载失败', 'error'));
+                };
+            });
+            assetLibraryGrid.querySelectorAll('[data-asset-rename]').forEach(btn => {
+                btn.onclick = async e => {
+                    e.stopPropagation();
+                    const item = canvasAssetItemById(btn.dataset.assetRename);
+                    if(!item) return;
+                    const name = prompt('资产名称', item.name || 'asset');
+                    if(name === null) return;
+                    try {
+                        const data = await window.CanvasAssetLibrary.renameItem(item.id, name.trim() || item.name || 'asset');
+                        setCanvasAssetLibraryFromResponse(data);
+                    } catch(err) {
+                        setAssetLibraryNotice(err.message || '重命名失败', 'error');
+                    }
+                };
+            });
+            assetLibraryGrid.querySelectorAll('[data-asset-delete]').forEach(btn => {
+                btn.onclick = async e => {
+                    e.stopPropagation();
+                    const item = canvasAssetItemById(btn.dataset.assetDelete);
+                    if(!item || !confirm(`删除资产“${item.name || 'asset'}”？`)) return;
+                    try {
+                        const data = await window.CanvasAssetLibrary.deleteItem(item.id);
+                        setCanvasAssetLibraryFromResponse(data);
+                    } catch(err) {
+                        setAssetLibraryNotice(err.message || '删除失败', 'error');
+                    }
+                };
+            });
+        }
+        async function ensureCanvasAssetCategory(){
+            let cat = activeCanvasAssetCategory();
+            if(cat) return cat;
+            const data = await window.CanvasAssetLibrary.createCategory('图片');
+            setCanvasAssetLibraryFromResponse(data);
+            return activeCanvasAssetCategory();
+        }
+        async function saveCanvasImageToAssetLibrary(url, name=''){
+            const clean = String(url || '').trim();
+            if(!window.CanvasAssetLibrary?.isLocalMediaUrl(clean)){
+                throw new Error('只有本地 /assets 或 /output 图片可以保存到资产库。');
+            }
+            if(!window.CanvasAssetLibrary.isImageMediaUrl(clean)){
+                throw new Error('资产库目前只保存图片。');
+            }
+            const cat = await ensureCanvasAssetCategory();
+            if(!cat) throw new Error('没有可用的资产库分类。');
+            const data = await window.CanvasAssetLibrary.addItem(cat.id, clean, name || outputImageName(clean));
+            setCanvasAssetLibraryFromResponse(data);
+            setAssetLibraryNotice('已保存到资产库', 'success');
+            if(!canvasAssetLibraryOpen) toggleCanvasAssetLibrary(true);
+            return data.item;
+        }
+        async function saveOutputNodeImagesToAssetLibrary(nodeId){
+            const node = nodes.find(n => n.id === nodeId);
+            const urls = outputDownloadableImageUrls(node).filter(url => window.CanvasAssetLibrary?.isImageMediaUrl(url));
+            if(!urls.length) throw new Error('没有可保存的本地图片。');
+            for(const url of urls){
+                await saveCanvasImageToAssetLibrary(url, outputImageName(url));
+            }
+            setAssetLibraryNotice(`已保存 ${urls.length} 张图片到资产库`, 'success');
+        }
+        function canvasAssetFromDataTransfer(dataTransfer){
+            try {
+                const raw = dataTransfer?.getData?.('application/x-canvas-asset') || '';
+                if(raw) return JSON.parse(raw);
+            } catch(_) {}
+            const url = imageUrlFromDataTransfer(dataTransfer);
+            return url ? {url, name:outputImageName(url)} : null;
+        }
+        function hasCanvasAssetDrag(dataTransfer){
+            return [...(dataTransfer?.types || [])].includes('application/x-canvas-asset');
         }
         function menuPasteNodes(){
             pasteNodes(menuPoint || lastMouseBoard);
@@ -12710,6 +13028,9 @@
             const inputName = String(f?.input || '').toLowerCase();
             const classType = String(f?.classType || f?.class_type || '').toLowerCase();
             if(classType === 'loadimage' && inputName === 'upload') return 'ignored';
+            if(inputName === 'rgthree_comparer' || classType.includes('image comparer')) return 'ignored';
+            if(classType.includes('layerutility: imagereel') && /^image\d+_text$/.test(inputName)) return 'ignored';
+            if(rawType === 'ignored') return 'ignored';
             if(['image','video','audio'].includes(rawType)) return rawType;
             const key = `${f.input || ''} ${f.name || ''} ${f.nodeTitle || ''} ${f.classType || ''}`.toLowerCase();
             if(/negative|negative_prompt|负向|负面|反向/.test(key)) return 'setting';
@@ -12762,7 +13083,12 @@
         }
         function comfyParamValue(node, field){
             node.comfyParams = node.comfyParams || {};
-            if(node.comfyParams[field.id] !== undefined) return node.comfyParams[field.id];
+            if(Object.prototype.hasOwnProperty.call(node.comfyParams, field.id)){
+                const stored = node.comfyParams[field.id];
+                const hasDefault = field.default !== undefined && field.default !== null && String(field.default).trim() !== '';
+                if((stored === '' || stored === null || stored === undefined) && hasDefault) return field.default;
+                return stored;
+            }
             return field.default ?? (field.type === 'boolean' ? false : (field.type === 'number' || field.type === 'slider' ? 0 : ''));
         }
         function comfyRandomEnabled(field){
@@ -13026,15 +13352,6 @@
             if(/prompt|positive|negative|text|caption|description|提示词|正向|负向/.test(key)) return 'prompt';
             return 'text';
         }
-        function rhUnsafeStringFormatDefault(field, value){
-            const classType = String(field?.classType || '').toLowerCase();
-            const fieldName = String(field?.fieldName || '').toLowerCase();
-            if(!classType.includes('stringformat') || !['f_string','format','text'].includes(fieldName)) return false;
-            const text = String(value ?? '').trim();
-            const fallback = String(field?.default ?? '').trim();
-            if(fallback && text !== fallback) return false;
-            return /^\{\s*[A-Za-z_][A-Za-z0-9_]*\s*\}$/.test(text);
-        }
         function isAudioUrl(url){
             const clean = (url || '').split('?')[0].toLowerCase();
             return /\.(mp3|wav|ogg|m4a|flac|aac|wma|opus|aiff|aif|amr)$/.test(clean);
@@ -13090,13 +13407,15 @@
             const hasStored = Object.prototype.hasOwnProperty.call(node.rhValues, key);
             if(hasStored){
                 const stored = node.rhValues[key];
-                const storedText = String(stored || '').trim();
+                const storedText = String(stored ?? '').trim();
                 if(['image','video','audio'].includes(role)){
                     if(mediaRef?.url && (!storedText || storedText === String(field.default || '').trim())) return mediaRef.url;
                     if(storedText) return stored;
                 } else {
                     const fieldName = String(field?.fieldName || '').toLowerCase();
                     if(fieldName === 'filename_prefix' && /^\/?(assets|output)\//i.test(storedText)) return field.default ?? '';
+                    const hasDefault = field.default !== undefined && field.default !== null && String(field.default).trim() !== '';
+                    if((stored === '' || stored === null || stored === undefined) && hasDefault) return field.default;
                     return stored;
                 }
             }
@@ -13105,7 +13424,6 @@
             }
             if(role === 'prompt'){
                 if(source.prompt) return source.prompt;
-                if(rhUnsafeStringFormatDefault(field, field.default)) return '';
             }
             return field.default ?? '';
         }
@@ -14721,7 +15039,9 @@ ${referenceNote}
             const mode = node.mode || 'text';
             const customMediaFields = mode === 'custom' ? comfyMediaFields(node) : [];
             const customPromptFields = mode === 'custom' ? comfyFields(node, 'prompt') : [];
-            if((mode === 'text' || (mode === 'custom' && customPromptFields.length)) && !prompt){ alert(tr('canvas.needPrompt')); return; }
+            const customPromptDefaults = customPromptFields.map(field => String(comfyParamValue(node, field) ?? '').trim()).filter(Boolean);
+            if(mode === 'text' && !prompt){ alert(tr('canvas.needPrompt')); return; }
+            if(mode === 'custom' && customPromptFields.length && !prompt && !customPromptDefaults.length){ alert(tr('canvas.needPrompt')); return; }
             if(mode !== 'text' && mode !== 'custom' && !refs.length){ alert(tr('canvas.needImage')); return; }
             if(mode === 'custom' && customMediaFields.length){
                 const media = comfyMediaSources(node);
@@ -14810,7 +15130,7 @@ ${referenceNote}
                     promptFields.forEach(f => {
                         if(!f.node || !f.input) return;
                         params[f.node] = params[f.node] || {};
-                        params[f.node][f.input] = prompt;
+                        params[f.node][f.input] = prompt || comfyParamValue(node, f) || '';
                     });
                     settingFields.forEach(f => {
                         if(!f.node || !f.input) return;
@@ -15516,6 +15836,14 @@ ${referenceNote}
             const clean = (url || '').split('?')[0];
             const ext = clean.includes('.') ? clean.split('.').pop() : 'png';
             return `canvas-output-${Date.now()}.${ext || 'png'}`;
+        }
+        function mediaDownloadName(url, preferred=''){
+            const name = String(preferred || '').trim();
+            const fallback = outputImageName(url) || outputDownloadName(url);
+            if(!name) return fallback;
+            if(/\.[A-Za-z0-9]{2,6}$/.test(name)) return name;
+            const ext = (fallback.match(/\.[^./\\?]+$/) || [])[0] || '';
+            return ext ? `${name}${ext}` : name;
         }
         function isVideoUrl(url){
             const clean = (url || '').split('?')[0].toLowerCase();
@@ -16286,13 +16614,26 @@ ${referenceNote}
             render();
             scheduleSave();
         }
+        function triggerDownloadLink(href, filename=''){
+            const link = document.createElement('a');
+            link.href = href;
+            if(filename) link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        }
         async function downloadUrl(url, filename){
+            const name = mediaDownloadName(url, filename || outputDownloadName(url));
+            if(window.CanvasAssetLibrary?.isLocalMediaUrl(url)){
+                triggerDownloadLink(window.CanvasAssetLibrary.downloadHref(url, name), name);
+                return;
+            }
             const res = await fetch(url);
             if(!res.ok) throw new Error('下载失败');
             const blob = await res.blob();
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = filename;
+            link.download = name;
             document.body.appendChild(link);
             link.click();
             link.remove();
@@ -17635,7 +17976,7 @@ ${referenceNote}
         });
         function startBoardPan(e){
             if(!canvas) return false;
-            if(isEditableTarget(e.target) || e.target.closest?.('#nodePalette, #createMenu, #linkCreateMenu, #nodeInputMenu, #nodeOutputMenu, #nodeActionMenu, #imageNodeMenu, .minimap')) return false;
+            if(isEditableTarget(e.target) || e.target.closest?.('#nodePalette, #assetLibraryPanel, #createMenu, #linkCreateMenu, #nodeInputMenu, #nodeOutputMenu, #nodeActionMenu, #imageNodeMenu, .minimap')) return false;
             e.preventDefault();
             e.stopPropagation();
             closeCreateMenu();
@@ -17694,12 +18035,12 @@ ${referenceNote}
             openCreateMenu(e.clientX, e.clientY);
         };
         board.addEventListener('mousedown', e => {
-            if(e.target.closest?.('#nodePalette, #createMenu, #linkCreateMenu, #nodeInputMenu, #nodeOutputMenu, #nodeActionMenu, #imageNodeMenu')) return;
+            if(e.target.closest?.('#nodePalette, #assetLibraryPanel, #createMenu, #linkCreateMenu, #nodeInputMenu, #nodeOutputMenu, #nodeActionMenu, #imageNodeMenu')) return;
             closeCreateMenu();
         });
         board.onwheel = e => {
             if(!canvas) return;
-            if(e.target.closest?.('#nodePalette')) return;
+            if(e.target.closest?.('#nodePalette, #assetLibraryPanel')) return;
             e.preventDefault();
             const before = screenToWorld(e.clientX, e.clientY);
             viewport.scale = viewport.scale * (e.deltaY > 0 ? .92 : 1.08);
@@ -17722,9 +18063,9 @@ ${referenceNote}
                 dropOverlay.classList.remove('active');
                 return;
             }
-            if(hasImageDropData(e.dataTransfer) || hasOutputImageDrag(e.dataTransfer)){
+            if(hasImageDropData(e.dataTransfer) || hasOutputImageDrag(e.dataTransfer) || hasCanvasAssetDrag(e.dataTransfer)){
                 e.preventDefault();
-                e.dataTransfer.dropEffect = hasOutputImageDrag(e.dataTransfer) ? 'copy' : 'move';
+                e.dataTransfer.dropEffect = (hasOutputImageDrag(e.dataTransfer) || hasCanvasAssetDrag(e.dataTransfer)) ? 'copy' : 'move';
                 dropOverlay.classList.add('active');
             }
         });
@@ -17748,6 +18089,11 @@ ${referenceNote}
             if(handlePromptTemplateCanvasDrop(e)) return;
             if(hasOutputImageDrag(e.dataTransfer)) {
                 createImageCardFromOutput(e.dataTransfer.getData('application/x-canvas-output-image'), screenToWorld(e.clientX, e.clientY));
+                return;
+            }
+            if(hasCanvasAssetDrag(e.dataTransfer)){
+                const asset = canvasAssetFromDataTransfer(e.dataTransfer);
+                if(asset?.url) createImageCardFromUrl(asset.url, screenToWorld(e.clientX, e.clientY), asset.name || outputImageName(asset.url));
                 return;
             }
             if(internalDrag || e.dataTransfer?.types?.includes('application/x-canvas-input')) {

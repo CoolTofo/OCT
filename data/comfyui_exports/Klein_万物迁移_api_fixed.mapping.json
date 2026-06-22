@@ -1,0 +1,75 @@
+{
+  "profile": "generic",
+  "main_output_node_id": "312",
+  "output_mode": "all",
+  "workflow_output": "D:\\Program Files\\OCT\\data\\comfyui_exports\\Klein_万物迁移_api_fixed.workflow.json",
+  "api_output": "D:\\Program Files\\OCT\\workflows\\custom\\Klein_万物迁移_api_fixed.json",
+  "api_input": "D:\\Program Files\\OCT\\data\\comfyui_exports\\_api_input_8c5569197d2942e2bd6f73c9b22cf46b.json",
+  "normalize_legacy_widgets": {
+    "changes": []
+  },
+  "compatible_custom_nodes": {
+    "converted": []
+  },
+  "strip_reroute_nodes": {
+    "removed": 0,
+    "rewired": [],
+    "unresolved": []
+  },
+  "flatten_set_get": {
+    "converted": [],
+    "skipped": []
+  },
+  "frontend_switches": {
+    "converted": [],
+    "skipped": []
+  },
+  "body_ratio_mapper_widget_values": {
+    "changes": []
+  },
+  "api_value_overlay": {
+    "updated": [
+      {
+        "node_id": "382",
+        "class_type": "Image Comparer (rgthree)",
+        "inputs": [
+          "rgthree_comparer"
+        ]
+      },
+      {
+        "node_id": "401",
+        "class_type": "Image Comparer (rgthree)",
+        "inputs": [
+          "rgthree_comparer"
+        ]
+      },
+      {
+        "node_id": "414",
+        "class_type": "INTConstant",
+        "inputs": [
+          "value"
+        ]
+      },
+      {
+        "node_id": "417",
+        "class_type": "FloatConstant",
+        "inputs": [
+          "value"
+        ]
+      }
+    ],
+    "skipped": []
+  },
+  "body_ratio_mapper_api_repair": {
+    "changes": []
+  },
+  "body_ratio_mapper_api_validation": {
+    "issues": []
+  },
+  "validation": {
+    "nodes": 55,
+    "links": 83,
+    "bad_links": 0,
+    "residual_ui_nodes": []
+  }
+}
