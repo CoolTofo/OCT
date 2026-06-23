@@ -1187,7 +1187,7 @@
                 <div class="menu-divider" data-menu-paste-divider style="display:none"></div>
                 <button class="menu-btn" onclick="menuAdd('image')"><i data-lucide="image-plus" class="w-4 h-4"></i><span data-i18n="canvas.imageCard">图片卡片</span></button>
                 <button class="menu-btn" onclick="menuAdd('prompt')"><i data-lucide="text-cursor-input" class="w-4 h-4"></i><span data-i18n="canvas.prompt">提示词</span></button>
-                <button class="menu-btn" onclick="menuAdd('poseEditor')"><i data-lucide="person-standing" class="w-4 h-4"></i><span>&#x59ff;&#x52bf;&#x7f16;&#x8f91;</span></button>
+                <button class="menu-btn" onclick="menuAdd('poseEditor')"><i data-lucide="move" class="w-4 h-4"></i><span>&#x59ff;&#x52bf;&#x7f16;&#x8f91;</span></button>
                 <button class="menu-btn" onclick="menuAdd('flowFrame')"><i data-lucide="film" class="w-4 h-4"></i><span>流帧心法</span></button>
                 <button class="menu-btn" onclick="menuAdd('scriptPlanner')"><i data-lucide="scroll-text" class="w-4 h-4"></i><span>长剧本拆分</span></button>
                 <button class="menu-btn" onclick="menuAdd('seedanceDirector')"><i data-lucide="clapperboard" class="w-4 h-4"></i><span>Seedance导演Agent</span></button>
@@ -1423,12 +1423,51 @@
     <script src="/static/canvas-video-frame.js?v=20260615-video-frame-extract"></script>
     <script src="/static/canvas-pose-editor.js?v=20260622-pose-editor"></script>
     <script>
+        const LUCIDE_ICON_FALLBACKS = Object.freeze({
+            'person-standing':'move'
+        });
+        function normalizeLucideIconNames(root=document){
+            root.querySelectorAll?.('[data-lucide]')?.forEach(icon => {
+                const name = icon.getAttribute('data-lucide') || '';
+                const fallback = LUCIDE_ICON_FALLBACKS[name];
+                if(fallback){
+                    icon.dataset.lucideMissing = name;
+                    icon.setAttribute('data-lucide', fallback);
+                }
+            });
+        }
+        function fallbackLucideIconFromError(error){
+            const message = String(error?.message || error || '');
+            let missing = Object.keys(LUCIDE_ICON_FALLBACKS).find(name => message.includes(name)) || '';
+            if(!missing){
+                const match = message.match(/["'`]([^"'`]+)["'`]/);
+                missing = match?.[1] || '';
+            }
+            if(!missing) return false;
+            let changed = false;
+            document.querySelectorAll?.('[data-lucide]')?.forEach(icon => {
+                if(icon.getAttribute('data-lucide') !== missing) return;
+                icon.dataset.lucideMissing = missing;
+                icon.setAttribute('data-lucide', LUCIDE_ICON_FALLBACKS[missing] || 'circle');
+                changed = true;
+            });
+            return changed;
+        }
         function refreshIcons(){
             if(!window.lucide || refreshIcons._queued) return;
             refreshIcons._queued = true;
             requestAnimationFrame(() => {
                 refreshIcons._queued = false;
-                if(window.lucide) lucide.createIcons();
+                if(!window.lucide) return;
+                normalizeLucideIconNames();
+                try {
+                    lucide.createIcons();
+                } catch(err) {
+                    console.warn('lucide icon render failed', err);
+                    if(fallbackLucideIconFromError(err)){
+                        try { lucide.createIcons(); } catch(retryErr) { console.warn('lucide fallback render failed', retryErr); }
+                    }
+                }
             });
         }
         refreshIcons();

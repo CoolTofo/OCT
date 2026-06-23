@@ -26,7 +26,7 @@
         output: {fallback:'Output', icon:'circle-dot', title:'Output'},
         image: {labelKey:'canvas.imageCard', fallback:'图片卡片', icon:'image-plus', title:'Image'},
         prompt: {labelKey:'canvas.prompt', fallback:'提示词', icon:'text-cursor-input', title:'Prompt'},
-        poseEditor: {fallback:'\u59ff\u52bf\u7f16\u8f91', icon:'person-standing', title:'\u59ff\u52bf\u7f16\u8f91'},
+        poseEditor: {fallback:'\u59ff\u52bf\u7f16\u8f91', icon:'move', title:'\u59ff\u52bf\u7f16\u8f91'},
         flowFrame: {fallback:'流帧心法', icon:'film', title:'流帧心法'},
         scriptPlanner: {fallback:'长剧本拆分', icon:'scroll-text', title:'长剧本拆分'},
         scriptSection: {fallback:'剧情段落', icon:'file-text', title:'剧情段落'},
