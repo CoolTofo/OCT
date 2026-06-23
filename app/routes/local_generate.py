@@ -14,7 +14,7 @@ from typing import Any, Dict
 import requests
 from fastapi import APIRouter
 
-from app.comfyui.runtime import preferred_history_output_node_ids
+from app.comfyui.runtime import missing_declared_final_outputs, preferred_history_output_node_ids
 from app.schemas import GenerateRequest
 
 router = APIRouter()
@@ -165,6 +165,10 @@ def generate(req: GenerateRequest):
         local_urls = []
         current_timestamp = time.time()
         if 'outputs' in history_data:
+            missing_final_outputs = missing_declared_final_outputs(history_data, workflow)
+            if missing_final_outputs:
+                detail = describe_comfy_failure(history_data)
+                raise Exception(f"ComfyUI final output node(s) did not generate media: {', '.join(missing_final_outputs)}. {detail}")
             for node_id in preferred_history_output_node_ids(history_data, workflow):
                 node_output = history_data['outputs'].get(node_id) or history_data['outputs'].get(int(node_id)) or {}
                 if not isinstance(node_output, dict):

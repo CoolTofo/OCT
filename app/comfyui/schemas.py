@@ -47,6 +47,6 @@ class ComfyWorkflowExportRequest(BaseModel):
     api_input: Optional[Dict[str, Any]] = None
     name: str = ""
     profile: str = "auto"
-    output_mode: str = "all"
-    main_output_id: str = "312"
+    output_mode: str = "main"
+    main_output_id: str = "auto"
     save_config: bool = True

@@ -89,7 +89,7 @@ def create_router(generate_callable) -> APIRouter:
                 source_title = os.path.splitext(os.path.basename(source_path))[0]
 
             profile = comfy_workflows.detect_comfy_export_profile(workflow_data, payload.profile)
-            output_mode = (payload.output_mode or "all").lower()
+            output_mode = (payload.output_mode or "main").lower()
             if output_mode not in {"all", "main"}:
                 raise HTTPException(status_code=400, detail="output_mode must be all or main")
 
@@ -114,7 +114,7 @@ def create_router(generate_callable) -> APIRouter:
                 workflow_output=Path(workflow_output),
                 api_output=Path(api_output),
                 mapping_output=Path(mapping_output),
-                main_output_id=str(payload.main_output_id or "312"),
+                main_output_id=str(payload.main_output_id or "auto"),
                 output_mode=output_mode,
                 profile=profile,
             )

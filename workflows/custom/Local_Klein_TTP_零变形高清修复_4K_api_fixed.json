@@ -56,27 +56,6 @@
       "title": "SimpleMath+"
     }
   },
-  "27": {
-    "inputs": {
-      "filename_prefix": "Klein"
-    },
-    "class_type": "SaveImage",
-    "_meta": {
-      "title": "SaveImage"
-    }
-  },
-  "31": {
-    "inputs": {
-      "image": [
-        "54",
-        0
-      ]
-    },
-    "class_type": "GetImageSize",
-    "_meta": {
-      "title": "GetImageSize"
-    }
-  },
   "32": {
     "inputs": {
       "model": [
@@ -177,6 +156,10 @@
   },
   "38": {
     "inputs": {
+      "model": [
+        "57",
+        0
+      ],
       "lcs_data": [
         "23",
         0
@@ -283,35 +266,9 @@
       "title": "VAELoader"
     }
   },
-  "46": {
-    "inputs": {
-      "a": [
-        "31",
-        1
-      ],
-      "expression": "(a+1279)//1280+int(a%1280==0)"
-    },
-    "class_type": "MathExpression|pysssss",
-    "_meta": {
-      "title": "纵向分块计算"
-    }
-  },
-  "47": {
-    "inputs": {
-      "a": [
-        "31",
-        0
-      ],
-      "expression": "(a+1279)//1280+int(a%1280==0)"
-    },
-    "class_type": "MathExpression|pysssss",
-    "_meta": {
-      "title": "横线分块计算"
-    }
-  },
   "49": {
     "inputs": {
-      "image": "pasted/image (28).png",
+      "image": "小空空2.jpg",
       "upload": "image"
     },
     "class_type": "LoadImage",
@@ -376,32 +333,6 @@
       "title": "TTP_Image_Assy"
     }
   },
-  "53": {
-    "inputs": {
-      "image_b": [
-        "49",
-        0
-      ],
-      "rgthree_comparer": {
-        "images": [
-          {
-            "name": "A",
-            "selected": true,
-            "url": "/api/view?filename=rgthree.compare._temp_rhpky_00003_.png&type=temp&subfolder=&rand=0.7810894171426332"
-          },
-          {
-            "name": "B",
-            "selected": true,
-            "url": "/api/view?filename=rgthree.compare._temp_rhpky_00004_.png&type=temp&subfolder=&rand=0.738387982459012"
-          }
-        ]
-      }
-    },
-    "class_type": "Image Comparer (rgthree)",
-    "_meta": {
-      "title": "Image Comparer (rgthree)"
-    }
-  },
   "54": {
     "inputs": {
       "image": [
@@ -428,6 +359,10 @@
   },
   "57": {
     "inputs": {
+      "model": [
+        "42",
+        0
+      ],
       "lora_name": "f2k_9B_lcs_consist_20260415.safetensors",
       "strength_model": [
         "71",

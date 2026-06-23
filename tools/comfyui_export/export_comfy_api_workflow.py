@@ -18,7 +18,7 @@ import comfy_api_workflow_converter as converter
 
 OCT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_WORKFLOW_DIR = OCT_ROOT / "workflows" / "comfyui_full"
-DEFAULT_MAIN_OUTPUT_ID = "312"
+DEFAULT_MAIN_OUTPUT_ID = "auto"
 
 
 def read_json(path: Path) -> dict[str, Any]:

@@ -1,0 +1,45 @@
+{
+  "title": "任意姿势编辑",
+  "fields": [
+    {
+      "id": "169.text",
+      "node": "169",
+      "input": "text",
+      "name": "姿势编辑提示词 / text",
+      "nodeTitle": "CLIPTextEncode",
+      "classType": "CLIPTextEncode",
+      "type": "textarea",
+      "default": "修改图1中人物的姿势，使其与图2的姿势一致。确保图1中人物的面部特征、服装细节保持不变，同时背景环境、光照方向和色彩风格也需与原图保持一致。",
+      "options": [],
+      "random_enabled": false,
+      "locked": false
+    },
+    {
+      "id": "171.image",
+      "node": "171",
+      "input": "image",
+      "name": "人物原图 / image",
+      "nodeTitle": "LoadImage",
+      "classType": "LoadImage",
+      "type": "image",
+      "default": "pasted/image (31).png",
+      "options": [],
+      "random_enabled": false,
+      "locked": false
+    },
+    {
+      "id": "207.image",
+      "node": "207",
+      "input": "image",
+      "name": "姿势骨骼图 / image",
+      "nodeTitle": "NuiKr.OpenPoseEditor",
+      "classType": "NuiKr.OpenPoseEditor",
+      "type": "image",
+      "default": "openpose_dw_bg_temp_1781779598292.png",
+      "options": [],
+      "random_enabled": false,
+      "locked": false
+    }
+  ],
+  "mini_cards": {}
+}

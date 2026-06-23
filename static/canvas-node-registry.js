@@ -26,6 +26,7 @@
         output: {fallback:'Output', icon:'circle-dot', title:'Output'},
         image: {labelKey:'canvas.imageCard', fallback:'图片卡片', icon:'image-plus', title:'Image'},
         prompt: {labelKey:'canvas.prompt', fallback:'提示词', icon:'text-cursor-input', title:'Prompt'},
+        poseEditor: {fallback:'\u59ff\u52bf\u7f16\u8f91', icon:'person-standing', title:'\u59ff\u52bf\u7f16\u8f91'},
         flowFrame: {fallback:'流帧心法', icon:'film', title:'流帧心法'},
         scriptPlanner: {fallback:'长剧本拆分', icon:'scroll-text', title:'长剧本拆分'},
         scriptSection: {fallback:'剧情段落', icon:'file-text', title:'剧情段落'},
@@ -39,9 +40,9 @@
     const GENERATOR_TYPES = Object.freeze(['generator','storyboardGrid','msgen','comfy','rh','video','png','dreamina','imageExtend','panorama']);
     const IMAGE_OUTPUT_TYPES = Object.freeze(['generator','storyboardGrid','msgen','comfy','rh','png','dreamina','imageExtend','panorama']);
     const ADDABLE_GENERATOR_TYPES = Object.freeze(['generator','storyboard','storyboardGrid','msgen','comfy','rh','video','sd2Video','dreaminaImage','dreaminaVideo','png','imageExtend','panorama']);
-    const ADDABLE_SOURCE_TYPES = Object.freeze(['image','prompt','flowFrame','loop','group','llm']);
+    const ADDABLE_SOURCE_TYPES = Object.freeze(['image','prompt','poseEditor','flowFrame','loop','group','llm']);
     const NODE_PALETTE_SECTIONS = Object.freeze([
-        {id:'source', fallback:'素材', types:['image','prompt','flowFrame','scriptPlanner','seedanceDirector','loop','group','output']},
+        {id:'source', fallback:'素材', types:['image','prompt','poseEditor','flowFrame','scriptPlanner','seedanceDirector','loop','group','output']},
         {id:'imageGen', fallback:'图片 / 合成', types:['generator','storyboard','storyboardGrid','msgen','png','imageExtend','panorama']},
         {id:'videoGen', fallback:'视频', types:['video','sd2Video','dreaminaImage','dreaminaVideo']},
         {id:'workflow', fallback:'工作流 / AI', types:['llm','comfy','rh']}

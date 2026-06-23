@@ -1,10 +1,10 @@
 {
   "profile": "generic",
-  "main_output_node_id": "312",
-  "output_mode": "all",
+  "main_output_node_id": "72",
+  "output_mode": "main",
   "workflow_output": "D:\\Program Files\\OCT\\data\\comfyui_exports\\Local_Klein_TTP_零变形高清修复_4K_api_fixed.workflow.json",
   "api_output": "D:\\Program Files\\OCT\\workflows\\custom\\Local_Klein_TTP_零变形高清修复_4K_api_fixed.json",
-  "api_input": "D:\\Program Files\\OCT\\data\\comfyui_exports\\_api_input_421f886404284cbb8a5e3cb07c19f417.json",
+  "api_input": "D:\\Program Files\\OCT\\data\\comfyui_exports\\_api_input_45714721bdab41a0a41dbea71ea7d970.json",
   "normalize_legacy_widgets": {
     "changes": []
   },
@@ -15,6 +15,55 @@
     "removed": 0,
     "rewired": [],
     "unresolved": []
+  },
+  "anything_everywhere": {
+    "removed": 0,
+    "added_links": [],
+    "sources": []
+  },
+  "bypassed_nodes": {
+    "rewired": [
+      {
+        "bypassed_node_id": "67",
+        "output_index": 0,
+        "link_id": "92",
+        "from": [
+          67,
+          0
+        ],
+        "to": [
+          57,
+          0
+        ]
+      },
+      {
+        "bypassed_node_id": "56",
+        "output_index": 0,
+        "link_id": "78",
+        "from": [
+          56,
+          0
+        ],
+        "to": [
+          42,
+          0
+        ]
+      },
+      {
+        "bypassed_node_id": "22",
+        "output_index": 0,
+        "link_id": "28",
+        "from": [
+          22,
+          0
+        ],
+        "to": [
+          45,
+          0
+        ]
+      }
+    ],
+    "removed_links": 6
   },
   "flatten_set_get": {
     "converted": [],
@@ -36,13 +85,6 @@
   "api_value_overlay": {
     "updated": [
       {
-        "node_id": "53",
-        "class_type": "Image Comparer (rgthree)",
-        "inputs": [
-          "rgthree_comparer"
-        ]
-      },
-      {
         "node_id": "71",
         "class_type": "Float",
         "inputs": [
@@ -57,17 +99,41 @@
         ]
       }
     ],
-    "skipped": []
+    "skipped": [
+      {
+        "node_id": "27",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "31",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "46",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "47",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "53",
+        "reason": "node not present in repaired prompt"
+      }
+    ]
   },
   "body_ratio_mapper_api_repair": {
     "changes": []
+  },
+  "api_prompt_input_validation": {
+    "issues": []
   },
   "body_ratio_mapper_api_validation": {
     "issues": []
   },
   "validation": {
-    "nodes": 30,
-    "links": 41,
+    "nodes": 25,
+    "links": 39,
     "bad_links": 0,
     "residual_ui_nodes": []
   }

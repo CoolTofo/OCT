@@ -1,0 +1,171 @@
+{
+  "profile": "generic",
+  "main_output_node_id": "174",
+  "output_mode": "main",
+  "workflow_output": "D:\\Program Files\\OCT\\data\\comfyui_exports\\图片姿势控制_api_fixed.workflow.json",
+  "api_output": "D:\\Program Files\\OCT\\workflows\\custom\\图片姿势控制_api_fixed.json",
+  "api_input": null,
+  "normalize_legacy_widgets": {
+    "changes": []
+  },
+  "compatible_custom_nodes": {
+    "converted": []
+  },
+  "strip_reroute_nodes": {
+    "removed": 0,
+    "rewired": [],
+    "unresolved": []
+  },
+  "anything_everywhere": {
+    "removed": 1,
+    "added_links": [
+      {
+        "link_id": "5545",
+        "source": [
+          "6",
+          0
+        ],
+        "target": [
+          "159",
+          "vae"
+        ],
+        "type": "VAE"
+      },
+      {
+        "link_id": "5546",
+        "source": [
+          "6",
+          0
+        ],
+        "target": [
+          "157",
+          "vae"
+        ],
+        "type": "VAE"
+      },
+      {
+        "link_id": "5547",
+        "source": [
+          "18",
+          0
+        ],
+        "target": [
+          "191",
+          "model"
+        ],
+        "type": "MODEL"
+      },
+      {
+        "link_id": "5548",
+        "source": [
+          "6",
+          0
+        ],
+        "target": [
+          "158",
+          "vae"
+        ],
+        "type": "VAE"
+      },
+      {
+        "link_id": "5549",
+        "source": [
+          "4",
+          0
+        ],
+        "target": [
+          "169",
+          "clip"
+        ],
+        "type": "CLIP"
+      }
+    ],
+    "sources": [
+      {
+        "broadcaster_id": "201",
+        "input": "anything",
+        "type": "MODEL",
+        "source": [
+          "18",
+          0
+        ]
+      },
+      {
+        "broadcaster_id": "201",
+        "input": "anything2",
+        "type": "CLIP",
+        "source": [
+          "4",
+          0
+        ]
+      },
+      {
+        "broadcaster_id": "201",
+        "input": "anything3",
+        "type": "VAE",
+        "source": [
+          "6",
+          0
+        ]
+      }
+    ]
+  },
+  "bypassed_nodes": {
+    "rewired": [
+      {
+        "bypassed_node_id": "191",
+        "output_index": 0,
+        "link_id": "5474",
+        "from": [
+          191,
+          0
+        ],
+        "to": [
+          18,
+          0
+        ]
+      }
+    ],
+    "removed_links": 1
+  },
+  "flatten_set_get": {
+    "converted": [],
+    "skipped": []
+  },
+  "frontend_switches": {
+    "converted": [],
+    "skipped": []
+  },
+  "body_ratio_mapper_widget_values": {
+    "changes": []
+  },
+  "api_value_overlay": {
+    "updated": [],
+    "skipped": []
+  },
+  "body_ratio_mapper_api_repair": {
+    "changes": []
+  },
+  "api_prompt_input_validation": {
+    "issues": []
+  },
+  "body_ratio_mapper_api_validation": {
+    "issues": []
+  },
+  "validation": {
+    "nodes": 27,
+    "links": 37,
+    "bad_links": 0,
+    "residual_ui_nodes": []
+  },
+  "post_convert_api_repair": {
+    "flux_latent_resolution_steps": [
+      {
+        "node_id": "163",
+        "input": "resolution_steps",
+        "from": 1,
+        "to": 16
+      }
+    ]
+  }
+}

@@ -184,21 +184,11 @@ def is_essential_comfy_field(field: Dict[str, Any]) -> bool:
 
 
 def lock_essential_comfy_fields(fields: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    locked = []
-    for field in fields:
-        item = dict(field)
-        if is_essential_comfy_field(item):
-            item["locked"] = True
-        locked.append(item)
-    return locked
+    return [dict(field, locked=bool(field.get("locked"))) for field in fields]
 
 
 def is_stale_locked_comfy_media_field(field: Dict[str, Any]) -> bool:
-    field_type = str(field.get("type") or "").lower()
-    return (
-        field.get("locked") is True
-        and field_type in {"image", "video", "audio"}
-    )
+    return False
 
 
 def is_comfy_link(value):
@@ -211,33 +201,27 @@ def repair_comfy_workflow_config(workflow: Dict[str, Any], config: Dict[str, Any
     cfg = dict(config or {})
     current_fields = [dict(field) for field in (cfg.get("fields") or []) if isinstance(field, dict)]
     extracted = lock_essential_comfy_fields(extract_api_prompt_fields(workflow))
-    essential_by_key = {
+    extracted_by_key = {
         comfy_field_stable_key(field): field
         for field in extracted
-        if is_essential_comfy_field(field)
     }
-    if not essential_by_key:
+    if not extracted_by_key:
         cfg["fields"] = current_fields
         return cfg, False
 
     changed = False
-    used_keys = set()
     repaired = []
     for field in current_fields:
         key = comfy_field_stable_key(field)
-        essential = essential_by_key.get(key)
-        if essential:
-            used_keys.add(key)
-            merged = {**essential, **field}
-            if merged.get("type") != essential.get("type"):
-                merged["type"] = essential.get("type")
-            if merged.get("classType") != essential.get("classType"):
-                merged["classType"] = essential.get("classType")
-            if merged.get("nodeTitle") != essential.get("nodeTitle") and not merged.get("nodeTitle"):
-                merged["nodeTitle"] = essential.get("nodeTitle")
-            if merged.get("locked") is not True:
-                merged["locked"] = True
-                changed = True
+        extracted_field = extracted_by_key.get(key)
+        if extracted_field:
+            merged = {**extracted_field, **field}
+            if merged.get("type") != extracted_field.get("type"):
+                merged["type"] = extracted_field.get("type")
+            if merged.get("classType") != extracted_field.get("classType"):
+                merged["classType"] = extracted_field.get("classType")
+            if merged.get("nodeTitle") != extracted_field.get("nodeTitle") and not merged.get("nodeTitle"):
+                merged["nodeTitle"] = extracted_field.get("nodeTitle")
             if merged != field:
                 changed = True
             repaired.append(merged)
@@ -247,17 +231,10 @@ def repair_comfy_workflow_config(workflow: Dict[str, Any], config: Dict[str, Any
                 continue
             repaired.append(field)
 
-    for key, field in essential_by_key.items():
-        if key in used_keys:
-            continue
-        repaired.append(field)
-        changed = True
-
     cfg["fields"] = repaired
     if "mini_cards" not in cfg or not isinstance(cfg.get("mini_cards"), dict):
         cfg["mini_cards"] = {}
     return cfg, changed
-
 
 def extract_api_prompt_fields(workflow: Dict[str, Any]) -> List[Dict[str, Any]]:
     fields: List[Dict[str, Any]] = []

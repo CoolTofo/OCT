@@ -1,0 +1,38 @@
+{
+  "title": "图片姿势控制_api_fixed",
+  "fields": [
+    {
+      "id": "171.image",
+      "node": "171",
+      "input": "image",
+      "name": "OCTInput_Image1 / image",
+      "nodeTitle": "OCTInput_Image1",
+      "classType": "LoadImage",
+      "type": "image",
+      "default": "2 (1).png",
+      "options": [],
+      "random_enabled": false,
+      "locked": false,
+      "min": null,
+      "max": null,
+      "step": null
+    },
+    {
+      "id": "208.image",
+      "node": "208",
+      "input": "image",
+      "name": "OCTInput_Image2 / image",
+      "nodeTitle": "OCTInput_Image2",
+      "classType": "LoadImage",
+      "type": "image",
+      "default": "pasted/image (37).png",
+      "options": [],
+      "random_enabled": false,
+      "locked": false,
+      "min": null,
+      "max": null,
+      "step": null
+    }
+  ],
+  "mini_cards": {}
+}

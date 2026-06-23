@@ -205,13 +205,13 @@
                         <label class="field">
                             <span class="label">输出范围</span>
                             <select id="exportModeSelect" class="select">
-                                <option value="all">all - 保留全部可执行节点</option>
-                                <option value="main">main - 只保留主输出链路</option>
+                                <option value="main" selected>main - 只保留主输出链路</option>
+                            <option value="all">all - 保留全部可执行节点</option>
                             </select>
                         </label>
                         <label class="field">
                             <span class="label">主输出节点 ID</span>
-                            <input id="exportMainOutputInput" class="input" type="text" value="312">
+                            <input id="exportMainOutputInput" class="input" type="text" value="auto">
                         </label>
                         <div class="field">
                             <span class="label">选择完整 workflow</span>
@@ -359,13 +359,13 @@
                     <label class="field">
                         <span class="label">输出范围</span>
                         <select id="workflowUploadModeSelect" class="select">
+                            <option value="main" selected>main - 只保留主输出链路</option>
                             <option value="all">all - 保留全部可执行节点</option>
-                            <option value="main">main - 只保留主输出链路</option>
                         </select>
                     </label>
                     <label class="field">
                         <span class="label">主输出节点 ID</span>
-                        <input id="workflowUploadMainOutputInput" class="input" type="text" value="312">
+                        <input id="workflowUploadMainOutputInput" class="input" type="text" value="auto">
                     </label>
                     <div class="field">
                         <span class="label">或上传完整 workflow</span>
@@ -505,11 +505,10 @@
             return false;
         }
         function protectEssentialField(field){
-            if(isEssentialWorkflowField(field)) field.locked = true;
             return field;
         }
         function isFieldLocked(field){
-            return field?.locked === true || isEssentialWorkflowField(field);
+            return field?.locked === true;
         }
         function countLockedFields(fields){
             return (fields || []).filter(isFieldLocked).length;
@@ -721,8 +720,8 @@
                         workflow:exportFullWorkflowJson,
                         name,
                         profile:els.exportProfile?.value || 'auto',
-                        output_mode:els.exportMode?.value || 'all',
-                        main_output_id:els.exportMainOutput?.value || '312',
+                        output_mode:els.exportMode?.value || 'main',
+                        main_output_id:els.exportMainOutput?.value || 'auto',
                         api_input:exportApiInputJson,
                         save_config:true,
                     })
@@ -964,8 +963,8 @@
                         workflow:workflowUploadFullJson,
                         name,
                         profile:els.workflowUploadProfile?.value || 'auto',
-                        output_mode:els.workflowUploadModeSelect?.value || 'all',
-                        main_output_id:els.workflowUploadMainOutput?.value || '312',
+                        output_mode:els.workflowUploadModeSelect?.value || 'main',
+                        main_output_id:els.workflowUploadMainOutput?.value || 'auto',
                         api_input:workflowUploadNativeApiJson,
                         save_config:true,
                     })
@@ -1178,12 +1177,6 @@
         function toggleFieldLock(index){
             const field = currentConfig.fields[index];
             if(!field) return;
-            if(isEssentialWorkflowField(field)){
-                field.locked = true;
-                setStatus('图片、视频、音频和提示词入口字段会自动保留');
-                renderFieldEditor();
-                return;
-            }
             field.locked = !field.locked;
             renderFieldEditor();
         }

@@ -38,7 +38,7 @@ class ExportApp(tk.Tk):
         self.output_dir_var = tk.StringVar(value=str(DEFAULT_OUTPUT_DIR))
         self.name_var = tk.StringVar()
         self.profile_var = tk.StringVar(value="auto")
-        self.output_mode_var = tk.StringVar(value="all")
+        self.output_mode_var = tk.StringVar(value="main")
         self.main_output_var = tk.StringVar(value=export_tool.DEFAULT_MAIN_OUTPUT_ID)
         self.status_var = tk.StringVar(value="Ready")
 

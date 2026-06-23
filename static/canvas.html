@@ -356,6 +356,14 @@
         .seedance-director-actions { display:flex; flex-direction:column; gap:7px; }
         .seedance-director-actions-row { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
         .seedance-director-actions .gen-btn { width:100%; }
+        .poseEditor-node { width:360px; }
+        .pose-editor-body { display:flex; flex-direction:column; gap:10px; min-width:0; }
+        .pose-editor-stage { position:relative; aspect-ratio:1/1; border-radius:16px; overflow:hidden; border:1px solid var(--line); background:#020617; box-shadow:inset 0 0 0 1px rgba(255,255,255,.04); }
+        .pose-editor-canvas { width:100%; height:100%; display:block; touch-action:none; cursor:crosshair; }
+        .pose-editor-actions { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+        .pose-editor-actions .gen-btn { width:100%; min-width:0; font-size:10.5px; }
+        .pose-editor-note { padding:8px 10px; border-radius:12px; border:1px dashed var(--line-2); background:var(--soft); color:var(--muted); font-size:10.5px; line-height:1.45; font-weight:750; }
+        .pose-editor-json { width:100%; min-height:70px; resize:vertical; border:1px solid var(--line); border-radius:12px; background:var(--card-solid); color:var(--muted); padding:8px 9px; font-size:10.5px; line-height:1.45; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
         .prompt-editor { height:100%; display:flex; flex-direction:column; gap:7px; }
         .prompt-editor-tools { display:flex; align-items:center; gap:6px; }
         .prompt-template-select { flex:1; min-width:0; height:30px; border:1px solid var(--line); border-radius:10px; background:var(--card-solid); color:var(--muted); padding:0 9px; font-size:11px; font-weight:800; outline:none; }
@@ -1179,6 +1187,7 @@
                 <div class="menu-divider" data-menu-paste-divider style="display:none"></div>
                 <button class="menu-btn" onclick="menuAdd('image')"><i data-lucide="image-plus" class="w-4 h-4"></i><span data-i18n="canvas.imageCard">图片卡片</span></button>
                 <button class="menu-btn" onclick="menuAdd('prompt')"><i data-lucide="text-cursor-input" class="w-4 h-4"></i><span data-i18n="canvas.prompt">提示词</span></button>
+                <button class="menu-btn" onclick="menuAdd('poseEditor')"><i data-lucide="person-standing" class="w-4 h-4"></i><span>&#x59ff;&#x52bf;&#x7f16;&#x8f91;</span></button>
                 <button class="menu-btn" onclick="menuAdd('flowFrame')"><i data-lucide="film" class="w-4 h-4"></i><span>流帧心法</span></button>
                 <button class="menu-btn" onclick="menuAdd('scriptPlanner')"><i data-lucide="scroll-text" class="w-4 h-4"></i><span>长剧本拆分</span></button>
                 <button class="menu-btn" onclick="menuAdd('seedanceDirector')"><i data-lucide="clapperboard" class="w-4 h-4"></i><span>Seedance导演Agent</span></button>
@@ -1412,6 +1421,7 @@
     <script src="/static/canvas-seedance-agent.js?v=20260611-seedance-director-agent"></script>
     <script src="/static/canvas-linked-clones.js?v=20260609-linked-clones"></script>
     <script src="/static/canvas-video-frame.js?v=20260615-video-frame-extract"></script>
+    <script src="/static/canvas-pose-editor.js?v=20260622-pose-editor"></script>
     <script>
         function refreshIcons(){
             if(!window.lucide || refreshIcons._queued) return;
@@ -3576,6 +3586,22 @@
             const p = point || defaultPoint(0, 0);
             return addNode({id:uid('prompt'), type:'prompt', x:p.x, y:p.y, text:''});
         }
+        function addPoseEditorNode(point){
+            const p = point || defaultPoint(20, 0);
+            const pose = window.CanvasPoseEditor?.defaultPoseData ? window.CanvasPoseEditor.defaultPoseData() : null;
+            return addNode({
+                id:uid('pose'),
+                type:'poseEditor',
+                x:p.x,
+                y:p.y,
+                w:360,
+                h:0,
+                name:'\u59ff\u52bf\u7f16\u8f91',
+                poseData:pose,
+                poseNote:'',
+                inputs:[]
+            });
+        }
         function addFlowFrameNode(point){
             const p = point || defaultPoint(20, 0);
             const flowChatProvider = resolveChatProviderId(chatApiProviders()[0]?.id || 'comfly');
@@ -4878,6 +4904,7 @@
         function createNodeByType(type, point){
             if(type === 'image') return addImageNode(point);
             if(type === 'prompt') return addPromptNode(point);
+            if(type === 'poseEditor') return addPoseEditorNode(point);
             if(type === 'flowFrame') return addFlowFrameNode(point);
             if(type === 'scriptPlanner') return addScriptPlannerNode(point);
             if(type === 'seedanceDirector') return addSeedanceDirectorNode(point);
@@ -4905,6 +4932,7 @@
             closeCreateMenu();
             if(type === 'image') addImageNode(menuPoint);
             if(type === 'prompt') addPromptNode(menuPoint);
+            if(type === 'poseEditor') addPoseEditorNode(menuPoint);
             if(type === 'flowFrame') addFlowFrameNode(menuPoint);
             if(type === 'scriptPlanner') addScriptPlannerNode(menuPoint);
             if(type === 'seedanceDirector') addSeedanceDirectorNode(menuPoint);
@@ -7005,7 +7033,7 @@
             });
         }
         function isNodeControl(target){
-            return !!target.closest('textarea, input, select, option, button, audio, video, [contenteditable="true"], .seg, .gen-btn, .comfy-run, .input-item, .blank-image, .mode-tabs, .ms-model-tabs, .llm-provider, .llm-output, .llm-chat-log, .llm-bubble, .llm-pane-resizer, .loop-preview');
+            return !!target.closest('textarea, input, select, option, button, audio, video, [contenteditable="true"], .seg, .gen-btn, .comfy-run, .input-item, .blank-image, .mode-tabs, .ms-model-tabs, .llm-provider, .llm-output, .llm-chat-log, .llm-bubble, .llm-pane-resizer, .loop-preview, .pose-editor-canvas, .pose-editor-json');
         }
         function isNodeDragSurface(target){
             return !isNodeControl(target) && !target.closest('.port, .resize-handle, .organize-resize-handle, .output-img-wrap, audio, video');
@@ -7022,6 +7050,173 @@
         function organizeFrameResizeHandlesHtml(){
             const dirs = window.CanvasOrganizeFrames?.RESIZE_DIRECTIONS || ['n','e','s','w','ne','nw','se','sw'];
             return dirs.map(dir => `<div class="organize-resize-handle organize-resize-${dir}" data-resize-dir="${dir}" title="${tr('canvas.resize')}"></div>`).join('');
+        }
+        function ensurePoseEditorNode(node){
+            if(!node || node.type !== 'poseEditor') return null;
+            node.poseData = window.CanvasPoseEditor?.normalizePoseData
+                ? window.CanvasPoseEditor.normalizePoseData(node.poseData)
+                : (node.poseData || null);
+            node.name = node.name || '\u59ff\u52bf\u7f16\u8f91';
+            node.inputs = Array.isArray(node.inputs) ? node.inputs : [];
+            return node;
+        }
+        function poseEditorDataUrl(node){
+            ensurePoseEditorNode(node);
+            return window.CanvasPoseEditor?.poseToDataUrl ? window.CanvasPoseEditor.poseToDataUrl(node.poseData) : '';
+        }
+        function poseEditorOutputRef(node){
+            const url = poseEditorDataUrl(node);
+            if(!url) return null;
+            return {url, name:`${node.name || '\u59ff\u52bf\u7f16\u8f91'}.png`, role:'pose', mediaKind:'image'};
+        }
+        function poseComfyWorkflowName(){
+            const posePattern = /\u59ff\u52bf|\u9aa8\u9abc|pose|openpose|dwpose/i;
+            const preferred = comfyWorkflows.find(w => posePattern.test(`${w.name || ''} ${w.title || ''}`));
+            if(preferred?.name) return preferred.name;
+            return validComfyWorkflowName(comfyWorkflows[0]?.name || '');
+        }
+        function renderPoseEditorBody(node){
+            ensurePoseEditorNode(node);
+            const wrap = document.createElement('div');
+            wrap.className = 'pose-editor-body';
+            wrap.innerHTML = `
+                <div class="pose-editor-note">\u62d6\u52a8\u9aa8\u9abc\u70b9\u624b\u52a8\u6446\u59ff\u52bf\uff1b\u53ef\u5bfc\u51fa\u6210\u56fe\u7247\u8282\u70b9\uff0c\u4e5f\u53ef\u76f4\u63a5\u8fde\u5230 ComfyUI \u59ff\u52bf\u5de5\u4f5c\u6d41\u3002</div>
+                <div class="pose-editor-stage"><canvas class="pose-editor-canvas" width="512" height="512"></canvas></div>
+                <div class="pose-editor-actions">
+                    <button class="gen-btn" type="button" data-pose-action="reset"><i data-lucide="rotate-ccw" class="w-4 h-4"></i>\u91cd\u7f6e</button>
+                    <button class="gen-btn" type="button" data-pose-action="mirror"><i data-lucide="flip-horizontal" class="w-4 h-4"></i>\u955c\u50cf</button>
+                    <button class="gen-btn" type="button" data-pose-action="export"><i data-lucide="image-plus" class="w-4 h-4"></i>\u5bfc\u51fa\u56fe\u7247</button>
+                    <button class="gen-btn" type="button" data-pose-action="workflow"><i data-lucide="workflow" class="w-4 h-4"></i>\u63a5\u5165\u59ff\u52bf\u5de5\u4f5c\u6d41</button>
+                </div>
+                <textarea class="pose-editor-json" spellcheck="false"></textarea>`;
+            const canvas = wrap.querySelector('.pose-editor-canvas');
+            const json = wrap.querySelector('.pose-editor-json');
+            const ctx = canvas.getContext('2d');
+            let activeIndex = -1;
+            const redraw = () => window.CanvasPoseEditor?.drawPose?.(ctx, node.poseData, {activeIndex});
+            const syncJson = () => { json.value = JSON.stringify(node.poseData || {}, null, 2); };
+            const updatePoint = event => {
+                if(activeIndex < 0 || !window.CanvasPoseEditor) return;
+                const hit = window.CanvasPoseEditor.hitTest(canvas, node.poseData, event.clientX, event.clientY, 9999);
+                node.poseData = window.CanvasPoseEditor.setPoint(node.poseData, activeIndex, hit.x, hit.y);
+                syncJson();
+                redraw();
+                scheduleSave();
+            };
+            syncJson();
+            redraw();
+            canvas.onmousedown = event => event.stopPropagation();
+            canvas.onpointerdown = event => {
+                event.preventDefault();
+                event.stopPropagation();
+                const hit = window.CanvasPoseEditor?.hitTest?.(canvas, node.poseData, event.clientX, event.clientY, 24);
+                activeIndex = hit?.index ?? -1;
+                if(activeIndex >= 0){
+                    canvas.setPointerCapture?.(event.pointerId);
+                    redraw();
+                    updatePoint(event);
+                }
+            };
+            canvas.onpointermove = event => {
+                if(activeIndex < 0) return;
+                event.preventDefault();
+                event.stopPropagation();
+                updatePoint(event);
+            };
+            const endDrag = event => {
+                if(activeIndex < 0) return;
+                event?.stopPropagation?.();
+                activeIndex = -1;
+                redraw();
+                scheduleSave();
+            };
+            canvas.onpointerup = endDrag;
+            canvas.onpointercancel = endDrag;
+            json.onmousedown = event => event.stopPropagation();
+            json.onclick = event => event.stopPropagation();
+            json.oninput = event => {
+                event.stopPropagation();
+                try {
+                    node.poseData = window.CanvasPoseEditor.normalizePoseData(JSON.parse(json.value || '{}'));
+                    json.style.borderColor = '';
+                    redraw();
+                    scheduleSave();
+                } catch(err){
+                    json.style.borderColor = '#ef4444';
+                }
+            };
+            wrap.querySelector('[data-pose-action="reset"]').onclick = event => {
+                event.stopPropagation();
+                node.poseData = window.CanvasPoseEditor.defaultPoseData();
+                syncJson();
+                redraw();
+                scheduleSave();
+            };
+            wrap.querySelector('[data-pose-action="mirror"]').onclick = event => {
+                event.stopPropagation();
+                node.poseData = window.CanvasPoseEditor.mirrorPose(node.poseData);
+                syncJson();
+                redraw();
+                scheduleSave();
+            };
+            wrap.querySelector('[data-pose-action="export"]').onclick = event => {
+                event.stopPropagation();
+                exportPoseEditorToImageNode(node.id);
+            };
+            wrap.querySelector('[data-pose-action="workflow"]').onclick = event => {
+                event.stopPropagation();
+                createPoseComfyNode(node.id);
+            };
+            return wrap;
+        }
+        function exportPoseEditorToImageNode(nodeId){
+            const node = nodes.find(n => n.id === nodeId && n.type === 'poseEditor');
+            if(!node) return null;
+            pushUndo();
+            const ref = poseEditorOutputRef(node);
+            if(!ref) return null;
+            let imageNode = nodes.find(n => n.id === node.exportedImageNodeId && n.type === 'image');
+            if(!imageNode){
+                imageNode = {id:uid('img'), type:'image', x:(node.x || 0) + (node.w || 360) + 80, y:node.y || 0, w:220, h:300, url:'', name:'\u59ff\u52bf\u9aa8\u9abc.png'};
+                nodes.push(imageNode);
+                node.exportedImageNodeId = imageNode.id;
+            }
+            imageNode.url = ref.url;
+            imageNode.previewUrl = ref.url;
+            imageNode.name = ref.name;
+            imageNode.mediaKind = 'image';
+            connectWorkflowRelation(node.id, imageNode.id, '\u5bfc\u51fa\u9aa8\u9abc\u56fe');
+            selected.clear();
+            selected.add(imageNode.id);
+            render();
+            scheduleSave();
+            return imageNode;
+        }
+        function createPoseComfyNode(nodeId){
+            const node = nodes.find(n => n.id === nodeId && n.type === 'poseEditor');
+            if(!node) return null;
+            pushUndo();
+            let comfy = nodes.find(n => n.id === node.poseComfyNodeId && n.type === 'comfy');
+            if(!comfy){
+                comfy = addComfyNode({x:(node.x || 0) + (node.w || 360) + 120, y:node.y || 0});
+                node.poseComfyNodeId = comfy.id;
+            }
+            comfy.mode = 'custom';
+            const workflowName = poseComfyWorkflowName();
+            if(workflowName) comfy.comfyWorkflow = workflowName;
+            const upstreamIds = dataConnections().filter(c => c.to === node.id).map(c => c.from).filter(Boolean);
+            upstreamIds.forEach(fromId => {
+                if(canConnect(fromId, comfy.id)) connectDataConnection(fromId, comfy.id, 'workflowData');
+            });
+            if(canConnect(node.id, comfy.id)) connectDataConnection(node.id, comfy.id, 'workflowData');
+            syncGeneratorInputs();
+            const sources = generatorSources(comfy);
+            orderedSources(comfy, sources);
+            comfy.inputs = [...(comfy.inputs || []).filter(id => id !== node.id), node.id];
+            selected.clear();
+            selected.add(comfy.id);
+            ensureComfyWorkflow(comfy.comfyWorkflow).finally(() => { render(); scheduleSave(); });
+            return comfy;
         }
         function renderNode(node){
             normalizeApiNodeLayout(node);
@@ -7110,6 +7305,7 @@
                     };
                 }
             }
+            if(node.type === 'poseEditor') body.appendChild(renderPoseEditorBody(node));
             if(node.type === 'image') {
                 if(node.url) {
                     const missing = isMissingAssetUrl(node.url);
@@ -7562,6 +7758,7 @@
         function defaultNodeSize(type){
             if(type === 'image') return {w:260, h:336};
             if(type === 'prompt') return {w:310, h:0};
+            if(type === 'poseEditor') return {w:360, h:0};
             if(type === 'flowFrame') return {w:380, h:0};
             if(type === 'scriptPlanner') return {w:430, h:0};
             if(type === 'scriptSection') return {w:390, h:0};
@@ -13076,10 +13273,27 @@
         function comfyMediaFieldIndex(node, field, kind){
             return comfyMediaFields(node).filter(f => comfyFieldKind(f) === kind).findIndex(f => f.id === field.id);
         }
+        function isPoseEditorSource(src){
+            return src?.type === 'poseEditor' || (src?.refs || []).some(ref => ref?.role === 'pose');
+        }
+        function isPoseComfyWorkflow(node){
+            const workflow = comfyWorkflows.find(w => w.name === node?.comfyWorkflow) || {};
+            return /\u59ff\u52bf|\u9aa8\u9abc|pose|openpose|dwpose/i.test(`${node?.comfyWorkflow || ''} ${workflow.title || ''}`);
+        }
         function comfyMediaFieldSource(node, field, media=null){
             const kind = comfyFieldKind(field);
             const source = media || comfyMediaSources(node);
-            return source[kind]?.[Math.max(0, comfyMediaFieldIndex(node, field, kind))] || null;
+            const index = Math.max(0, comfyMediaFieldIndex(node, field, kind));
+            if(kind === 'image' && isPoseComfyWorkflow(node)){
+                const images = source.image || [];
+                const poseSources = images.filter(isPoseEditorSource);
+                const normalSources = images.filter(src => !isPoseEditorSource(src));
+                const key = `${field?.input || ''} ${field?.name || ''} ${field?.nodeTitle || ''} ${field?.classType || ''}`;
+                if(/pose|openpose|dwpose|\u59ff\u52bf|\u9aa8\u9abc/i.test(key)) return poseSources[0] || images[index] || null;
+                const mapped = [normalSources[0], poseSources[0], ...normalSources.slice(1), ...poseSources.slice(1)].filter(Boolean);
+                return mapped[index] || images[index] || null;
+            }
+            return source[kind]?.[index] || null;
         }
         function comfyParamValue(node, field){
             node.comfyParams = node.comfyParams || {};
@@ -14086,6 +14300,10 @@
                         }));
                     }
                 }
+                if(n.type === 'poseEditor') {
+                    const ref = poseEditorOutputRef(n);
+                    return ref ? {id:n.id, type:'poseEditor', label:n.name || '\u59ff\u52bf\u7f16\u8f91', preview:ref.url, refs:[ref], prompt:''} : null;
+                }
                 if(n.type === 'image' && n.url) {
                     const refUrl = imageNodeReferenceUrl(n);
                     const previewUrl = n.previewUrl || n.url;
@@ -14193,11 +14411,11 @@
         }
         function syncGeneratorInputs(){
             const context = createGeneratorSourceContext();
-            nodes.filter(n => ['generator','storyboardGrid','comfy','rh','msgen','video','dreamina','imageExtend','panorama','flowFrame','scriptPlanner','seedanceDirector'].includes(n.type)).forEach(gen => orderedSources(gen, generatorSources(gen, context)));
+            nodes.filter(n => ['generator','storyboardGrid','comfy','rh','msgen','video','dreamina','imageExtend','panorama','flowFrame','scriptPlanner','seedanceDirector','poseEditor'].includes(n.type)).forEach(gen => orderedSources(gen, generatorSources(gen, context)));
         }
         function refreshGeneratorInputViews(){
             const context = createGeneratorSourceContext();
-            nodes.filter(n => ['generator','storyboardGrid','comfy','rh','msgen','video','dreamina','imageExtend','panorama','flowFrame','scriptPlanner','seedanceDirector'].includes(n.type)).forEach(gen => {
+            nodes.filter(n => ['generator','storyboardGrid','comfy','rh','msgen','video','dreamina','imageExtend','panorama','flowFrame','scriptPlanner','seedanceDirector','poseEditor'].includes(n.type)).forEach(gen => {
                 const el = nodesEl.querySelector(`.node[data-id="${gen.id}"]`);
                 if(!el) return;
                 const sources = orderedSources(gen, generatorSources(gen, context));
@@ -17482,6 +17700,7 @@ ${referenceNote}
             if(!from || !to) return false;
             if(CANVAS_GENERATOR_TYPES.includes(from.type)){
                 if(to.type === 'seedanceDirector' && (CANVAS_IMAGE_OUTPUT_TYPES.includes(from.type) || from.type === 'video')) return !wouldCreateGeneratorCycle(fromId, toId);
+                if(to.type === 'poseEditor' && CANVAS_IMAGE_OUTPUT_TYPES.includes(from.type)) return !wouldCreateGeneratorCycle(fromId, toId);
                 if(to.type === 'scriptPlanner' && (CANVAS_IMAGE_OUTPUT_TYPES.includes(from.type) || from.type === 'video')) return !wouldCreateGeneratorCycle(fromId, toId);
                 if(to.type === 'flowFrame' && (CANVAS_IMAGE_OUTPUT_TYPES.includes(from.type) || from.type === 'video')) return !wouldCreateGeneratorCycle(fromId, toId);
                 if(to.type === 'output') return true;
@@ -17490,6 +17709,7 @@ ${referenceNote}
                 }
                 return false;
             }
+            if(to.type === 'poseEditor') return ['image','group','output'].includes(from.type);
             if(to.type === 'loop'){
                 const allowImage = Boolean(to.imageInput) && ['image','group','output'].includes(from.type);
                 const allowPrompt = Boolean(to.showPrompt) && ['prompt','promptGroup','loop','llm'].includes(from.type);
@@ -17509,7 +17729,7 @@ ${referenceNote}
             if(from.type === 'scriptSegment') return to.type === 'flowFrame';
             if(from.type === 'flowFrame') return (CANVAS_GENERATOR_TYPES.includes(to.type) || to.type === 'llm') && !wouldCreateGeneratorCycle(fromId, toId);
             if(from.type === 'llm') return CANVAS_GENERATOR_TYPES.includes(to.type);
-            return CANVAS_GENERATOR_TYPES.includes(to.type) && ['image','prompt','loop','group','promptGroup','output','llm','flowFrame'].includes(from.type);
+            return CANVAS_GENERATOR_TYPES.includes(to.type) && ['image','poseEditor','prompt','loop','group','promptGroup','output','llm','flowFrame'].includes(from.type);
         }
         function sanitizeConnections(){
             const nodeIds = new Set((nodes || []).map(n => n.id));

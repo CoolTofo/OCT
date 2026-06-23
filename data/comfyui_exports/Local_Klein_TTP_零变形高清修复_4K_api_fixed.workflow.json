@@ -890,7 +890,9 @@
           "label": "MODEL",
           "name": "MODEL",
           "type": "MODEL",
-          "links": null
+          "links": [
+            78
+          ]
         }
       ],
       "properties": {
@@ -910,67 +912,6 @@
       "widgets_values": [
         "Flux2-Klein-9B-True-v2-bf16.safetensors",
         "fp8_e4m3fn"
-      ]
-    },
-    {
-      "id": 53,
-      "type": "Image Comparer (rgthree)",
-      "pos": [
-        8088.80810546875,
-        1928.5057373046875
-      ],
-      "size": [
-        812.5655517578125,
-        924.2518310546875
-      ],
-      "flags": {},
-      "order": 14,
-      "mode": 0,
-      "inputs": [
-        {
-          "dir": 3,
-          "label": "image_a",
-          "name": "image_a",
-          "type": "IMAGE",
-          "link": null
-        },
-        {
-          "dir": 3,
-          "label": "image_b",
-          "name": "image_b",
-          "type": "IMAGE",
-          "link": 74
-        }
-      ],
-      "outputs": [
-        {
-          "dir": 4,
-          "label": "image_urls",
-          "name": "image_urls",
-          "shape": 3,
-          "type": "STRING",
-          "links": null
-        }
-      ],
-      "properties": {
-        "comparer_mode": "Slide",
-        "cnr_id": "rgthree-comfy",
-        "ver": "d5a2f47a583c4166374901d72e2a48ae2221ec44",
-        "widget_ue_connectable": {}
-      },
-      "widgets_values": [
-        [
-          {
-            "name": "A",
-            "selected": true,
-            "url": "/api/view?filename=rgthree.compare._temp_rhpky_00003_.png&type=temp&subfolder=&rand=0.7810894171426332"
-          },
-          {
-            "name": "B",
-            "selected": true,
-            "url": "/api/view?filename=rgthree.compare._temp_rhpky_00004_.png&type=temp&subfolder=&rand=0.738387982459012"
-          }
-        ]
       ]
     },
     {
@@ -1137,7 +1078,6 @@
           "name": "image",
           "type": "IMAGE",
           "links": [
-            70,
             71,
             72,
             73
@@ -1352,7 +1292,7 @@
           "label": "model",
           "name": "model",
           "type": "MODEL",
-          "link": null
+          "link": 92
         },
         {
           "label": "lcs_data",
@@ -1816,7 +1756,7 @@
           "label": "model",
           "name": "model",
           "type": "MODEL",
-          "link": null
+          "link": 78
         },
         {
           "label": "lora_name",
@@ -1842,12 +1782,18 @@
           "label": "MODEL",
           "name": "MODEL",
           "type": "MODEL",
-          "links": null
+          "links": [
+            92
+          ]
         }
       ],
       "properties": {
         "Node name for S&R": "LoraLoaderModelOnly",
-        "widget_ue_connectable": {}
+        "ue_properties": {
+          "version": "7.8",
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {}
+        }
       },
       "widgets_values": [
         "f2k_9B_lcs_consist_20260415.safetensors",
@@ -1880,229 +1826,17 @@
       ],
       "title": "OCTInput_SameModle",
       "properties": {
-        "Node name for S&R": "Float"
+        "Node name for S&R": "Float",
+        "ue_properties": {
+          "widget_ue_connectable": {
+            "value": true
+          },
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
       },
       "widgets_values": [
         0.2
-      ]
-    },
-    {
-      "id": 31,
-      "type": "GetImageSize",
-      "pos": [
-        6570.4103092464675,
-        3405.1650428549406
-      ],
-      "size": [
-        140,
-        130
-      ],
-      "flags": {},
-      "order": 17,
-      "mode": 0,
-      "inputs": [
-        {
-          "label": "image",
-          "name": "image",
-          "type": "IMAGE",
-          "link": 70
-        }
-      ],
-      "outputs": [
-        {
-          "label": "width",
-          "name": "width",
-          "type": "INT",
-          "links": [
-            58
-          ]
-        },
-        {
-          "label": "height",
-          "name": "height",
-          "type": "INT",
-          "links": [
-            57
-          ]
-        },
-        {
-          "label": "batch_size",
-          "name": "batch_size",
-          "type": "INT",
-          "links": null
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "GetImageSize",
-        "cnr_id": "comfy-core",
-        "ver": "0.21.0",
-        "ue_properties": {
-          "widget_ue_connectable": {},
-          "input_ue_unconnectable": {},
-          "version": "7.8"
-        },
-        "widget_ue_connectable": {}
-      },
-      "widgets_values": []
-    },
-    {
-      "id": 46,
-      "type": "MathExpression|pysssss",
-      "pos": [
-        6737.577942711683,
-        3584.1843608276436
-      ],
-      "size": [
-        260,
-        130
-      ],
-      "flags": {
-        "collapsed": true
-      },
-      "order": 21,
-      "mode": 0,
-      "inputs": [
-        {
-          "label": "a",
-          "name": "a",
-          "shape": 7,
-          "type": "INT,FLOAT,IMAGE,LATENT",
-          "link": 57
-        },
-        {
-          "label": "b",
-          "name": "b",
-          "shape": 7,
-          "type": "INT,FLOAT,IMAGE,LATENT",
-          "link": null
-        },
-        {
-          "label": "c",
-          "name": "c",
-          "shape": 7,
-          "type": "INT,FLOAT,IMAGE,LATENT",
-          "link": null
-        },
-        {
-          "label": "expression",
-          "name": "expression",
-          "type": "INT,FLOAT,IMAGE,LATENT",
-          "widget": {
-            "name": "expression"
-          },
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "label": "INT",
-          "name": "INT",
-          "type": "INT",
-          "links": null
-        },
-        {
-          "label": "FLOAT",
-          "name": "FLOAT",
-          "type": "FLOAT",
-          "links": null
-        }
-      ],
-      "title": "纵向分块计算",
-      "properties": {
-        "Node name for S&R": "MathExpression|pysssss",
-        "cnr_id": "comfyui-custom-scripts",
-        "ver": "f2838ed5e59de4d73cde5c98354b87a8d3200190",
-        "ue_properties": {
-          "widget_ue_connectable": {},
-          "input_ue_unconnectable": {},
-          "version": "7.5.2"
-        },
-        "widget_ue_connectable": {
-          "expression": true
-        }
-      },
-      "widgets_values": [
-        "(a+1279)//1280+int(a%1280==0)"
-      ]
-    },
-    {
-      "id": 47,
-      "type": "MathExpression|pysssss",
-      "pos": [
-        6733.550136179846,
-        3515.034870266909
-      ],
-      "size": [
-        260,
-        130
-      ],
-      "flags": {
-        "collapsed": true
-      },
-      "order": 20,
-      "mode": 0,
-      "inputs": [
-        {
-          "label": "a",
-          "name": "a",
-          "shape": 7,
-          "type": "INT,FLOAT,IMAGE,LATENT",
-          "link": 58
-        },
-        {
-          "label": "b",
-          "name": "b",
-          "shape": 7,
-          "type": "INT,FLOAT,IMAGE,LATENT",
-          "link": null
-        },
-        {
-          "label": "c",
-          "name": "c",
-          "shape": 7,
-          "type": "INT,FLOAT,IMAGE,LATENT",
-          "link": null
-        },
-        {
-          "label": "expression",
-          "name": "expression",
-          "type": "INT,FLOAT,IMAGE,LATENT",
-          "widget": {
-            "name": "expression"
-          },
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "label": "INT",
-          "name": "INT",
-          "type": "INT",
-          "links": null
-        },
-        {
-          "label": "FLOAT",
-          "name": "FLOAT",
-          "type": "FLOAT",
-          "links": null
-        }
-      ],
-      "title": "横线分块计算",
-      "properties": {
-        "Node name for S&R": "MathExpression|pysssss",
-        "cnr_id": "comfyui-custom-scripts",
-        "ver": "f2838ed5e59de4d73cde5c98354b87a8d3200190",
-        "ue_properties": {
-          "widget_ue_connectable": {},
-          "input_ue_unconnectable": {},
-          "version": "7.5.2"
-        },
-        "widget_ue_connectable": {
-          "expression": true
-        }
-      },
-      "widgets_values": [
-        "(a+1279)//1280+int(a%1280==0)"
       ]
     },
     {
@@ -2194,6 +1928,42 @@
       ]
     },
     {
+      "id": 72,
+      "type": "SaveImage",
+      "pos": [
+        8741.66980553964,
+        3239.4326192770222
+      ],
+      "size": [
+        270,
+        270
+      ],
+      "flags": {},
+      "order": 37,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 98
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage",
+        "ue_properties": {
+          "widget_ue_connectable": {
+            "filename_prefix": true
+          },
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "ComfyUI"
+      ]
+    },
+    {
       "id": 49,
       "type": "LoadImage",
       "pos": [
@@ -2205,7 +1975,7 @@
         705.8817749023438
       ],
       "flags": {},
-      "order": 8,
+      "order": 9,
       "mode": 0,
       "inputs": [
         {
@@ -2233,8 +2003,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            69,
-            74
+            69
           ]
         },
         {
@@ -2247,101 +2016,18 @@
       "title": "OCT_Load Image",
       "properties": {
         "Node name for S&R": "LoadImage",
-        "widget_ue_connectable": {}
+        "ue_properties": {
+          "version": "7.8",
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {}
+        }
       },
       "widgets_values": [
-        "pasted/image (28).png",
+        "小空空2.jpg",
         "image"
       ],
       "color": "#322",
       "bgcolor": "#533"
-    },
-    {
-      "id": 27,
-      "type": "SaveImage",
-      "pos": [
-        7218.213773048361,
-        1973.0607974286931
-      ],
-      "size": [
-        834.3565673828125,
-        924.8983154296875
-      ],
-      "flags": {},
-      "order": 10,
-      "mode": 0,
-      "inputs": [
-        {
-          "label": "images",
-          "name": "images",
-          "type": "IMAGE",
-          "link": null
-        },
-        {
-          "label": "filename_prefix",
-          "name": "filename_prefix",
-          "type": "STRING",
-          "widget": {
-            "name": "filename_prefix"
-          },
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "label": "image_urls",
-          "name": "image_urls",
-          "type": "STRING",
-          "links": null
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "SaveImage",
-        "cnr_id": "comfy-core",
-        "ver": "0.21.0",
-        "ue_properties": {
-          "widget_ue_connectable": {},
-          "input_ue_unconnectable": {},
-          "version": "7.8"
-        },
-        "widget_ue_connectable": {
-          "filename_prefix": true
-        }
-      },
-      "widgets_values": [
-        "Klein"
-      ],
-      "color": "#232",
-      "bgcolor": "#353"
-    },
-    {
-      "id": 72,
-      "type": "SaveImage",
-      "pos": [
-        8741.66980553964,
-        3239.4326192770222
-      ],
-      "size": [
-        270,
-        270
-      ],
-      "flags": {},
-      "order": 37,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "link": 98
-        }
-      ],
-      "outputs": [],
-      "properties": {
-        "Node name for S&R": "SaveImage"
-      },
-      "widgets_values": [
-        "ComfyUI"
-      ]
     }
   ],
   "links": [
@@ -2522,22 +2208,6 @@
       "IMAGE"
     ],
     [
-      57,
-      31,
-      1,
-      46,
-      0,
-      "INT,FLOAT,IMAGE,LATENT"
-    ],
-    [
-      58,
-      31,
-      0,
-      47,
-      0,
-      "INT,FLOAT,IMAGE,LATENT"
-    ],
-    [
       60,
       21,
       0,
@@ -2602,14 +2272,6 @@
       "IMAGE"
     ],
     [
-      70,
-      54,
-      0,
-      31,
-      0,
-      "IMAGE"
-    ],
-    [
       71,
       54,
       0,
@@ -2634,12 +2296,12 @@
       "IMAGE"
     ],
     [
-      74,
-      49,
+      78,
+      42,
       0,
-      53,
-      1,
-      "IMAGE"
+      57,
+      0,
+      "MODEL"
     ],
     [
       80,
@@ -2648,6 +2310,14 @@
       54,
       9,
       "INT"
+    ],
+    [
+      92,
+      57,
+      0,
+      38,
+      0,
+      "MODEL"
     ],
     [
       93,
@@ -2751,10 +2421,10 @@
     "frontendVersion": "1.43.18",
     "VHS_latentpreview": false,
     "ds": {
-      "scale": 1.3513057093104004,
+      "scale": 0.3914251301220421,
       "offset": [
-        -7869.174821081159,
-        -2901.1016271398253
+        -4666.445214330787,
+        -1408.755739786804
       ]
     }
   },

@@ -10,8 +10,8 @@ from pathlib import Path
 from typing import Any
 
 
-UI_ONLY_TYPES = {"Note", "MarkdownNote", "Fast Groups Bypasser (rgthree)"}
-DEFAULT_MAIN_OUTPUT_ID = "312"
+UI_ONLY_TYPES = {"Note", "MarkdownNote", "Fast Groups Bypasser (rgthree)", "Anything Everywhere"}
+DEFAULT_MAIN_OUTPUT_ID = "auto"
 BODY_RATIO_MAPPER_WIDGET_INPUTS = [
     "enable_rpca",
     "hand_scaling",
@@ -221,6 +221,141 @@ def strip_reroute_nodes(workflow: Workflow) -> dict[str, Any]:
     workflow.data["links"] = workflow.links
     workflow.rebuild_link_refs()
     return {"removed": len(reroute_ids), "rewired": rewired, "unresolved": unresolved}
+
+
+def slot_type_name(value: Any) -> str:
+    return str(value or "").strip().upper()
+
+
+def is_anything_everywhere_node(node: dict[str, Any]) -> bool:
+    return normalize_node_type(node.get("type")) == "anythingeverywhere"
+
+
+def expand_anything_everywhere(workflow: Workflow) -> dict[str, Any]:
+    """Materialize rgthree Anything Everywhere broadcasts into real API links."""
+    broadcaster_ids = {str(node["id"]) for node in workflow.nodes if is_anything_everywhere_node(node)}
+    if not broadcaster_ids:
+        return {"removed": 0, "added_links": [], "sources": []}
+
+    sources_by_type: dict[str, list[list[Any]]] = {}
+    sources: list[dict[str, Any]] = []
+    links = workflow.link_by_id
+    for node in workflow.nodes:
+        if str(node["id"]) not in broadcaster_ids:
+            continue
+        for input_slot in node.get("inputs", []) or []:
+            link = links.get(str(input_slot.get("link")))
+            if not link:
+                continue
+            source_type = slot_type_name(input_slot.get("type") or (link[5] if len(link) > 5 else ""))
+            if not source_type:
+                continue
+            sources_by_type.setdefault(source_type, []).append(link)
+            sources.append(
+                {
+                    "broadcaster_id": str(node["id"]),
+                    "input": input_slot.get("name"),
+                    "type": source_type,
+                    "source": [str(link[1]), link[2]],
+                }
+            )
+
+    added: list[dict[str, Any]] = []
+    next_link = workflow.next_link_id()
+    for node in workflow.nodes:
+        node_id = str(node["id"])
+        if node_id in broadcaster_ids:
+            continue
+        for input_index, input_slot in enumerate(node.get("inputs", []) or []):
+            if input_slot.get("link") is not None or input_slot.get("widget") is not None:
+                continue
+            input_type = slot_type_name(input_slot.get("type"))
+            candidates = sources_by_type.get(input_type) or sources_by_type.get("*") or []
+            if not candidates:
+                continue
+            source = candidates[0]
+            link_type = input_slot.get("type") or (source[5] if len(source) > 5 else input_type)
+            workflow.add_link(next_link, source[1], source[2], node["id"], input_index, link_type)
+            input_slot["link"] = next_link
+            added.append(
+                {
+                    "link_id": str(next_link),
+                    "source": [str(source[1]), source[2]],
+                    "target": [node_id, input_slot.get("name")],
+                    "type": input_type,
+                }
+            )
+            next_link += 1
+
+    workflow.links = [
+        link
+        for link in workflow.links
+        if str(link[1]) not in broadcaster_ids and str(link[3]) not in broadcaster_ids
+    ]
+    workflow.nodes = [node for node in workflow.nodes if str(node["id"]) not in broadcaster_ids]
+    workflow.data["nodes"] = workflow.nodes
+    workflow.data["links"] = workflow.links
+    workflow.data["last_link_id"] = max(int(workflow.data.get("last_link_id", 0)), next_link - 1)
+    workflow.rebuild_link_refs()
+    return {"removed": len(broadcaster_ids), "added_links": added, "sources": sources}
+
+
+def matching_input_link_for_output(workflow: Workflow, node: dict[str, Any], output_slot: dict[str, Any]) -> list[Any] | None:
+    links = workflow.link_by_id
+    output_type = slot_type_name(output_slot.get("type"))
+    fallback = None
+    for input_slot in node.get("inputs", []) or []:
+        link = links.get(str(input_slot.get("link")))
+        if not link:
+            continue
+        if fallback is None:
+            fallback = link
+        input_type = slot_type_name(input_slot.get("type") or (link[5] if len(link) > 5 else ""))
+        if input_type == output_type or input_type == "*" or output_type == "*":
+            return link
+    return fallback
+
+
+def bypass_muted_nodes(workflow: Workflow) -> dict[str, Any]:
+    """Rewire mode=4 frontend-bypassed nodes so API prompts keep the live data path."""
+    bypass_ids = {str(node["id"]) for node in workflow.nodes if node.get("mode", 0) == 4 and node.get("type") not in UI_ONLY_TYPES}
+    if not bypass_ids:
+        return {"rewired": [], "removed_links": 0}
+
+    rewired: list[dict[str, Any]] = []
+    links = workflow.link_by_id
+    for node in workflow.nodes:
+        node_id = str(node["id"])
+        if node_id not in bypass_ids:
+            continue
+        for output_index, output_slot in enumerate(node.get("outputs", []) or []):
+            source_link = matching_input_link_for_output(workflow, node, output_slot)
+            if not source_link:
+                continue
+            for link_id in list(output_slot.get("links") or []):
+                consumer_link = links.get(str(link_id))
+                if not consumer_link:
+                    continue
+                old_source = [consumer_link[1], consumer_link[2]]
+                consumer_link[1] = source_link[1]
+                consumer_link[2] = source_link[2]
+                if not consumer_link[5] and len(source_link) > 5:
+                    consumer_link[5] = source_link[5]
+                rewired.append(
+                    {
+                        "bypassed_node_id": node_id,
+                        "output_index": output_index,
+                        "link_id": str(consumer_link[0]),
+                        "from": old_source,
+                        "to": [consumer_link[1], consumer_link[2]],
+                    }
+                )
+
+    before = len(workflow.links)
+    workflow.links = [link for link in workflow.links if str(link[1]) not in bypass_ids and str(link[3]) not in bypass_ids]
+    workflow.data["links"] = workflow.links
+    workflow.rebuild_link_refs()
+    return {"rewired": rewired, "removed_links": before - len(workflow.links)}
 
 
 def replace_compatible_custom_nodes(workflow: Workflow) -> dict[str, Any]:
@@ -811,6 +946,57 @@ def include_node(node: dict[str, Any]) -> bool:
     return True
 
 
+def normalize_node_type(node_type: Any) -> str:
+    return "".join(ch for ch in str(node_type or "").lower() if ch.isalnum())
+
+
+def is_preview_output_node(node: dict[str, Any]) -> bool:
+    node_type = normalize_node_type(node.get("type"))
+    return node_type == "previewimage" or "preview" in node_type
+
+
+def is_final_output_node(node: dict[str, Any]) -> bool:
+    node_type = normalize_node_type(node.get("type"))
+    return node_type in {
+        "saveimage",
+        "saveimagewithalpha",
+        "saveanimatedwebp",
+        "saveanimatedpng",
+        "savewebpimage",
+    } or (node_type.startswith("save") and "image" in node_type)
+
+
+def output_node_sort_key(node: dict[str, Any]) -> tuple[float, float, int]:
+    pos = node.get("pos")
+    x = float(pos[0]) if isinstance(pos, list) and pos else 0.0
+    y = float(pos[1]) if isinstance(pos, list) and len(pos) > 1 else 0.0
+    try:
+        node_id = int(node.get("id"))
+    except Exception:
+        node_id = 0
+    return (x, y, node_id)
+
+
+def infer_main_output_id(workflow: Workflow) -> str:
+    candidates = [node for node in workflow.nodes if include_node(node) and is_final_output_node(node)]
+    if not candidates:
+        candidates = [node for node in workflow.nodes if include_node(node) and not is_preview_output_node(node) and str(node.get("type") or "").lower().startswith("save")]
+    if not candidates:
+        candidates = [node for node in workflow.nodes if include_node(node) and is_preview_output_node(node)]
+    if not candidates:
+        return ""
+    return str(max(candidates, key=output_node_sort_key).get("id"))
+
+
+def resolve_main_output_id(workflow: Workflow, requested_id: Any) -> str:
+    requested = str(requested_id or "").strip()
+    if requested and requested.lower() != "auto" and requested in workflow.node_by_id:
+        return requested
+    inferred = infer_main_output_id(workflow)
+    return inferred or requested or DEFAULT_MAIN_OUTPUT_ID
+
+
+
 def reachable_nodes(workflow: Workflow, output_id: str) -> set[str]:
     nodes = workflow.node_by_id
     links = workflow.link_by_id
@@ -868,6 +1054,21 @@ def widget_consume_count(node: dict[str, Any], widget_index: int, input_name: st
     return 1
 
 
+
+def apply_output_constant_widget_value(node: dict[str, Any], inputs: dict[str, Any]) -> None:
+    if inputs or node.get("inputs"):
+        return
+    values = node.get("widgets_values", [])
+    if not isinstance(values, list) or not values:
+        return
+    class_type = str(node.get("type") or "")
+    outputs = node.get("outputs") if isinstance(node.get("outputs"), list) else []
+    output_name = str((outputs[0] or {}).get("name") or "value") if outputs else "value"
+    if not class_type.lower().endswith("constant"):
+        return
+    inputs[output_name or "value"] = values[0]
+
+
 def build_api_prompt(workflow_data: dict[str, Any]) -> dict[str, Any]:
     workflow = Workflow(workflow_data)
     links = workflow.link_by_id
@@ -891,6 +1092,8 @@ def build_api_prompt(workflow_data: dict[str, Any]) -> dict[str, Any]:
 
             if input_slot.get("widget") is not None:
                 widget_index += widget_consume_count(node, widget_index, input_slot.get("widget", {}).get("name", input_name))
+
+        apply_output_constant_widget_value(node, inputs)
 
         prompt[str(node["id"])] = {
             "inputs": inputs,
@@ -1143,6 +1346,44 @@ def validate_body_ratio_mapper_prompt(api_prompt: dict[str, Any]) -> dict[str, A
     return {"issues": issues}
 
 
+REQUIRED_LINK_INPUT_TYPES = {"MODEL", "CLIP", "VAE", "LATENT", "CONDITIONING"}
+
+
+def validate_api_prompt_inputs(workflow_data: dict[str, Any], api_prompt: dict[str, Any]) -> dict[str, Any]:
+    issues: list[dict[str, Any]] = []
+    for node in workflow_data.get("nodes", []) or []:
+        node_id = str(node.get("id"))
+        prompt_node = api_prompt.get(node_id) or {}
+        prompt_inputs = prompt_node.get("inputs") if isinstance(prompt_node.get("inputs"), dict) else {}
+        for input_slot in node.get("inputs", []) or []:
+            input_name = input_slot.get("name")
+            if not input_name or input_name in prompt_inputs:
+                continue
+            if input_slot.get("widget") is not None:
+                issues.append(
+                    {
+                        "node_id": node_id,
+                        "class_type": node.get("type"),
+                        "input": input_name,
+                        "type": input_slot.get("type"),
+                        "reason": "widget value was not exported to API prompt",
+                    }
+                )
+                continue
+            input_type = slot_type_name(input_slot.get("type"))
+            if input_type in REQUIRED_LINK_INPUT_TYPES:
+                issues.append(
+                    {
+                        "node_id": node_id,
+                        "class_type": node.get("type"),
+                        "input": input_name,
+                        "type": input_slot.get("type"),
+                        "reason": "required linked input is missing",
+                    }
+                )
+    return {"issues": issues}
+
+
 def validate_workflow(workflow_data: dict[str, Any]) -> dict[str, Any]:
     node_by_id = {str(node["id"]): node for node in workflow_data.get("nodes", [])}
     bad_links = []
@@ -1173,13 +1414,16 @@ def convert(args: argparse.Namespace) -> dict[str, Any]:
     widget_report = normalize_legacy_widgets(workflow)
     compatible_nodes_report = replace_compatible_custom_nodes(workflow)
     reroute_report = strip_reroute_nodes(workflow)
+    anything_report = expand_anything_everywhere(workflow)
+    bypass_report = bypass_muted_nodes(workflow)
     flatten_report = flatten_set_get(workflow)
     frontend_switch_report = convert_oct_posture_bypasser(workflow)
     profile_mapping = apply_motiontransfer_profile(workflow) if args.profile == "motiontransfer" else {"profile": args.profile}
+    main_output_id = resolve_main_output_id(workflow, args.main_output_id)
     if args.output_mode == "all":
         keep_ids = all_executable_nodes(workflow)
     else:
-        keep_ids = reachable_nodes(workflow, str(args.main_output_id))
+        keep_ids = reachable_nodes(workflow, main_output_id)
     pruned = prune_workflow(workflow, keep_ids)
     api_prompt = build_api_prompt(pruned)
     body_ratio_widget_report = apply_body_ratio_mapper_widget_values(pruned, api_prompt)
@@ -1187,13 +1431,16 @@ def convert(args: argparse.Namespace) -> dict[str, Any]:
     if args.api_input:
         overlay_report = overlay_api_values(read_json(args.api_input), api_prompt)
     body_ratio_report = repair_body_ratio_mapper_prompt(api_prompt)
+    api_prompt_input_validation = validate_api_prompt_inputs(pruned, api_prompt)
+    if api_prompt_input_validation["issues"]:
+        raise ValueError(f"Converted API workflow is missing required inputs: {api_prompt_input_validation['issues']}")
     body_ratio_validation = validate_body_ratio_mapper_prompt(api_prompt)
     if body_ratio_validation["issues"]:
         raise ValueError(f"BodyRatioMapper API prompt validation failed: {body_ratio_validation['issues']}")
 
     mapping = {
         **profile_mapping,
-        "main_output_node_id": str(args.main_output_id),
+        "main_output_node_id": main_output_id,
         "output_mode": args.output_mode,
         "workflow_output": str(args.workflow_output),
         "api_output": str(args.api_output),
@@ -1201,11 +1448,14 @@ def convert(args: argparse.Namespace) -> dict[str, Any]:
         "normalize_legacy_widgets": widget_report,
         "compatible_custom_nodes": compatible_nodes_report,
         "strip_reroute_nodes": reroute_report,
+        "anything_everywhere": anything_report,
+        "bypassed_nodes": bypass_report,
         "flatten_set_get": flatten_report,
         "frontend_switches": frontend_switch_report,
         "body_ratio_mapper_widget_values": body_ratio_widget_report,
         "api_value_overlay": overlay_report,
         "body_ratio_mapper_api_repair": body_ratio_report,
+        "api_prompt_input_validation": api_prompt_input_validation,
         "body_ratio_mapper_api_validation": body_ratio_validation,
         "validation": validate_workflow(pruned),
     }
@@ -1223,7 +1473,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--workflow-output", type=Path, required=True, help="Output API-friendly workflow JSON.")
     parser.add_argument("--api-output", type=Path, required=True, help="Output API prompt JSON.")
     parser.add_argument("--mapping-output", type=Path, required=True, help="Output parameter mapping report JSON.")
-    parser.add_argument("--main-output-id", default=DEFAULT_MAIN_OUTPUT_ID, help="Main output node id to keep.")
+    parser.add_argument("--main-output-id", default=DEFAULT_MAIN_OUTPUT_ID, help="Main output node id to keep, or auto to infer the final SaveImage output.")
     parser.add_argument(
         "--output-mode",
         default="main",

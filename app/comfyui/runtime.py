@@ -107,6 +107,56 @@ def comfy_is_final_image_output_class(class_name: str) -> bool:
     } or (class_name.startswith("save") and "image" in class_name)
 
 
+def is_comfy_link(value: Any) -> bool:
+    return isinstance(value, list) and len(value) == 2 and isinstance(value[0], (str, int)) and str(value[0]).isdigit()
+
+
+def comfy_node_output_has_media(node_output: Dict[str, Any]) -> bool:
+    if not isinstance(node_output, dict):
+        return False
+    if node_output.get("images"):
+        return True
+    return any(node_output.get(key) for key in ("videos", "gifs", "animated"))
+
+def comfy_node_has_linked_media_input(node: Dict[str, Any]) -> bool:
+    inputs = node.get("inputs") if isinstance(node.get("inputs"), dict) else {}
+    if not inputs:
+        return False
+    media_input_names = {"image", "images", "video", "videos", "audio", "audios", "frames", "gif", "gifs", "animated"}
+    for input_name, value in inputs.items():
+        key = normalize_comfy_class_name(input_name)
+        if key not in media_input_names:
+            continue
+        if is_comfy_link(value):
+            return True
+    return False
+
+
+def workflow_final_output_node_ids(workflow: Dict[str, Any]) -> list[str]:
+    if not isinstance(workflow, dict):
+        return []
+    result = []
+    for node_id, node in workflow.items():
+        if not isinstance(node, dict):
+            continue
+        class_name = normalize_comfy_class_name(node.get("class_type") or "")
+        if comfy_is_final_image_output_class(class_name) and comfy_node_has_linked_media_input(node):
+            result.append(str(node_id))
+    return result
+
+
+def missing_declared_final_outputs(history_data: Dict[str, Any], workflow: Dict[str, Any]) -> list[str]:
+    outputs = (history_data or {}).get("outputs") or {}
+    if not isinstance(outputs, dict):
+        return []
+    missing = []
+    for node_id in workflow_final_output_node_ids(workflow):
+        node_output = outputs.get(node_id) or outputs.get(int(node_id)) or {}
+        if not comfy_node_output_has_media(node_output):
+            missing.append(node_id)
+    return missing
+
+
 def preferred_history_output_node_ids(history_data: Dict[str, Any], workflow: Dict[str, Any]) -> list[str]:
     outputs = (history_data or {}).get("outputs") or {}
     if not isinstance(outputs, dict):
@@ -116,6 +166,7 @@ def preferred_history_output_node_ids(history_data: Dict[str, Any], workflow: Di
     if not node_ids:
         return []
 
+    declared_final_image_node_ids = set(workflow_final_output_node_ids(workflow))
     image_node_ids = []
     final_image_node_ids = []
     preview_image_node_ids = []
@@ -129,7 +180,7 @@ def preferred_history_output_node_ids(history_data: Dict[str, Any], workflow: Di
         class_name = comfy_output_node_class(workflow, node_id)
         if has_images:
             image_node_ids.append(node_id)
-            if comfy_is_final_image_output_class(class_name):
+            if node_id in declared_final_image_node_ids:
                 final_image_node_ids.append(node_id)
             elif comfy_is_preview_output_class(class_name):
                 preview_image_node_ids.append(node_id)
