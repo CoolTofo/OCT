@@ -72,7 +72,13 @@ GPT_IMAGE2_MAX_PIXELS = 8_294_400
 GPT_IMAGE2_MIN_PIXELS = 655_360
 
 def is_gpt_image_2_model(model):
-    return str(model or "").strip().lower() == "gpt-image-2"
+    value = str(model or "").strip().lower()
+    compact = re.sub(r"[\s_-]+", "", value)
+    return (
+        value == "gpt-image-2"
+        or compact.startswith("gptimage2")
+        or compact.startswith("gptimages2")
+    )
 
 def is_t8api_provider(provider):
     provider = provider or {}

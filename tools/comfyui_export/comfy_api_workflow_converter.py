@@ -6,11 +6,19 @@ from __future__ import annotations
 import argparse
 import copy
 import json
+import re
 from pathlib import Path
 from typing import Any
 
 
-UI_ONLY_TYPES = {"Note", "MarkdownNote", "Fast Groups Bypasser (rgthree)", "Anything Everywhere"}
+UI_ONLY_TYPES = {
+    "Note",
+    "MarkdownNote",
+    "Fast Groups Bypasser (rgthree)",
+    "Fast Groups Muter (rgthree)",
+    "Anything Everywhere",
+}
+RGTHREE_GROUP_CONTROL_TYPES = {"Fast Groups Bypasser (rgthree)", "Fast Groups Muter (rgthree)"}
 DEFAULT_MAIN_OUTPUT_ID = "auto"
 BODY_RATIO_MAPPER_WIDGET_INPUTS = [
     "enable_rpca",
@@ -739,10 +747,180 @@ def describe1_group_switch_name(group_title: str) -> str:
     return "enable_describe1"
 
 
-def convert_oct_posture_bypasser(workflow: Workflow) -> dict[str, Any]:
-    """Convert OCTInput rgthree group bypasser into lazy API switches."""
+def switch_key_from_group_title(group_title: str) -> str:
+    cleaned = str(group_title or "").strip()
+    cleaned = re.sub(r"^OCT[_\s-]*", "", cleaned, flags=re.I)
+    key = re.sub(r"\s+", "_", cleaned).strip("_")
+    return f"enable_oct_{key or 'group'}"
+
+
+def linked_source_for_input(workflow: Workflow, node: dict[str, Any], input_name: str) -> tuple[int, list[Any]] | None:
+    input_index = find_input_index(node, input_name)
+    if input_index is None:
+        return None
+    input_slot = (node.get("inputs") or [])[input_index]
+    link = workflow.link_by_id.get(str(input_slot.get("link")))
+    if not link:
+        return None
+    return input_index, [link[1], link[2], link[5]]
+
+
+def add_lazy_switch_for_sources(
+    workflow: Workflow,
+    bool_node_id: int | str,
+    false_source: list[Any],
+    true_source: list[Any],
+    title: str,
+    pos: list[float] | None = None,
+) -> dict[str, Any]:
+    switch_id = workflow.next_node_id()
+    next_link = workflow.next_link_id()
+    switch_node = make_lazy_switch(switch_id, title, pos)
+    workflow.nodes.append(switch_node)
+    workflow.data["nodes"] = workflow.nodes
+    workflow.add_link(next_link, bool_node_id, 0, switch_id, 0, "BOOLEAN")
+    next_link += 1
+    workflow.add_link(next_link, false_source[0], false_source[1], switch_id, 1, false_source[2])
+    next_link += 1
+    workflow.add_link(next_link, true_source[0], true_source[1], switch_id, 2, true_source[2])
+    workflow.data["last_node_id"] = max(int(workflow.data.get("last_node_id", 0)), switch_id)
+    workflow.data["last_link_id"] = max(int(workflow.data.get("last_link_id", 0)), next_link)
+    workflow.rebuild_link_refs()
+    return {
+        "switch_node_id": str(switch_id),
+        "source": [switch_id, 0, true_source[2] or false_source[2] or "*"],
+    }
+
+
+def rewire_input_to_source(workflow: Workflow, node: dict[str, Any], input_index: int, source: list[Any]) -> None:
+    input_slot = (node.get("inputs") or [])[input_index]
+    old_link_id = input_slot.get("link")
+    if old_link_id is not None:
+        workflow.remove_links({str(old_link_id)})
+    next_link = workflow.next_link_id()
+    workflow.add_link(next_link, source[0], source[1], node["id"], input_index, source[2])
+    workflow.data["last_link_id"] = max(int(workflow.data.get("last_link_id", 0)), next_link)
+    workflow.rebuild_link_refs()
+
+
+def convert_oct_group_bypasser(workflow: Workflow) -> dict[str, Any]:
+    """Convert rgthree OCT group bypassers into API-visible branch switches."""
     converted: list[dict[str, Any]] = []
     skipped: list[dict[str, Any]] = []
+    main_output_node_id: str | None = None
+    groups = workflow.data.get("groups", []) or []
+
+    for bypasser in list(workflow.nodes):
+        control_type = str(bypasser.get("type") or "")
+        if control_type not in RGTHREE_GROUP_CONTROL_TYPES:
+            continue
+        match_title = (bypasser.get("properties") or {}).get("matchTitle") or ""
+        title = str(bypasser.get("title") or "")
+        is_oct_muter = control_type == "Fast Groups Muter (rgthree)" and title.startswith("OCT")
+        if match_title != "OCT" and not is_oct_muter:
+            continue
+
+        matched_groups = [
+            group for group in groups
+            if str(group.get("title") or "").startswith("OCT")
+        ]
+        if not matched_groups:
+            skipped.append({"node_id": str(bypasser.get("id")), "reason": "no OCT groups found"})
+            continue
+
+        branches: list[dict[str, Any]] = []
+        for index, group in enumerate(matched_groups):
+            group_title = str(group.get("title") or f"OCT_Group_{index + 1}")
+            current_group_nodes = nodes_in_group(workflow, group)
+            save_nodes = [node for node in current_group_nodes if is_final_output_node(node)]
+            if not save_nodes:
+                skipped.append({"group": group_title, "reason": "no final SaveImage node in group"})
+                continue
+            save_node = max(save_nodes, key=output_node_sort_key)
+            source_info = linked_source_for_input(workflow, save_node, "images") or linked_source_for_input(workflow, save_node, "image")
+            if not source_info:
+                skipped.append({"group": group_title, "save_node_id": str(save_node.get("id")), "reason": "SaveImage has no linked image input"})
+                continue
+
+            default = any(node.get("mode", 0) != 4 and node.get("type") not in UI_ONLY_TYPES for node in current_group_nodes)
+            bool_id = workflow.next_node_id()
+            switch_name = switch_key_from_group_title(group_title)
+            bool_node = make_primitive_boolean(
+                bool_id,
+                f"Input_{switch_name}",
+                default,
+                [bypasser.get("pos", [0, 0])[0], bypasser.get("pos", [0, 0])[1] + 150 + index * 80],
+            )
+            workflow.nodes.append(bool_node)
+            workflow.data["nodes"] = workflow.nodes
+            workflow.data["last_node_id"] = max(int(workflow.data.get("last_node_id", 0)), bool_id)
+            workflow.rebuild_link_refs()
+
+            for node in current_group_nodes:
+                if node.get("type") not in UI_ONLY_TYPES:
+                    node["mode"] = 0
+
+            branches.append({
+                "group": group_title,
+                "name": switch_name,
+                "enabled_node_id": str(bool_id),
+                "enabled_input": "value",
+                "default": default,
+                "save_node_id": str(save_node.get("id")),
+                "save_node": save_node,
+                "save_input_index": source_info[0],
+                "source": source_info[1],
+            })
+
+        if not branches:
+            skipped.append({"node_id": str(bypasser.get("id")), "reason": "no runnable OCT group branches"})
+            continue
+
+        main_branch = next((branch for branch in branches if branch.get("default")), branches[0])
+        main_save_node = main_branch["save_node"]
+        selected_source = main_branch["source"]
+        switch_reports: list[dict[str, Any]] = []
+        for branch in reversed(branches):
+            report = add_lazy_switch_for_sources(
+                workflow,
+                branch["enabled_node_id"],
+                selected_source,
+                branch["source"],
+                f"API_{branch['name']}_select_output",
+                [main_save_node.get("pos", [0, 0])[0] - 320, main_save_node.get("pos", [0, 0])[1] + len(switch_reports) * 100],
+            )
+            report.update({"name": branch["name"], "group": branch["group"], "enabled_node_id": branch["enabled_node_id"]})
+            switch_reports.append(report)
+            selected_source = report["source"]
+
+        rewire_input_to_source(workflow, main_save_node, main_branch["save_input_index"], selected_source)
+        main_save_node["mode"] = 0
+        for branch in branches:
+            if branch["save_node"] is not main_save_node:
+                branch["save_node"]["mode"] = 4
+
+        main_output_node_id = str(main_save_node.get("id"))
+        converted.append({
+            "frontend_node_id": str(bypasser.get("id")),
+            "frontend_title": bypasser.get("title") or "",
+            "match_title": match_title,
+            "main_output_node_id": main_output_node_id,
+            "switches": [
+                {k: branch[k] for k in ("name", "enabled_node_id", "enabled_input", "default", "group", "save_node_id")}
+                for branch in branches
+            ],
+            "output_switches": switch_reports,
+        })
+
+    return {"converted": converted, "skipped": skipped, "main_output_node_id": main_output_node_id}
+
+
+def convert_oct_posture_bypasser(workflow: Workflow) -> dict[str, Any]:
+    """Convert OCTInput rgthree group bypasser into lazy API switches."""
+    generic_report = convert_oct_group_bypasser(workflow)
+    converted: list[dict[str, Any]] = list(generic_report.get("converted") or [])
+    skipped: list[dict[str, Any]] = list(generic_report.get("skipped") or [])
+    main_output_node_id = generic_report.get("main_output_node_id")
     groups = workflow.data.get("groups", []) or []
 
     for bypasser in list(workflow.nodes):
@@ -899,7 +1077,7 @@ def convert_oct_posture_bypasser(workflow: Workflow) -> dict[str, Any]:
             }
         )
 
-    return {"converted": converted, "skipped": skipped}
+    return {"converted": converted, "skipped": skipped, "main_output_node_id": main_output_node_id}
 
 
 def apply_motiontransfer_profile(workflow: Workflow) -> dict[str, Any]:
@@ -1349,6 +1527,16 @@ def validate_body_ratio_mapper_prompt(api_prompt: dict[str, Any]) -> dict[str, A
 REQUIRED_LINK_INPUT_TYPES = {"MODEL", "CLIP", "VAE", "LATENT", "CONDITIONING"}
 
 
+def is_optional_input_slot(input_slot: dict[str, Any]) -> bool:
+    if input_slot.get("shape") == 7:
+        return True
+    labels = [
+        str(input_slot.get("name") or ""),
+        str(input_slot.get("localized_name") or ""),
+    ]
+    return any("optional" in label.lower() or "可选" in label or "可空" in label for label in labels)
+
+
 def validate_api_prompt_inputs(workflow_data: dict[str, Any], api_prompt: dict[str, Any]) -> dict[str, Any]:
     issues: list[dict[str, Any]] = []
     for node in workflow_data.get("nodes", []) or []:
@@ -1369,6 +1557,8 @@ def validate_api_prompt_inputs(workflow_data: dict[str, Any], api_prompt: dict[s
                         "reason": "widget value was not exported to API prompt",
                     }
                 )
+                continue
+            if is_optional_input_slot(input_slot):
                 continue
             input_type = slot_type_name(input_slot.get("type"))
             if input_type in REQUIRED_LINK_INPUT_TYPES:
@@ -1415,11 +1605,14 @@ def convert(args: argparse.Namespace) -> dict[str, Any]:
     compatible_nodes_report = replace_compatible_custom_nodes(workflow)
     reroute_report = strip_reroute_nodes(workflow)
     anything_report = expand_anything_everywhere(workflow)
+    frontend_switch_report = convert_oct_posture_bypasser(workflow)
     bypass_report = bypass_muted_nodes(workflow)
     flatten_report = flatten_set_get(workflow)
-    frontend_switch_report = convert_oct_posture_bypasser(workflow)
     profile_mapping = apply_motiontransfer_profile(workflow) if args.profile == "motiontransfer" else {"profile": args.profile}
-    main_output_id = resolve_main_output_id(workflow, args.main_output_id)
+    requested_main_output_id = args.main_output_id
+    if str(requested_main_output_id or "").strip().lower() == "auto" and frontend_switch_report.get("main_output_node_id"):
+        requested_main_output_id = frontend_switch_report.get("main_output_node_id")
+    main_output_id = resolve_main_output_id(workflow, requested_main_output_id)
     if args.output_mode == "all":
         keep_ids = all_executable_nodes(workflow)
     else:

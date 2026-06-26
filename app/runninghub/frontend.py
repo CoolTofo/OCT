@@ -20,6 +20,7 @@ UI_ONLY_FRONTEND_NODE_TYPES = {
     "GetNode",
     "SetNode",
     "Fast Groups Bypasser (rgthree)",
+    "Fast Groups Muter (rgthree)",
 }
 
 
@@ -184,7 +185,7 @@ def groups(workflow: Any) -> List[Dict[str, Any]]:
 def rgthree_group_bypasser_default(workflow: Any, node: Dict[str, Any]) -> Optional[str]:
     current_type = node_type(node).lower()
     title = node_title(node).lower()
-    if "fast groups bypasser" not in current_type and "groups bypasser" not in current_type:
+    if not any(token in current_type for token in ("fast groups bypasser", "groups bypasser", "fast groups muter", "groups muter")):
         return None
     if not (io_has_opt_connection(node.get("outputs")) or "switch" in title):
         return None

@@ -654,14 +654,14 @@
             document.getElementById('exportApiInputFile').value = '';
             if(!file) return;
             try {
-                exportApiInputJson = JSON.parse(await file.text());
-                exportApiInputName = file.name;
-                if(exportApiInputJson?.nodes){
-                    exportApiInputJson = null;
-                    exportApiInputName = '';
-                    alert('这里请选择 ComfyUI 原生 Export(API) JSON，不是完整画布 workflow JSON。');
+                const data = JSON.parse(await file.text());
+                const apiPrompt = normalizeNativeApiPromptJson(data);
+                if(!apiPrompt){
+                    alertNativeApiJsonError(data);
                     return;
                 }
+                exportApiInputJson = apiPrompt;
+                exportApiInputName = file.name;
                 onExportWorkflowSelected(false);
                 setStatus(`已读取 Export(API)：${file.name}`);
             } catch(e){
@@ -757,6 +757,23 @@
         function isFullWorkflowJson(data){
             return Array.isArray(data?.nodes);
         }
+        function isNativeApiPromptJson(data){
+            if(!data || typeof data !== 'object' || Array.isArray(data) || data.nodes) return false;
+            const first = Object.values(data)[0];
+            return !!(first && typeof first === 'object' && !Array.isArray(first) && first.class_type && first.inputs && typeof first.inputs === 'object');
+        }
+        function normalizeNativeApiPromptJson(data){
+            if(isNativeApiPromptJson(data)) return data;
+            if(data && typeof data === 'object' && isNativeApiPromptJson(data.prompt)) return data.prompt;
+            return null;
+        }
+        function alertNativeApiJsonError(data){
+            if(isFullWorkflowJson(data)){
+                alert('这里请选择 ComfyUI 原生 Export(API) JSON，不是完整画布 workflow JSON。完整 workflow 请放在上方，或清空这个可选项继续转换。');
+            } else {
+                alert('这个文件不是 ComfyUI 原生 Export(API) JSON。请在 ComfyUI 使用 Export(API) 导出，或清空这个可选项继续转换。');
+            }
+        }
         function renderWorkflowUploadFullOptions(meta={}){
             if(!els.workflowUploadFullSelect) return;
             const current = els.workflowUploadFullSelect.value;
@@ -828,11 +845,12 @@
             if(!file) return;
             try {
                 const data = JSON.parse(await file.text());
-                if(isFullWorkflowJson(data)){
-                    alert('这个文件是完整画布 workflow。请切换到“完整 workflow 转换”后再选择。');
+                const apiPrompt = normalizeNativeApiPromptJson(data);
+                if(!apiPrompt){
+                    alertNativeApiJsonError(data);
                     return;
                 }
-                workflowUploadApiJson = data;
+                workflowUploadApiJson = apiPrompt;
                 workflowUploadApiName = file.name;
                 els.workflowUploadApiFileName.textContent = file.name;
                 if(els.workflowUploadName && !els.workflowUploadName.value.trim()){
@@ -878,11 +896,12 @@
             if(!file) return;
             try {
                 const data = JSON.parse(await file.text());
-                if(isFullWorkflowJson(data)){
-                    alert('这里请选择 ComfyUI 原生 Export(API) JSON，不是完整画布 workflow JSON。');
+                const apiPrompt = normalizeNativeApiPromptJson(data);
+                if(!apiPrompt){
+                    alertNativeApiJsonError(data);
                     return;
                 }
-                workflowUploadNativeApiJson = data;
+                workflowUploadNativeApiJson = apiPrompt;
                 workflowUploadNativeApiName = file.name;
                 els.workflowUploadNativeApiFileName.textContent = file.name;
                 updateWorkflowUploadSummary();

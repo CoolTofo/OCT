@@ -1,0 +1,222 @@
+{
+  "profile": "generic",
+  "main_output_node_id": "9",
+  "output_mode": "all",
+  "workflow_output": ".tmp\\flux2_test_workflow.json",
+  "api_output": ".tmp\\flux2_test_api.json",
+  "api_input": null,
+  "normalize_legacy_widgets": {
+    "changes": []
+  },
+  "compatible_custom_nodes": {
+    "converted": []
+  },
+  "strip_reroute_nodes": {
+    "removed": 0,
+    "rewired": [],
+    "unresolved": []
+  },
+  "anything_everywhere": {
+    "removed": 0,
+    "added_links": [],
+    "sources": []
+  },
+  "bypassed_nodes": {
+    "rewired": [],
+    "removed_links": 7
+  },
+  "flatten_set_get": {
+    "converted": [],
+    "skipped": []
+  },
+  "frontend_switches": {
+    "converted": [
+      {
+        "frontend_node_id": "404",
+        "frontend_title": "OCTFast Groups Muter (rgthree)",
+        "match_title": "",
+        "main_output_node_id": "9",
+        "switches": [
+          {
+            "name": "enable_oct_图反推文生图(断开反推节点为纯文生图)",
+            "enabled_node_id": "405",
+            "enabled_input": "value",
+            "default": true,
+            "group": "OCT图反推文生图(断开反推节点为纯文生图)",
+            "save_node_id": "9"
+          },
+          {
+            "name": "enable_oct_单图编辑",
+            "enabled_node_id": "406",
+            "enabled_input": "value",
+            "default": true,
+            "group": "OCT_单图编辑",
+            "save_node_id": "153"
+          },
+          {
+            "name": "enable_oct_双图编辑",
+            "enabled_node_id": "407",
+            "enabled_input": "value",
+            "default": true,
+            "group": "OCT双图编辑",
+            "save_node_id": "198"
+          },
+          {
+            "name": "enable_oct_局部重绘",
+            "enabled_node_id": "408",
+            "enabled_input": "value",
+            "default": true,
+            "group": "OCT局部重绘",
+            "save_node_id": "368"
+          },
+          {
+            "name": "enable_oct_图像扩展",
+            "enabled_node_id": "409",
+            "enabled_input": "value",
+            "default": true,
+            "group": "OCT图像扩展",
+            "save_node_id": "369"
+          },
+          {
+            "name": "enable_oct_SeedVR2高清放大",
+            "enabled_node_id": "410",
+            "enabled_input": "value",
+            "default": true,
+            "group": "OCT_SeedVR2高清放大",
+            "save_node_id": "370"
+          },
+          {
+            "name": "enable_oct_三图编辑",
+            "enabled_node_id": "411",
+            "enabled_input": "value",
+            "default": true,
+            "group": "OCT三图编辑",
+            "save_node_id": "341"
+          },
+          {
+            "name": "enable_oct_图像输入_+_Multiangle_Camera",
+            "enabled_node_id": "412",
+            "enabled_input": "value",
+            "default": true,
+            "group": "OCT图像输入 + Multiangle Camera",
+            "save_node_id": "384"
+          }
+        ],
+        "output_switches": [
+          {
+            "switch_node_id": "413",
+            "source": [
+              413,
+              0,
+              "IMAGE"
+            ],
+            "name": "enable_oct_图像输入_+_Multiangle_Camera",
+            "group": "OCT图像输入 + Multiangle Camera",
+            "enabled_node_id": "412"
+          },
+          {
+            "switch_node_id": "414",
+            "source": [
+              414,
+              0,
+              "IMAGE"
+            ],
+            "name": "enable_oct_三图编辑",
+            "group": "OCT三图编辑",
+            "enabled_node_id": "411"
+          },
+          {
+            "switch_node_id": "415",
+            "source": [
+              415,
+              0,
+              "IMAGE"
+            ],
+            "name": "enable_oct_SeedVR2高清放大",
+            "group": "OCT_SeedVR2高清放大",
+            "enabled_node_id": "410"
+          },
+          {
+            "switch_node_id": "416",
+            "source": [
+              416,
+              0,
+              "IMAGE"
+            ],
+            "name": "enable_oct_图像扩展",
+            "group": "OCT图像扩展",
+            "enabled_node_id": "409"
+          },
+          {
+            "switch_node_id": "417",
+            "source": [
+              417,
+              0,
+              "IMAGE"
+            ],
+            "name": "enable_oct_局部重绘",
+            "group": "OCT局部重绘",
+            "enabled_node_id": "408"
+          },
+          {
+            "switch_node_id": "418",
+            "source": [
+              418,
+              0,
+              "IMAGE"
+            ],
+            "name": "enable_oct_双图编辑",
+            "group": "OCT双图编辑",
+            "enabled_node_id": "407"
+          },
+          {
+            "switch_node_id": "419",
+            "source": [
+              419,
+              0,
+              "IMAGE"
+            ],
+            "name": "enable_oct_单图编辑",
+            "group": "OCT_单图编辑",
+            "enabled_node_id": "406"
+          },
+          {
+            "switch_node_id": "420",
+            "source": [
+              420,
+              0,
+              "IMAGE"
+            ],
+            "name": "enable_oct_图反推文生图(断开反推节点为纯文生图)",
+            "group": "OCT图反推文生图(断开反推节点为纯文生图)",
+            "enabled_node_id": "405"
+          }
+        ]
+      }
+    ],
+    "skipped": [],
+    "main_output_node_id": "9"
+  },
+  "body_ratio_mapper_widget_values": {
+    "changes": []
+  },
+  "api_value_overlay": {
+    "updated": [],
+    "skipped": []
+  },
+  "body_ratio_mapper_api_repair": {
+    "changes": []
+  },
+  "api_prompt_input_validation": {
+    "issues": []
+  },
+  "body_ratio_mapper_api_validation": {
+    "issues": []
+  },
+  "validation": {
+    "nodes": 178,
+    "links": 245,
+    "bad_links": 0,
+    "residual_ui_nodes": []
+  }
+}

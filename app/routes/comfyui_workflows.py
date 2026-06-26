@@ -102,10 +102,15 @@ def create_router(generate_callable) -> APIRouter:
 
             api_input_path = None
             if payload.api_input is not None:
-                if not comfy_workflows.is_api_prompt_workflow(payload.api_input):
-                    raise HTTPException(status_code=400, detail="api_input must be a native ComfyUI Export(API) JSON")
+                normalized_api_input = comfy_workflows.normalize_api_prompt_workflow(payload.api_input)
+                if normalized_api_input is None:
+                    if comfy_workflows.is_full_comfy_workflow(payload.api_input):
+                        detail = "可选的 Export(API) JSON 选成了完整 ComfyUI workflow。请把完整 workflow 放在上方，或清空这个可选项。"
+                    else:
+                        detail = "可选的 Export(API) JSON 不是原生 ComfyUI API prompt。请在 ComfyUI 使用 Export(API) 导出，或清空这个可选项继续转换。"
+                    raise HTTPException(status_code=400, detail=detail)
                 api_input_path = os.path.join(comfy_workflows.COMFY_EXPORT_REPORT_DIR, f"_api_input_{uuid.uuid4().hex}.json")
-                comfy_workflows.write_json_file(api_input_path, payload.api_input)
+                comfy_workflows.write_json_file(api_input_path, normalized_api_input)
                 temp_paths.append(api_input_path)
 
             args = SimpleNamespace(

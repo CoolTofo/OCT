@@ -1,0 +1,359 @@
+{
+  "profile": "generic",
+  "main_output_node_id": "379",
+  "output_mode": "main",
+  "workflow_output": "data\\comfyui_exports\\图像编辑端合集_api_fixed.workflow.json",
+  "api_output": "workflows\\custom\\图像编辑端合集_api_fixed.json",
+  "api_input": null,
+  "normalize_legacy_widgets": {
+    "changes": []
+  },
+  "compatible_custom_nodes": {
+    "converted": []
+  },
+  "strip_reroute_nodes": {
+    "removed": 18,
+    "rewired": [
+      {
+        "link_id": "646",
+        "from": [
+          363,
+          0
+        ],
+        "to": [
+          352,
+          0
+        ]
+      },
+      {
+        "link_id": "647",
+        "from": [
+          363,
+          0
+        ],
+        "to": [
+          352,
+          0
+        ]
+      },
+      {
+        "link_id": "648",
+        "from": [
+          364,
+          0
+        ],
+        "to": [
+          352,
+          0
+        ]
+      },
+      {
+        "link_id": "650",
+        "from": [
+          365,
+          0
+        ],
+        "to": [
+          213,
+          0
+        ]
+      },
+      {
+        "link_id": "652",
+        "from": [
+          366,
+          0
+        ],
+        "to": [
+          362,
+          0
+        ]
+      },
+      {
+        "link_id": "654",
+        "from": [
+          367,
+          0
+        ],
+        "to": [
+          352,
+          3
+        ]
+      },
+      {
+        "link_id": "656",
+        "from": [
+          368,
+          0
+        ],
+        "to": [
+          352,
+          4
+        ]
+      },
+      {
+        "link_id": "658",
+        "from": [
+          369,
+          0
+        ],
+        "to": [
+          229,
+          0
+        ]
+      },
+      {
+        "link_id": "679",
+        "from": [
+          382,
+          0
+        ],
+        "to": [
+          381,
+          0
+        ]
+      },
+      {
+        "link_id": "680",
+        "from": [
+          382,
+          0
+        ],
+        "to": [
+          381,
+          0
+        ]
+      },
+      {
+        "link_id": "681",
+        "from": [
+          383,
+          0
+        ],
+        "to": [
+          381,
+          0
+        ]
+      },
+      {
+        "link_id": "683",
+        "from": [
+          384,
+          0
+        ],
+        "to": [
+          371,
+          0
+        ]
+      },
+      {
+        "link_id": "878",
+        "from": [
+          511,
+          0
+        ],
+        "to": [
+          525,
+          0
+        ]
+      },
+      {
+        "link_id": "879",
+        "from": [
+          519,
+          0
+        ],
+        "to": [
+          524,
+          0
+        ]
+      },
+      {
+        "link_id": "882",
+        "from": [
+          517,
+          0
+        ],
+        "to": [
+          525,
+          0
+        ]
+      },
+      {
+        "link_id": "891",
+        "from": [
+          512,
+          0
+        ],
+        "to": [
+          530,
+          0
+        ]
+      },
+      {
+        "link_id": "902",
+        "from": [
+          517,
+          0
+        ],
+        "to": [
+          525,
+          0
+        ]
+      },
+      {
+        "link_id": "903",
+        "from": [
+          518,
+          0
+        ],
+        "to": [
+          515,
+          0
+        ]
+      },
+      {
+        "link_id": "904",
+        "from": [
+          513,
+          0
+        ],
+        "to": [
+          525,
+          3
+        ]
+      },
+      {
+        "link_id": "905",
+        "from": [
+          514,
+          0
+        ],
+        "to": [
+          525,
+          4
+        ]
+      },
+      {
+        "link_id": "930",
+        "from": [
+          546,
+          0
+        ],
+        "to": [
+          545,
+          0
+        ]
+      }
+    ],
+    "unresolved": []
+  },
+  "anything_everywhere": {
+    "removed": 0,
+    "added_links": [],
+    "sources": []
+  },
+  "bypassed_nodes": {
+    "rewired": [],
+    "removed_links": 2
+  },
+  "flatten_set_get": {
+    "converted": [],
+    "skipped": []
+  },
+  "frontend_switches": {
+    "converted": [
+      {
+        "frontend_node_id": "557",
+        "frontend_title": "OCT_开关",
+        "match_title": "OCT",
+        "main_output_node_id": "379",
+        "switches": [
+          {
+            "name": "enable_oct_姿势迁移编辑1",
+            "enabled_node_id": "560",
+            "enabled_input": "value",
+            "default": false,
+            "group": "OCT_姿势迁移编辑1",
+            "save_node_id": "354"
+          },
+          {
+            "name": "enable_oct_单图编辑1",
+            "enabled_node_id": "561",
+            "enabled_input": "value",
+            "default": true,
+            "group": "OCT_单图编辑1",
+            "save_node_id": "379"
+          },
+          {
+            "name": "enable_oct_角色替换（不是百分百成功）",
+            "enabled_node_id": "562",
+            "enabled_input": "value",
+            "default": false,
+            "group": "OCT_角色替换（不是百分百成功）",
+            "save_node_id": "520"
+          }
+        ],
+        "output_switches": [
+          {
+            "switch_node_id": "563",
+            "source": [
+              563,
+              0,
+              "IMAGE"
+            ],
+            "name": "enable_oct_角色替换（不是百分百成功）",
+            "group": "OCT_角色替换（不是百分百成功）",
+            "enabled_node_id": "562"
+          },
+          {
+            "switch_node_id": "564",
+            "source": [
+              564,
+              0,
+              "IMAGE"
+            ],
+            "name": "enable_oct_单图编辑1",
+            "group": "OCT_单图编辑1",
+            "enabled_node_id": "561"
+          },
+          {
+            "switch_node_id": "565",
+            "source": [
+              565,
+              0,
+              "IMAGE"
+            ],
+            "name": "enable_oct_姿势迁移编辑1",
+            "group": "OCT_姿势迁移编辑1",
+            "enabled_node_id": "560"
+          }
+        ]
+      }
+    ],
+    "skipped": [],
+    "main_output_node_id": "379"
+  },
+  "body_ratio_mapper_widget_values": {
+    "changes": []
+  },
+  "api_value_overlay": {
+    "updated": [],
+    "skipped": []
+  },
+  "body_ratio_mapper_api_repair": {
+    "changes": []
+  },
+  "api_prompt_input_validation": {
+    "issues": []
+  },
+  "body_ratio_mapper_api_validation": {
+    "issues": []
+  },
+  "validation": {
+    "nodes": 31,
+    "links": 48,
+    "bad_links": 0,
+    "residual_ui_nodes": []
+  }
+}

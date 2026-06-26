@@ -125,6 +125,17 @@ def is_api_prompt_workflow(data: Any) -> bool:
     return isinstance(sample, dict) and "class_type" in sample and "inputs" in sample
 
 
+def normalize_api_prompt_workflow(data: Any) -> Optional[Dict[str, Any]]:
+    """Return a native ComfyUI API prompt from common export wrappers."""
+    if is_api_prompt_workflow(data):
+        return data
+    if not isinstance(data, dict):
+        return None
+    prompt = data.get("prompt")
+    if is_api_prompt_workflow(prompt):
+        return prompt
+    return None
+
 def detect_comfy_export_profile(workflow_data: Dict[str, Any], requested: str) -> str:
     requested = (requested or "auto").lower()
     if requested in {"motiontransfer", "generic"}:

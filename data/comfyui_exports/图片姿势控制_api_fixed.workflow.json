@@ -1548,7 +1548,7 @@
         768,
         1344,
         "lanczos",
-        "stretch",
+        "fill / crop",
         "always",
         0
       ],

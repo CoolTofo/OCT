@@ -1,4 +1,4 @@
-# Runtime secrets and local state
+﻿# Runtime secrets and local state
 API/.env
 history.json
 global_config.json
@@ -23,6 +23,7 @@ __pycache__/
 *.pyo
 *.log
 .workbuddy/
+.tmp/
 
 # Bundled runtime and offline dependency cache
 python/
@@ -47,3 +48,4 @@ count_lines.py
 Thumbs.db
 .vscode/
 .idea/
+

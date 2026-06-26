@@ -424,7 +424,20 @@
             updateResolutionUI();
         }
 
-        function updateResolutionUI(){}
+        function updateResolutionUI(){
+            const ratioSelect = document.getElementById('ratioSelect');
+            if(!ratioSelect) return;
+            const squareOption = ratioSelect.querySelector('option[value="square"]');
+            const blocksSquare4k = resolution === '4k';
+            if(squareOption){
+                squareOption.disabled = blocksSquare4k;
+                squareOption.title = blocksSquare4k ? '4K 不支持 1:1，已自动使用 16:9。' : '';
+            }
+            if(blocksSquare4k && ratio === 'square'){
+                ratio = 'wide';
+                ratioSelect.value = ratio;
+            }
+        }
         function fitCustomSizeToImage(event){
             if(event) event.preventDefault();
             const dim = firstReferenceDimension();

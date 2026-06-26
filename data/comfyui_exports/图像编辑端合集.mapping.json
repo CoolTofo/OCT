@@ -1,0 +1,666 @@
+{
+  "profile": "generic",
+  "main_output_node_id": "354",
+  "output_mode": "main",
+  "workflow_output": "D:\\Program Files\\OCT\\data\\comfyui_exports\\图像编辑端合集.workflow.json",
+  "api_output": "D:\\Program Files\\OCT\\workflows\\custom\\图像编辑端合集.json",
+  "api_input": "D:\\Program Files\\OCT\\data\\comfyui_exports\\_api_input_55f64426ed774eb8aaf8bc84904fd8b5.json",
+  "normalize_legacy_widgets": {
+    "changes": []
+  },
+  "compatible_custom_nodes": {
+    "converted": []
+  },
+  "strip_reroute_nodes": {
+    "removed": 18,
+    "rewired": [
+      {
+        "link_id": "646",
+        "from": [
+          363,
+          0
+        ],
+        "to": [
+          352,
+          0
+        ]
+      },
+      {
+        "link_id": "647",
+        "from": [
+          363,
+          0
+        ],
+        "to": [
+          352,
+          0
+        ]
+      },
+      {
+        "link_id": "648",
+        "from": [
+          364,
+          0
+        ],
+        "to": [
+          352,
+          0
+        ]
+      },
+      {
+        "link_id": "650",
+        "from": [
+          365,
+          0
+        ],
+        "to": [
+          213,
+          0
+        ]
+      },
+      {
+        "link_id": "652",
+        "from": [
+          366,
+          0
+        ],
+        "to": [
+          362,
+          0
+        ]
+      },
+      {
+        "link_id": "654",
+        "from": [
+          367,
+          0
+        ],
+        "to": [
+          352,
+          3
+        ]
+      },
+      {
+        "link_id": "656",
+        "from": [
+          368,
+          0
+        ],
+        "to": [
+          352,
+          4
+        ]
+      },
+      {
+        "link_id": "658",
+        "from": [
+          369,
+          0
+        ],
+        "to": [
+          229,
+          0
+        ]
+      },
+      {
+        "link_id": "679",
+        "from": [
+          382,
+          0
+        ],
+        "to": [
+          381,
+          0
+        ]
+      },
+      {
+        "link_id": "680",
+        "from": [
+          382,
+          0
+        ],
+        "to": [
+          381,
+          0
+        ]
+      },
+      {
+        "link_id": "681",
+        "from": [
+          383,
+          0
+        ],
+        "to": [
+          381,
+          0
+        ]
+      },
+      {
+        "link_id": "683",
+        "from": [
+          384,
+          0
+        ],
+        "to": [
+          371,
+          0
+        ]
+      },
+      {
+        "link_id": "878",
+        "from": [
+          511,
+          0
+        ],
+        "to": [
+          525,
+          0
+        ]
+      },
+      {
+        "link_id": "879",
+        "from": [
+          519,
+          0
+        ],
+        "to": [
+          524,
+          0
+        ]
+      },
+      {
+        "link_id": "882",
+        "from": [
+          517,
+          0
+        ],
+        "to": [
+          525,
+          0
+        ]
+      },
+      {
+        "link_id": "891",
+        "from": [
+          512,
+          0
+        ],
+        "to": [
+          530,
+          0
+        ]
+      },
+      {
+        "link_id": "902",
+        "from": [
+          517,
+          0
+        ],
+        "to": [
+          525,
+          0
+        ]
+      },
+      {
+        "link_id": "903",
+        "from": [
+          518,
+          0
+        ],
+        "to": [
+          515,
+          0
+        ]
+      },
+      {
+        "link_id": "904",
+        "from": [
+          513,
+          0
+        ],
+        "to": [
+          525,
+          3
+        ]
+      },
+      {
+        "link_id": "905",
+        "from": [
+          514,
+          0
+        ],
+        "to": [
+          525,
+          4
+        ]
+      },
+      {
+        "link_id": "930",
+        "from": [
+          546,
+          0
+        ],
+        "to": [
+          545,
+          0
+        ]
+      }
+    ],
+    "unresolved": []
+  },
+  "anything_everywhere": {
+    "removed": 0,
+    "added_links": [],
+    "sources": []
+  },
+  "bypassed_nodes": {
+    "rewired": [],
+    "removed_links": 2
+  },
+  "flatten_set_get": {
+    "converted": [],
+    "skipped": []
+  },
+  "frontend_switches": {
+    "converted": [
+      {
+        "frontend_node_id": "557",
+        "frontend_title": "OCT_开关",
+        "match_title": "OCT",
+        "main_output_node_id": "354",
+        "switches": [
+          {
+            "name": "enable_oct_姿势迁移编辑1",
+            "enabled_node_id": "560",
+            "enabled_input": "value",
+            "default": true,
+            "group": "OCT_姿势迁移编辑1",
+            "save_node_id": "354"
+          },
+          {
+            "name": "enable_oct_单图编辑1",
+            "enabled_node_id": "561",
+            "enabled_input": "value",
+            "default": true,
+            "group": "OCT_单图编辑1",
+            "save_node_id": "379"
+          },
+          {
+            "name": "enable_oct_角色替换（不是百分百成功）",
+            "enabled_node_id": "562",
+            "enabled_input": "value",
+            "default": true,
+            "group": "OCT_角色替换（不是百分百成功）",
+            "save_node_id": "520"
+          }
+        ],
+        "output_switches": [
+          {
+            "switch_node_id": "563",
+            "source": [
+              563,
+              0,
+              "IMAGE"
+            ],
+            "name": "enable_oct_角色替换（不是百分百成功）",
+            "group": "OCT_角色替换（不是百分百成功）",
+            "enabled_node_id": "562"
+          },
+          {
+            "switch_node_id": "564",
+            "source": [
+              564,
+              0,
+              "IMAGE"
+            ],
+            "name": "enable_oct_单图编辑1",
+            "group": "OCT_单图编辑1",
+            "enabled_node_id": "561"
+          },
+          {
+            "switch_node_id": "565",
+            "source": [
+              565,
+              0,
+              "IMAGE"
+            ],
+            "name": "enable_oct_姿势迁移编辑1",
+            "group": "OCT_姿势迁移编辑1",
+            "enabled_node_id": "560"
+          }
+        ]
+      }
+    ],
+    "skipped": [],
+    "main_output_node_id": "354"
+  },
+  "body_ratio_mapper_widget_values": {
+    "changes": []
+  },
+  "api_value_overlay": {
+    "updated": [
+      {
+        "node_id": "216",
+        "class_type": "QwenImageIntegratedKSampler",
+        "inputs": [
+          "positive_prompt",
+          "negative_prompt",
+          "generation_mode",
+          "batch_size",
+          "seed",
+          "steps",
+          "cfg",
+          "sampler_name",
+          "scheduler",
+          "denoise",
+          "auraflow_shift",
+          "cfg_norm_strength",
+          "enable_clean_gpu_memory",
+          "enable_clean_cpu_memory_after_finish",
+          "enable_sound_notification",
+          "auto_save_output_folder",
+          "output_filename_prefix",
+          "instruction"
+        ]
+      },
+      {
+        "node_id": "229",
+        "class_type": "QwenImageControlNetIntegratedLoader",
+        "inputs": [
+          "control_net_name",
+          "control_type",
+          "strength",
+          "start_percent",
+          "end_percent"
+        ]
+      },
+      {
+        "node_id": "351",
+        "class_type": "CheckpointLoaderSimple",
+        "inputs": [
+          "ckpt_name"
+        ]
+      },
+      {
+        "node_id": "352",
+        "class_type": "LayerUtility: ImageScaleByAspectRatio V2",
+        "inputs": [
+          "aspect_ratio",
+          "proportional_width",
+          "proportional_height",
+          "fit",
+          "method",
+          "round_to_multiple",
+          "scale_to_side",
+          "background_color"
+        ]
+      },
+      {
+        "node_id": "354",
+        "class_type": "SaveImage",
+        "inputs": [
+          "filename_prefix"
+        ]
+      },
+      {
+        "node_id": "357",
+        "class_type": "LoraLoaderModelOnly",
+        "inputs": [
+          "lora_name",
+          "strength_model"
+        ]
+      },
+      {
+        "node_id": "362",
+        "class_type": "LayerColor: AutoAdjustV2",
+        "inputs": [
+          "strength",
+          "brightness",
+          "contrast",
+          "saturation",
+          "red",
+          "green",
+          "blue",
+          "mode"
+        ]
+      },
+      {
+        "node_id": "371",
+        "class_type": "QwenImageIntegratedKSampler",
+        "inputs": [
+          "negative_prompt",
+          "generation_mode",
+          "batch_size",
+          "seed",
+          "steps",
+          "cfg",
+          "sampler_name",
+          "scheduler",
+          "denoise",
+          "auraflow_shift",
+          "cfg_norm_strength",
+          "enable_clean_gpu_memory",
+          "enable_clean_cpu_memory_after_finish",
+          "enable_sound_notification",
+          "auto_save_output_folder",
+          "output_filename_prefix",
+          "instruction"
+        ]
+      },
+      {
+        "node_id": "372",
+        "class_type": "CheckpointLoaderSimple",
+        "inputs": [
+          "ckpt_name"
+        ]
+      },
+      {
+        "node_id": "373",
+        "class_type": "LoraLoaderModelOnly",
+        "inputs": [
+          "lora_name",
+          "strength_model"
+        ]
+      },
+      {
+        "node_id": "374",
+        "class_type": "LoadImage",
+        "inputs": [
+          "image"
+        ]
+      },
+      {
+        "node_id": "381",
+        "class_type": "LayerUtility: ImageScaleByAspectRatio V2",
+        "inputs": [
+          "aspect_ratio",
+          "proportional_width",
+          "proportional_height",
+          "fit",
+          "method",
+          "round_to_multiple",
+          "scale_to_side",
+          "background_color"
+        ]
+      },
+      {
+        "node_id": "509",
+        "class_type": "CheckpointLoaderSimple",
+        "inputs": [
+          "ckpt_name"
+        ]
+      },
+      {
+        "node_id": "510",
+        "class_type": "LoraLoaderModelOnly",
+        "inputs": [
+          "lora_name",
+          "strength_model"
+        ]
+      },
+      {
+        "node_id": "515",
+        "class_type": "QwenImageControlNetIntegratedLoader",
+        "inputs": [
+          "control_net_name",
+          "control_type",
+          "strength",
+          "start_percent",
+          "end_percent"
+        ]
+      },
+      {
+        "node_id": "525",
+        "class_type": "LayerUtility: ImageScaleByAspectRatio V2",
+        "inputs": [
+          "aspect_ratio",
+          "proportional_width",
+          "proportional_height",
+          "fit",
+          "method",
+          "round_to_multiple",
+          "scale_to_side",
+          "background_color"
+        ]
+      },
+      {
+        "node_id": "530",
+        "class_type": "QwenImageIntegratedKSampler",
+        "inputs": [
+          "positive_prompt",
+          "negative_prompt",
+          "generation_mode",
+          "batch_size",
+          "seed",
+          "steps",
+          "cfg",
+          "sampler_name",
+          "scheduler",
+          "denoise",
+          "auraflow_shift",
+          "cfg_norm_strength",
+          "enable_clean_gpu_memory",
+          "enable_clean_cpu_memory_after_finish",
+          "enable_sound_notification",
+          "auto_save_output_folder",
+          "output_filename_prefix",
+          "instruction"
+        ]
+      },
+      {
+        "node_id": "545",
+        "class_type": "LayerUtility: ImageScaleByAspectRatio V2",
+        "inputs": [
+          "aspect_ratio",
+          "proportional_width",
+          "proportional_height",
+          "fit",
+          "method",
+          "round_to_multiple",
+          "scale_to_side",
+          "background_color"
+        ]
+      },
+      {
+        "node_id": "559",
+        "class_type": "LoadImage",
+        "inputs": [
+          "image"
+        ]
+      }
+    ],
+    "skipped": [
+      {
+        "node_id": "208",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "214",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "215",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "353",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "355",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "356",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "375",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "376",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "377",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "378",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "379",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "507",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "508",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "516",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "520",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "521",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "522",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "523",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "556",
+        "reason": "node not present in repaired prompt"
+      }
+    ]
+  },
+  "body_ratio_mapper_api_repair": {
+    "changes": []
+  },
+  "api_prompt_input_validation": {
+    "issues": []
+  },
+  "body_ratio_mapper_api_validation": {
+    "issues": []
+  },
+  "validation": {
+    "nodes": 31,
+    "links": 48,
+    "bad_links": 0,
+    "residual_ui_nodes": []
+  }
+}

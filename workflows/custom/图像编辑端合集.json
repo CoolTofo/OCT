@@ -1,0 +1,578 @@
+{
+  "213": {
+    "inputs": {
+      "image": [
+        "559",
+        0
+      ],
+      "detect_hand": "enable",
+      "detect_body": "enable",
+      "detect_face": "enable",
+      "resolution": 512,
+      "bbox_detector": "yolox_l.onnx",
+      "pose_estimator": "dw-ll_ucoco_384_bs5.torchscript.pt",
+      "scale_stick_for_xinsr_cn": "disable"
+    },
+    "class_type": "DWPreprocessor",
+    "_meta": {
+      "title": "DWPreprocessor"
+    }
+  },
+  "216": {
+    "inputs": {
+      "model": [
+        "357",
+        0
+      ],
+      "clip": [
+        "351",
+        1
+      ],
+      "vae": [
+        "351",
+        2
+      ],
+      "image1": [
+        "352",
+        0
+      ],
+      "controlnet_data": [
+        "229",
+        0
+      ],
+      "width": [
+        "352",
+        3
+      ],
+      "height": [
+        "352",
+        4
+      ],
+      "positive_prompt": "让图片1中的人物摆出图片2中的姿势，保持图片1中的人物一致性",
+      "negative_prompt": "Describe the key features of the input image (color, shape, size, texture, objects, background), then explain how the user's text instruction should alter or modify the image. Generate a new image that meets the user's requirements while maintaining consistency with the original input where appropriate.",
+      "generation_mode": "图生图 image-to-image",
+      "batch_size": 1,
+      "seed": 374655329567396,
+      "steps": 6,
+      "cfg": 1,
+      "sampler_name": "er_sde",
+      "scheduler": "beta57",
+      "denoise": 1,
+      "auraflow_shift": 3,
+      "cfg_norm_strength": 1,
+      "enable_clean_gpu_memory": true,
+      "enable_clean_cpu_memory_after_finish": true,
+      "enable_sound_notification": true,
+      "auto_save_output_folder": "",
+      "output_filename_prefix": "auto_save",
+      "instruction": "Describe the key features of the input image (color, shape, size, texture, objects, background), then explain how the user's text instruction should alter or modify the image. Generate a new image that meets the user's requirements while maintaining consistency with the original input where appropriate."
+    },
+    "class_type": "QwenImageIntegratedKSampler",
+    "_meta": {
+      "title": "QwenImageIntegratedKSampler"
+    }
+  },
+  "229": {
+    "inputs": {
+      "image": [
+        "213",
+        0
+      ],
+      "control_net_name": "Qwen-Image-InstantX-ControlNet-Union.safetensors",
+      "control_type": "openpose",
+      "strength": 2,
+      "start_percent": 0,
+      "end_percent": 0.5
+    },
+    "class_type": "QwenImageControlNetIntegratedLoader",
+    "_meta": {
+      "title": "QwenImageControlNetIntegratedLoader"
+    }
+  },
+  "351": {
+    "inputs": {
+      "ckpt_name": "QWEN\\Qwen-Rapid-AIO-NSFW-v13.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "CheckpointLoaderSimple"
+    }
+  },
+  "352": {
+    "inputs": {
+      "image": [
+        "374",
+        0
+      ],
+      "scale_to_length": [
+        "370",
+        0
+      ],
+      "aspect_ratio": "original",
+      "proportional_width": 1,
+      "proportional_height": 1,
+      "fit": "letterbox",
+      "method": "lanczos",
+      "round_to_multiple": "8",
+      "scale_to_side": "longest",
+      "background_color": "#000000"
+    },
+    "class_type": "LayerUtility: ImageScaleByAspectRatio V2",
+    "_meta": {
+      "title": "LayerUtility: ImageScaleByAspectRatio V2"
+    }
+  },
+  "354": {
+    "inputs": {
+      "images": [
+        "565",
+        0
+      ],
+      "filename_prefix": "Work-Fisher"
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "SaveImage"
+    }
+  },
+  "357": {
+    "inputs": {
+      "model": [
+        "351",
+        0
+      ],
+      "lora_name": "qwen\\Qwen-Image-Edit-F2P.safetensors",
+      "strength_model": 0.25
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "LoraLoaderModelOnly"
+    }
+  },
+  "362": {
+    "inputs": {
+      "image": [
+        "216",
+        0
+      ],
+      "strength": 100,
+      "brightness": 0,
+      "contrast": -10,
+      "saturation": -10,
+      "red": 0,
+      "green": 0,
+      "blue": 0,
+      "mode": "RGB"
+    },
+    "class_type": "LayerColor: AutoAdjustV2",
+    "_meta": {
+      "title": "LayerColor: AutoAdjustV2"
+    }
+  },
+  "370": {
+    "inputs": {
+      "value": 1536
+    },
+    "class_type": "INTConstant",
+    "_meta": {
+      "title": "整数常量"
+    }
+  },
+  "371": {
+    "inputs": {
+      "model": [
+        "373",
+        0
+      ],
+      "clip": [
+        "372",
+        1
+      ],
+      "vae": [
+        "372",
+        2
+      ],
+      "image1": [
+        "381",
+        0
+      ],
+      "positive_prompt": [
+        "547",
+        0
+      ],
+      "width": [
+        "381",
+        3
+      ],
+      "height": [
+        "381",
+        4
+      ],
+      "negative_prompt": "Describe the key features of the input image (color, shape, size, texture, objects, background), then explain how the user's text instruction should alter or modify the image. Generate a new image that meets the user's requirements while maintaining consistency with the original input where appropriate.",
+      "generation_mode": "图生图 image-to-image",
+      "batch_size": 1,
+      "seed": 34874782540838,
+      "steps": 6,
+      "cfg": 1,
+      "sampler_name": "er_sde",
+      "scheduler": "beta57",
+      "denoise": 1,
+      "auraflow_shift": 3,
+      "cfg_norm_strength": 1,
+      "enable_clean_gpu_memory": true,
+      "enable_clean_cpu_memory_after_finish": true,
+      "enable_sound_notification": true,
+      "auto_save_output_folder": "",
+      "output_filename_prefix": "auto_save",
+      "instruction": "Describe the key features of the input image (color, shape, size, texture, objects, background), then explain how the user's text instruction should alter or modify the image. Generate a new image that meets the user's requirements while maintaining consistency with the original input where appropriate."
+    },
+    "class_type": "QwenImageIntegratedKSampler",
+    "_meta": {
+      "title": "QwenImageIntegratedKSampler"
+    }
+  },
+  "372": {
+    "inputs": {
+      "ckpt_name": "QWEN\\Qwen-Rapid-AIO-NSFW-v13.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "CheckpointLoaderSimple"
+    }
+  },
+  "373": {
+    "inputs": {
+      "model": [
+        "372",
+        0
+      ],
+      "lora_name": "qwen\\Qwen-Image-Edit-F2P.safetensors",
+      "strength_model": 0.25
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "LoraLoaderModelOnly"
+    }
+  },
+  "374": {
+    "inputs": {
+      "image": "下载 (1) (1).png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "OCT_Image1"
+    }
+  },
+  "380": {
+    "inputs": {
+      "value": 1536
+    },
+    "class_type": "INTConstant",
+    "_meta": {
+      "title": "整数常量"
+    }
+  },
+  "381": {
+    "inputs": {
+      "image": [
+        "374",
+        0
+      ],
+      "scale_to_length": [
+        "380",
+        0
+      ],
+      "aspect_ratio": "original",
+      "proportional_width": 1,
+      "proportional_height": 1,
+      "fit": "letterbox",
+      "method": "lanczos",
+      "round_to_multiple": "8",
+      "scale_to_side": "longest",
+      "background_color": "#000000"
+    },
+    "class_type": "LayerUtility: ImageScaleByAspectRatio V2",
+    "_meta": {
+      "title": "LayerUtility: ImageScaleByAspectRatio V2"
+    }
+  },
+  "509": {
+    "inputs": {
+      "ckpt_name": "QWEN\\Qwen-Rapid-AIO-NSFW-v13.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "CheckpointLoaderSimple"
+    }
+  },
+  "510": {
+    "inputs": {
+      "model": [
+        "509",
+        0
+      ],
+      "lora_name": "qwen\\Qwen-Image-Edit-F2P.safetensors",
+      "strength_model": 0.25
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "LoraLoaderModelOnly"
+    }
+  },
+  "515": {
+    "inputs": {
+      "image": [
+        "524",
+        0
+      ],
+      "control_net_name": "Qwen-Image-InstantX-ControlNet-Union.safetensors",
+      "control_type": "openpose",
+      "strength": 2,
+      "start_percent": 0,
+      "end_percent": 0.5
+    },
+    "class_type": "QwenImageControlNetIntegratedLoader",
+    "_meta": {
+      "title": "QwenImageControlNetIntegratedLoader"
+    }
+  },
+  "524": {
+    "inputs": {
+      "image": [
+        "374",
+        0
+      ],
+      "detect_hand": "enable",
+      "detect_body": "enable",
+      "detect_face": "enable",
+      "resolution": 512,
+      "bbox_detector": "yolox_l.onnx",
+      "pose_estimator": "dw-ll_ucoco_384_bs5.torchscript.pt",
+      "scale_stick_for_xinsr_cn": "disable"
+    },
+    "class_type": "DWPreprocessor",
+    "_meta": {
+      "title": "DWPreprocessor"
+    }
+  },
+  "525": {
+    "inputs": {
+      "image": [
+        "374",
+        0
+      ],
+      "scale_to_length": [
+        "526",
+        0
+      ],
+      "aspect_ratio": "original",
+      "proportional_width": 1,
+      "proportional_height": 1,
+      "fit": "letterbox",
+      "method": "lanczos",
+      "round_to_multiple": "8",
+      "scale_to_side": "longest",
+      "background_color": "#000000"
+    },
+    "class_type": "LayerUtility: ImageScaleByAspectRatio V2",
+    "_meta": {
+      "title": "LayerUtility: ImageScaleByAspectRatio V2"
+    }
+  },
+  "526": {
+    "inputs": {
+      "value": 1536
+    },
+    "class_type": "INTConstant",
+    "_meta": {
+      "title": "整数常量"
+    }
+  },
+  "530": {
+    "inputs": {
+      "model": [
+        "510",
+        0
+      ],
+      "clip": [
+        "509",
+        1
+      ],
+      "vae": [
+        "509",
+        2
+      ],
+      "image1": [
+        "525",
+        0
+      ],
+      "image2": [
+        "545",
+        0
+      ],
+      "controlnet_data": [
+        "515",
+        0
+      ],
+      "width": [
+        "525",
+        3
+      ],
+      "height": [
+        "525",
+        4
+      ],
+      "positive_prompt": "图1作为目标画面，图2作为角色参考；保持图1的构图和动作不变，只把图1中的角色完整替换为图2角色，并严格保持图2角色的人物一致性。",
+      "negative_prompt": "Describe the key features of the input image (color, shape, size, texture, objects, background), then explain how the user's text instruction should alter or modify the image. Generate a new image that meets the user's requirements while maintaining consistency with the original input where appropriate.",
+      "generation_mode": "图生图 image-to-image",
+      "batch_size": 1,
+      "seed": 962343417453799,
+      "steps": 6,
+      "cfg": 1,
+      "sampler_name": "er_sde",
+      "scheduler": "beta57",
+      "denoise": 1,
+      "auraflow_shift": 3,
+      "cfg_norm_strength": 1,
+      "enable_clean_gpu_memory": true,
+      "enable_clean_cpu_memory_after_finish": true,
+      "enable_sound_notification": true,
+      "auto_save_output_folder": "",
+      "output_filename_prefix": "auto_save",
+      "instruction": "Describe the key features of the input image (color, shape, size, texture, objects, background), then explain how the user's text instruction should alter or modify the image. Generate a new image that meets the user's requirements while maintaining consistency with the original input where appropriate."
+    },
+    "class_type": "QwenImageIntegratedKSampler",
+    "_meta": {
+      "title": "QwenImageIntegratedKSampler"
+    }
+  },
+  "545": {
+    "inputs": {
+      "image": [
+        "559",
+        0
+      ],
+      "scale_to_length": [
+        "526",
+        0
+      ],
+      "aspect_ratio": "original",
+      "proportional_width": 1,
+      "proportional_height": 1,
+      "fit": "letterbox",
+      "method": "lanczos",
+      "round_to_multiple": "8",
+      "scale_to_side": "longest",
+      "background_color": "#000000"
+    },
+    "class_type": "LayerUtility: ImageScaleByAspectRatio V2",
+    "_meta": {
+      "title": "LayerUtility: ImageScaleByAspectRatio V2"
+    }
+  },
+  "547": {
+    "inputs": {
+      "prompt": "人物衣服变成红色"
+    },
+    "class_type": "CR Prompt Text",
+    "_meta": {
+      "title": "OCT_单图编辑Prompt"
+    }
+  },
+  "559": {
+    "inputs": {
+      "image": "下载 (2).jfif"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "OCT_Image2"
+    }
+  },
+  "560": {
+    "inputs": {
+      "value": true
+    },
+    "class_type": "PrimitiveBoolean",
+    "_meta": {
+      "title": "Input_enable_oct_姿势迁移编辑1"
+    }
+  },
+  "561": {
+    "inputs": {
+      "value": true
+    },
+    "class_type": "PrimitiveBoolean",
+    "_meta": {
+      "title": "Input_enable_oct_单图编辑1"
+    }
+  },
+  "562": {
+    "inputs": {
+      "value": true
+    },
+    "class_type": "PrimitiveBoolean",
+    "_meta": {
+      "title": "Input_enable_oct_角色替换（不是百分百成功）"
+    }
+  },
+  "563": {
+    "inputs": {
+      "cond": [
+        "562",
+        0
+      ],
+      "on_false": [
+        "362",
+        0
+      ],
+      "on_true": [
+        "530",
+        0
+      ]
+    },
+    "class_type": "APILazySwitch",
+    "_meta": {
+      "title": "API_enable_oct_角色替换（不是百分百成功）_select_output"
+    }
+  },
+  "564": {
+    "inputs": {
+      "cond": [
+        "561",
+        0
+      ],
+      "on_false": [
+        "563",
+        0
+      ],
+      "on_true": [
+        "371",
+        0
+      ]
+    },
+    "class_type": "APILazySwitch",
+    "_meta": {
+      "title": "API_enable_oct_单图编辑1_select_output"
+    }
+  },
+  "565": {
+    "inputs": {
+      "cond": [
+        "560",
+        0
+      ],
+      "on_false": [
+        "564",
+        0
+      ],
+      "on_true": [
+        "362",
+        0
+      ]
+    },
+    "class_type": "APILazySwitch",
+    "_meta": {
+      "title": "API_enable_oct_姿势迁移编辑1_select_output"
+    }
+  }
+}
