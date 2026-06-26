@@ -1,0 +1,131 @@
+{
+  "profile": "generic",
+  "main_output_node_id": "369",
+  "output_mode": "main",
+  "workflow_output": "D:\\Program Files\\OCT\\data\\comfyui_exports\\Flux2_图片编辑_图像扩展.workflow.json",
+  "api_output": "D:\\Program Files\\OCT\\workflows\\custom\\Flux2_图片编辑_图像扩展.json",
+  "api_input": "D:\\Program Files\\OCT\\data\\comfyui_exports\\_api_input_c8892bded8044b02960c77d667225932.json",
+  "normalize_legacy_widgets": {
+    "changes": []
+  },
+  "compatible_custom_nodes": {
+    "converted": []
+  },
+  "strip_reroute_nodes": {
+    "removed": 1,
+    "rewired": [
+      {
+        "link_id": "648",
+        "from": [
+          254,
+          0
+        ],
+        "to": [
+          253,
+          0
+        ]
+      },
+      {
+        "link_id": "649",
+        "from": [
+          254,
+          0
+        ],
+        "to": [
+          253,
+          0
+        ]
+      },
+      {
+        "link_id": "650",
+        "from": [
+          254,
+          0
+        ],
+        "to": [
+          253,
+          0
+        ]
+      }
+    ],
+    "unresolved": []
+  },
+  "anything_everywhere": {
+    "removed": 0,
+    "added_links": [],
+    "sources": []
+  },
+  "bypassed_nodes": {
+    "rewired": [],
+    "removed_links": 0
+  },
+  "flatten_set_get": {
+    "converted": [],
+    "skipped": []
+  },
+  "frontend_switches": {
+    "converted": [],
+    "skipped": [],
+    "main_output_node_id": null
+  },
+  "body_ratio_mapper_widget_values": {
+    "changes": []
+  },
+  "api_value_overlay": {
+    "updated": [
+      {
+        "node_id": "399",
+        "class_type": "PrimitiveInt",
+        "inputs": [
+          "value"
+        ]
+      },
+      {
+        "node_id": "400",
+        "class_type": "PrimitiveInt",
+        "inputs": [
+          "value"
+        ]
+      },
+      {
+        "node_id": "401",
+        "class_type": "PrimitiveInt",
+        "inputs": [
+          "value"
+        ]
+      },
+      {
+        "node_id": "402",
+        "class_type": "PrimitiveInt",
+        "inputs": [
+          "value"
+        ]
+      }
+    ],
+    "skipped": [
+      {
+        "node_id": "275",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "283",
+        "reason": "node not present in repaired prompt"
+      }
+    ]
+  },
+  "body_ratio_mapper_api_repair": {
+    "changes": []
+  },
+  "api_prompt_input_validation": {
+    "issues": []
+  },
+  "body_ratio_mapper_api_validation": {
+    "issues": []
+  },
+  "validation": {
+    "nodes": 26,
+    "links": 37,
+    "bad_links": 0,
+    "residual_ui_nodes": []
+  }
+}

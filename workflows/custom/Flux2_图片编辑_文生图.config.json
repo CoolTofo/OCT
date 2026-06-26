@@ -1,0 +1,54 @@
+{
+  "title": "Flux2_图片编辑_文生图",
+  "fields": [
+    {
+      "id": "391.image",
+      "node": "391",
+      "input": "image",
+      "name": "OCT加载图像 / image",
+      "nodeTitle": "OCT加载图像",
+      "classType": "LoadImage",
+      "type": "image",
+      "default": "pasted/81b884cd414d33426de188d3d966b57ac6fff0c83d4e860fdd5368915e41f0fd.png",
+      "options": [],
+      "random_enabled": false,
+      "locked": false,
+      "min": null,
+      "max": null,
+      "step": null
+    },
+    {
+      "id": "395.value",
+      "node": "395",
+      "input": "value",
+      "name": "OCT图片反推提示词开关 / value",
+      "nodeTitle": "OCT图片反推提示词开关",
+      "classType": "PrimitiveBoolean",
+      "type": "boolean",
+      "default": false,
+      "options": [],
+      "random_enabled": false,
+      "locked": false,
+      "min": null,
+      "max": null,
+      "step": null
+    },
+    {
+      "id": "403.prompt",
+      "node": "403",
+      "input": "prompt",
+      "name": "OCT_文生图Prompt / prompt",
+      "nodeTitle": "OCT_文生图Prompt",
+      "classType": "CR Prompt Text",
+      "type": "textarea",
+      "default": "prompt",
+      "options": [],
+      "random_enabled": false,
+      "locked": false,
+      "min": null,
+      "max": null,
+      "step": null
+    }
+  ],
+  "mini_cards": {}
+}

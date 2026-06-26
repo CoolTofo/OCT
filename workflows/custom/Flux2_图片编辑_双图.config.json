@@ -1,0 +1,54 @@
+{
+  "title": "Flux2_图片编辑_双图",
+  "fields": [
+    {
+      "id": "193.text",
+      "node": "193",
+      "input": "text",
+      "name": "OCT双图编辑Prompt / text",
+      "nodeTitle": "OCT双图编辑Prompt",
+      "classType": "CLIPTextEncode",
+      "type": "textarea",
+      "default": "把图2的角色替换成图1的角色，角色动作要与图2的动作一致。",
+      "options": [],
+      "random_enabled": false,
+      "locked": false,
+      "min": null,
+      "max": null,
+      "step": null
+    },
+    {
+      "id": "194.image",
+      "node": "194",
+      "input": "image",
+      "name": "OCT双图编辑Image1 / image",
+      "nodeTitle": "OCT双图编辑Image1",
+      "classType": "LoadImage",
+      "type": "image",
+      "default": "2 (1).png",
+      "options": [],
+      "random_enabled": false,
+      "locked": false,
+      "min": null,
+      "max": null,
+      "step": null
+    },
+    {
+      "id": "200.image",
+      "node": "200",
+      "input": "image",
+      "name": "OCT双图编辑Image2 / image",
+      "nodeTitle": "OCT双图编辑Image2",
+      "classType": "LoadImage",
+      "type": "image",
+      "default": "1 (1).png",
+      "options": [],
+      "random_enabled": false,
+      "locked": false,
+      "min": null,
+      "max": null,
+      "step": null
+    }
+  ],
+  "mini_cards": {}
+}

@@ -1,0 +1,70 @@
+{
+  "title": "Flux2_图片编辑_三图",
+  "fields": [
+    {
+      "id": "352.image",
+      "node": "352",
+      "input": "image",
+      "name": "OCT三图编辑Image2 / image",
+      "nodeTitle": "OCT三图编辑Image2",
+      "classType": "LoadImage",
+      "type": "image",
+      "default": "workflow-custom_1781749645_f5edebd0ff.png",
+      "options": [],
+      "random_enabled": false,
+      "locked": false,
+      "min": null,
+      "max": null,
+      "step": null
+    },
+    {
+      "id": "353.text",
+      "node": "353",
+      "input": "text",
+      "name": "OCT三图编辑Prompt / text",
+      "nodeTitle": "OCT三图编辑Prompt",
+      "classType": "CLIPTextEncode",
+      "type": "textarea",
+      "default": "把图3的两个角色替换成图1和图2的角色，图3中蓝色衣服角色替换为图1，图3中红色衣服角色替换为图2，角色动作要与图3的动作一致。",
+      "options": [],
+      "random_enabled": false,
+      "locked": false,
+      "min": null,
+      "max": null,
+      "step": null
+    },
+    {
+      "id": "355.image",
+      "node": "355",
+      "input": "image",
+      "name": "OCT三图编辑Image1 / image",
+      "nodeTitle": "OCT三图编辑Image1",
+      "classType": "LoadImage",
+      "type": "image",
+      "default": "2 (1).png",
+      "options": [],
+      "random_enabled": false,
+      "locked": false,
+      "min": null,
+      "max": null,
+      "step": null
+    },
+    {
+      "id": "357.image",
+      "node": "357",
+      "input": "image",
+      "name": "OCT三图编辑Image3 / image",
+      "nodeTitle": "OCT三图编辑Image3",
+      "classType": "LoadImage",
+      "type": "image",
+      "default": "5月29日(1).jpg",
+      "options": [],
+      "random_enabled": false,
+      "locked": false,
+      "min": null,
+      "max": null,
+      "step": null
+    }
+  ],
+  "mini_cards": {}
+}

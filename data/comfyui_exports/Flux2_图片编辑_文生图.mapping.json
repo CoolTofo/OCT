@@ -1,0 +1,90 @@
+{
+  "profile": "generic",
+  "main_output_node_id": "9",
+  "output_mode": "main",
+  "workflow_output": "D:\\Program Files\\OCT\\data\\comfyui_exports\\Flux2_图片编辑_文生图.workflow.json",
+  "api_output": "D:\\Program Files\\OCT\\workflows\\custom\\Flux2_图片编辑_文生图.json",
+  "api_input": "D:\\Program Files\\OCT\\data\\comfyui_exports\\_api_input_46caee3bb0f540a881db2f5a49d00a8c.json",
+  "normalize_legacy_widgets": {
+    "changes": []
+  },
+  "compatible_custom_nodes": {
+    "converted": []
+  },
+  "strip_reroute_nodes": {
+    "removed": 0,
+    "rewired": [],
+    "unresolved": []
+  },
+  "anything_everywhere": {
+    "removed": 0,
+    "added_links": [],
+    "sources": []
+  },
+  "bypassed_nodes": {
+    "rewired": [],
+    "removed_links": 0
+  },
+  "flatten_set_get": {
+    "converted": [],
+    "skipped": []
+  },
+  "frontend_switches": {
+    "converted": [],
+    "skipped": [],
+    "main_output_node_id": null
+  },
+  "body_ratio_mapper_widget_values": {
+    "changes": []
+  },
+  "api_value_overlay": {
+    "updated": [
+      {
+        "node_id": "389",
+        "class_type": "easy showAnything",
+        "inputs": [
+          "text"
+        ]
+      },
+      {
+        "node_id": "395",
+        "class_type": "PrimitiveBoolean",
+        "inputs": [
+          "value"
+        ]
+      },
+      {
+        "node_id": "403",
+        "class_type": "CR Prompt Text",
+        "inputs": [
+          "prompt"
+        ]
+      }
+    ],
+    "skipped": [
+      {
+        "node_id": "89",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "90",
+        "reason": "node not present in repaired prompt"
+      }
+    ]
+  },
+  "body_ratio_mapper_api_repair": {
+    "changes": []
+  },
+  "api_prompt_input_validation": {
+    "issues": []
+  },
+  "body_ratio_mapper_api_validation": {
+    "issues": []
+  },
+  "validation": {
+    "nodes": 21,
+    "links": 24,
+    "bad_links": 0,
+    "residual_ui_nodes": []
+  }
+}

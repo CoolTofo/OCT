@@ -1,0 +1,38 @@
+{
+  "title": "Flux2_图片编辑_单图",
+  "fields": [
+    {
+      "id": "148.text",
+      "node": "148",
+      "input": "text",
+      "name": "OCT_单图编辑Prompt / text",
+      "nodeTitle": "OCT_单图编辑Prompt",
+      "classType": "CLIPTextEncode",
+      "type": "textarea",
+      "default": "1.红色部分改成搪胶颜色\n2.北京替换为真实室内场景，图中的玩具真实比例不超过十厘米。\n",
+      "options": [],
+      "random_enabled": false,
+      "locked": false,
+      "min": null,
+      "max": null,
+      "step": null
+    },
+    {
+      "id": "158.image",
+      "node": "158",
+      "input": "image",
+      "name": "OCT_单图编辑Image / image",
+      "nodeTitle": "OCT_单图编辑Image",
+      "classType": "LoadImage",
+      "type": "image",
+      "default": "c0893faaa2cf405ebc33f5a33a849e56.png",
+      "options": [],
+      "random_enabled": false,
+      "locked": false,
+      "min": null,
+      "max": null,
+      "step": null
+    }
+  ],
+  "mini_cards": {}
+}

@@ -1,0 +1,64 @@
+{
+  "profile": "generic",
+  "main_output_node_id": "370",
+  "output_mode": "main",
+  "workflow_output": "D:\\Program Files\\OCT\\data\\comfyui_exports\\Flux2_图片编辑_高清放大.workflow.json",
+  "api_output": "D:\\Program Files\\OCT\\workflows\\custom\\Flux2_图片编辑_高清放大.json",
+  "api_input": "D:\\Program Files\\OCT\\data\\comfyui_exports\\_api_input_96a9df55c22b4128ad620e671c466cd0.json",
+  "normalize_legacy_widgets": {
+    "changes": []
+  },
+  "compatible_custom_nodes": {
+    "converted": []
+  },
+  "strip_reroute_nodes": {
+    "removed": 0,
+    "rewired": [],
+    "unresolved": []
+  },
+  "anything_everywhere": {
+    "removed": 0,
+    "added_links": [],
+    "sources": []
+  },
+  "bypassed_nodes": {
+    "rewired": [],
+    "removed_links": 0
+  },
+  "flatten_set_get": {
+    "converted": [],
+    "skipped": []
+  },
+  "frontend_switches": {
+    "converted": [],
+    "skipped": [],
+    "main_output_node_id": null
+  },
+  "body_ratio_mapper_widget_values": {
+    "changes": []
+  },
+  "api_value_overlay": {
+    "updated": [],
+    "skipped": [
+      {
+        "node_id": "299",
+        "reason": "node not present in repaired prompt"
+      }
+    ]
+  },
+  "body_ratio_mapper_api_repair": {
+    "changes": []
+  },
+  "api_prompt_input_validation": {
+    "issues": []
+  },
+  "body_ratio_mapper_api_validation": {
+    "issues": []
+  },
+  "validation": {
+    "nodes": 7,
+    "links": 6,
+    "bad_links": 0,
+    "residual_ui_nodes": []
+  }
+}

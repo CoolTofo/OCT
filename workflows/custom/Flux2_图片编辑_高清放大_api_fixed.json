@@ -1,0 +1,130 @@
+{
+  "294": {
+    "inputs": {
+      "image": [
+        "317",
+        0
+      ],
+      "dit": [
+        "364",
+        0
+      ],
+      "vae": [
+        "296",
+        0
+      ],
+      "seed": 9527,
+      "resolution": [
+        "410",
+        0
+      ],
+      "max_resolution": 8192,
+      "batch_size": 5,
+      "uniform_batch_size": false,
+      "color_correction": "lab",
+      "temporal_overlap": 0,
+      "prepend_frames": 0,
+      "input_noise_scale": 0,
+      "latent_noise_scale": 0,
+      "offload_device": "cpu",
+      "enable_debug": false
+    },
+    "class_type": "SeedVR2VideoUpscaler",
+    "_meta": {
+      "title": "SeedVR2视频放大器"
+    }
+  },
+  "296": {
+    "inputs": {
+      "model": "ema_vae_fp16.safetensors",
+      "device": "cuda:0",
+      "encode_tiled": true,
+      "encode_tile_size": 1024,
+      "encode_tile_overlap": 128,
+      "decode_tiled": true,
+      "decode_tile_size": 1024,
+      "decode_tile_overlap": 128,
+      "tile_debug": "false",
+      "offload_device": "cpu",
+      "cache_model": false
+    },
+    "class_type": "SeedVR2LoadVAEModel",
+    "_meta": {
+      "title": "SeedVR2LoadVAEModel"
+    }
+  },
+  "305": {
+    "inputs": {
+      "image": [
+        "367",
+        0
+      ],
+      "upscale_method": "lanczos",
+      "megapixels": 1,
+      "resolution_steps": 2
+    },
+    "class_type": "ImageScaleToTotalPixels",
+    "_meta": {
+      "title": "ImageScaleToTotalPixels"
+    }
+  },
+  "317": {
+    "inputs": {
+      "anything": [
+        "305",
+        0
+      ]
+    },
+    "class_type": "easy cleanGpuUsed",
+    "_meta": {
+      "title": "easy cleanGpuUsed"
+    }
+  },
+  "364": {
+    "inputs": {
+      "model": "seedvr2_ema_7b-Q4_K_M.gguf",
+      "device": "cuda:0",
+      "blocks_to_swap": 16,
+      "swap_io_components": false,
+      "offload_device": "cpu",
+      "cache_model": "flash_attn",
+      "attention_mode": "sdpa"
+    },
+    "class_type": "SeedVR2LoadDiTModel",
+    "_meta": {
+      "title": "SeedVR2LoadDiTModel"
+    }
+  },
+  "367": {
+    "inputs": {
+      "image": "Kleinå__å_¾ç¼_è¾__00030_.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "OCT_SeedVR2高清放大Image"
+    }
+  },
+  "370": {
+    "inputs": {
+      "images": [
+        "294",
+        0
+      ],
+      "filename_prefix": "ComfyUI"
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "SaveImage"
+    }
+  },
+  "410": {
+    "inputs": {
+      "value": 2048
+    },
+    "class_type": "PrimitiveInt",
+    "_meta": {
+      "title": "OCT_分辨率"
+    }
+  }
+}

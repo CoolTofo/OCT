@@ -6,13 +6,16 @@
       "node": "15",
       "input": "image",
       "name": "图片",
+      "nodeTitle": "加载图像",
+      "classType": "LoadImage",
       "type": "image",
       "default": "pasted/image (794).png",
+      "options": [],
+      "random_enabled": false,
+      "locked": false,
       "min": null,
       "max": null,
-      "step": null,
-      "options": [],
-      "random_enabled": false
+      "step": null
     }
   ],
   "mini_cards": {

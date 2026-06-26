@@ -1,0 +1,38 @@
+{
+  "title": "Flux2_图片编辑_高清放大",
+  "fields": [
+    {
+      "id": "367.image",
+      "node": "367",
+      "input": "image",
+      "name": "OCT_SeedVR2高清放大Image / image",
+      "nodeTitle": "OCT_SeedVR2高清放大Image",
+      "classType": "LoadImage",
+      "type": "image",
+      "default": "Kleinå__å_¾ç¼_è¾__00030_.png",
+      "options": [],
+      "random_enabled": false,
+      "locked": false,
+      "min": null,
+      "max": null,
+      "step": null
+    },
+    {
+      "id": "410.value",
+      "node": "410",
+      "input": "value",
+      "name": "OCT_分辨率 / value",
+      "nodeTitle": "OCT_分辨率",
+      "classType": "PrimitiveInt",
+      "type": "number",
+      "default": 2048,
+      "options": [],
+      "random_enabled": false,
+      "locked": false,
+      "min": 0.0,
+      "max": 4096.0,
+      "step": 1.0
+    }
+  ],
+  "mini_cards": {}
+}
