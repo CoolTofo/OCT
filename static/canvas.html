@@ -94,7 +94,8 @@
         body.canvas-knife .node { outline:1px dashed rgba(220,38,38,.45); outline-offset:4px; }
         body.canvas-board-pan,
         body.canvas-board-pan * { cursor:grabbing !important; user-select:none !important; }
-        .world { position:absolute; left:0; top:0; width:6000px; height:4000px; transform-origin:0 0; }
+        body.canvas-board-pan .node .node-body { pointer-events:none !important; }
+        .world { position:absolute; left:0; top:0; width:6000px; height:4000px; transform-origin:0 0; will-change:transform; }
         .links { position:absolute; inset:0; width:6000px; height:4000px; overflow:visible; pointer-events:none; z-index:1; }
         .link { stroke:var(--faint); stroke-width:2.5; fill:none; opacity:.82; pointer-events:none; }
         .link.workflow { stroke:#3b82f6; stroke-width:2.2; stroke-dasharray:8 8; opacity:.68; }
@@ -4494,7 +4495,7 @@
                 y:p.y,
                 w:420,
                 h:460,
-                mode:'text',
+                mode:'custom',
                 width:1024,
                 height:1024,
                 enhanceStrength:0.5,
@@ -13383,10 +13384,11 @@
             const ordered = media.ordered;
             const imageInputs = ordered.filter(src => src.refs?.length);
             const promptInputs = ordered.filter(src => src.prompt && !src.refs?.length);
-            const mode = node.mode || 'text';
-            const promptFields = mode === 'custom' ? comfyFields(node, 'prompt') : [];
+            node.mode = 'custom';
+            const mode = 'custom';
+            const promptFields = comfyFields(node, 'prompt');
             const promptFieldCount = promptFields.length;
-            const mediaFields = mode === 'custom' ? comfyMediaFields(node) : [];
+            const mediaFields = comfyMediaFields(node);
             const mediaFieldCount = mediaFields.length;
             if(mode === 'custom'){
                 const validWorkflow = validComfyWorkflowName(node.comfyWorkflow);
@@ -13394,15 +13396,9 @@
                 if(!node.comfyWorkflow && validWorkflow) node.comfyWorkflow = validWorkflow;
             }
             wrap.innerHTML = `
-                <div class="mode-tabs">
-                    <button type="button" data-mode="text" class="${mode === 'text' ? 'active' : ''}">${tr('canvas.comfyModeText')}</button>
-                    <button type="button" data-mode="enhance" class="${mode === 'enhance' ? 'active' : ''}">${tr('canvas.comfyModeEnhance')}</button>
-                    <button type="button" data-mode="edit" class="${mode === 'edit' ? 'active' : ''}">${tr('canvas.comfyModeEdit')}</button>
-                    <button type="button" data-mode="custom" class="${mode === 'custom' ? 'active' : ''}">${tr('canvas.comfyModeCustom')}</button>
-                </div>
                 <div class="comfy-content">
                     <div class="prompt-list"></div>
-                    <div class="comfy-images ${(mode === 'text' || (mode === 'custom' && !mediaFieldCount)) ? 'hidden' : ''}">
+                    <div class="comfy-images ${!mediaFieldCount ? 'hidden' : ''}">
                         <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">${mode === 'custom' ? `素材输入 · 需要 ${mediaFieldCount}` : 'Images'}</div>
                         <div class="input-list mt-2"></div>
                     </div>
@@ -13429,8 +13425,7 @@
                 };
             });
             renderPromptPreview(wrap.querySelector('.prompt-list'), promptInputs, promptFieldCount);
-            if(mode === 'custom' && mediaFieldCount) renderComfyMediaInputs(wrap.querySelector('.input-list'), node, media, mediaFields);
-            else if(mode !== 'text') renderComfyImages(wrap.querySelector('.input-list'), node, imageInputs);
+            if(mediaFieldCount) renderComfyMediaInputs(wrap.querySelector('.input-list'), node, media, mediaFields);
             renderComfySettings(wrap.querySelector('.comfy-settings'), node);
             wrap.querySelector('.comfy-run').onclick = e => { e.stopPropagation(); runCanvasGenerate(node.id); };
             bindCascadeButtons(wrap, node.id);
@@ -14047,7 +14042,8 @@
             }
         }
         function renderComfySettings(container, node){
-            const mode = node.mode || 'text';
+            node.mode = 'custom';
+            const mode = 'custom';
             if(mode === 'text'){
                 container.innerHTML = `
                     <div class="gen-settings-row">
@@ -14326,7 +14322,7 @@
                 }
                 if(n.type === 'storyboardGrid') return storyboardGridOutputSources(n);
                 if(CANVAS_IMAGE_OUTPUT_TYPES.includes(n.type)){
-                    const includeMedia = gen?.type === 'video' || gen?.type === 'rh' || gen?.type === 'dreamina' || gen?.type === 'flowFrame' || gen?.type === 'scriptPlanner' || gen?.type === 'seedanceDirector' || (gen?.type === 'comfy' && (gen.mode || '') === 'custom');
+                    const includeMedia = gen?.type === 'video' || gen?.type === 'rh' || gen?.type === 'dreamina' || gen?.type === 'flowFrame' || gen?.type === 'scriptPlanner' || gen?.type === 'seedanceDirector' || gen?.type === 'comfy';
                     const refs = generatedImageRefs(n, includeMedia);
                     if(refs.length){
                         return refs.map((ref, i) => ({
@@ -14474,7 +14470,7 @@
                 }
                 if(gen.type === 'msgen') renderImageInputList(el.querySelector('.ms-img-list'), gen, imageInputs);
                 if(gen.type === 'comfy') {
-                    const mediaFields = (gen.mode || 'text') === 'custom' ? comfyMediaFields(gen) : [];
+                    const mediaFields = comfyMediaFields(gen);
                     if(mediaFields.length) renderComfyMediaInputs(el.querySelector('.input-list'), gen, comfyMediaSources(gen), mediaFields);
                     else renderComfyImages(el.querySelector('.input-list'), gen, imageInputs);
                 }
@@ -15293,9 +15289,10 @@ ${referenceNote}
             const sources = orderedSources(node, generatorSources(node));
             const prompt = sources.map(s => s.prompt).filter(Boolean).join('\n\n');
             const refs = sources.flatMap(s => s.refs || []);
-            const mode = node.mode || 'text';
-            const customMediaFields = mode === 'custom' ? comfyMediaFields(node) : [];
-            const customPromptFields = mode === 'custom' ? comfyFields(node, 'prompt') : [];
+            node.mode = 'custom';
+            const mode = 'custom';
+            const customMediaFields = comfyMediaFields(node);
+            const customPromptFields = comfyFields(node, 'prompt');
             const customPromptDefaults = customPromptFields.map(field => String(comfyParamValue(node, field) ?? '').trim()).filter(Boolean);
             if(mode === 'text' && !prompt){ alert(tr('canvas.needPrompt')); return; }
             if(mode === 'custom' && customPromptFields.length && !prompt && !customPromptDefaults.length){ alert(tr('canvas.needPrompt')); return; }
@@ -16173,12 +16170,8 @@ ${referenceNote}
             };
         }
         function comfyRunLabel(node){
-            const mode = node?.mode || 'text';
-            if(mode === 'text') return tr('canvas.comfyText');
-            if(mode === 'enhance') return tr('canvas.comfyEnhance');
-            if(mode === 'edit') return tr('canvas.comfyEdit');
-            if(mode === 'custom') return node?.comfyWorkflow || tr('canvas.comfyCustom');
-            return 'ComfyUI';
+            if(node) node.mode = 'custom';
+            return node?.comfyWorkflow || tr('canvas.comfyCustom');
         }
         function runTaskLabel(run){
             const node = run?.node || {};
@@ -18051,8 +18044,9 @@ ${referenceNote}
             const to = portPoint(connection.to, 'in', cache);
             let min = Infinity;
             let prev = cubicPoint(from, to, 0);
-            for(let i = 1; i <= 28; i++){
-                const cur = cubicPoint(from, to, i / 28);
+            const samples = 18;
+            for(let i = 1; i <= samples; i++){
+                const cur = cubicPoint(from, to, i / samples);
                 min = Math.min(min, pointSegmentDistance(point, prev, cur));
                 prev = cur;
             }
@@ -18075,6 +18069,10 @@ ${referenceNote}
             const button = document.elementFromPoint(e.clientX, e.clientY)?.closest?.('.link-delete');
             if(button?.dataset.connectionId){
                 setHoveredConnection(button.dataset.connectionId);
+                return;
+            }
+            if(e.target?.closest?.('.node')){
+                setHoveredConnection('');
                 return;
             }
             const point = screenToWorld(e.clientX, e.clientY);
@@ -18516,4 +18514,3 @@ ${referenceNote}
     </script>
 </body>
 </html>
-

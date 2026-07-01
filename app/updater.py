@@ -1,4 +1,4 @@
-"""GitHub self-update helpers for the local OCT server."""
+﻿"""GitLab self-update helpers for the local OCT server."""
 
 from __future__ import annotations
 
@@ -15,14 +15,24 @@ from threading import Lock
 from typing import Any, Dict, List
 
 
-DEFAULT_UPDATE_REPO = "CoolTofo/OCT"
-DEFAULT_UPDATE_BRANCH = "main"
+DEFAULT_UPDATE_REPO = "aigc/oct_aiflow"
+DEFAULT_UPDATE_BRANCH = "master"
+DEFAULT_GITLAB_BASE_URL = "http://gitlab.ds.com"
+
+
+def gitlab_base_url() -> str:
+    return os.getenv("OCT_GITLAB_BASE_URL", DEFAULT_GITLAB_BASE_URL).rstrip("/")
 
 
 def normalized_update_repo() -> str:
     repo = os.getenv("OCT_UPDATE_REPO", DEFAULT_UPDATE_REPO).strip().strip("/")
-    if repo.startswith("https://github.com/"):
-        repo = repo.removeprefix("https://github.com/").strip("/")
+    for prefix in (
+        "https://gitlab.ds.com/",
+        "http://gitlab.ds.com/",
+        "git@gitlab.ds.com:",
+    ):
+        if repo.startswith(prefix):
+            repo = repo.removeprefix(prefix).strip("/")
     if repo.endswith(".git"):
         repo = repo[:-4]
     return repo or DEFAULT_UPDATE_REPO
@@ -32,24 +42,37 @@ def update_branch() -> str:
     return os.getenv("OCT_UPDATE_BRANCH", DEFAULT_UPDATE_BRANCH).strip() or DEFAULT_UPDATE_BRANCH
 
 
-def github_repo_url() -> str:
-    return f"https://github.com/{normalized_update_repo()}"
+def gitlab_project_id() -> str:
+    return urllib.parse.quote(normalized_update_repo(), safe="")
 
 
-def github_version_url() -> str:
-    return f"https://raw.githubusercontent.com/{normalized_update_repo()}/{update_branch()}/VERSION"
+def gitlab_repo_url() -> str:
+    return f"{gitlab_base_url()}/{normalized_update_repo()}"
 
 
-def github_tree_url() -> str:
-    return f"https://api.github.com/repos/{normalized_update_repo()}/git/trees/{update_branch()}?recursive=1"
+def gitlab_version_url() -> str:
+    return f"{gitlab_repo_url()}/-/raw/{update_branch()}/VERSION"
 
 
-def github_raw_root() -> str:
-    return f"https://raw.githubusercontent.com/{normalized_update_repo()}/{update_branch()}"
+def gitlab_tree_url(page: int = 1) -> str:
+    quoted_ref = urllib.parse.quote(update_branch(), safe="")
+    return (
+        f"{gitlab_base_url()}/api/v4/projects/{gitlab_project_id()}/repository/tree"
+        f"?ref={quoted_ref}&recursive=true&per_page=100&page={int(page)}"
+    )
+
+
+def gitlab_raw_url(path: str) -> str:
+    quoted_path = urllib.parse.quote(path, safe="")
+    quoted_ref = urllib.parse.quote(update_branch(), safe="")
+    return (
+        f"{gitlab_base_url()}/api/v4/projects/{gitlab_project_id()}"
+        f"/repository/files/{quoted_path}/raw?ref={quoted_ref}"
+    )
 
 
 UPDATE_LOCK = Lock()
-GITHUB_TREE_CACHE: Dict[str, Any] = {"etag": "", "data": None, "expires_at": 0.0}
+GITLAB_TREE_CACHE: Dict[str, Any] = {"etag": "", "data": None, "expires_at": 0.0}
 
 
 class UpdateBusyError(RuntimeError):
@@ -68,7 +91,10 @@ def update_allowed_file(path: str) -> bool:
         "VERSION",
         "启动服务.bat",
         "安装依赖.bat",
+        "更新GitLab最新版.bat",
         "更新GitHub最新版.bat",
+        "上传到GitLab.bat",
+        "上传到GitHub.bat",
         "mac-启动服务.command",
         "mac-修复权限.command",
         "MAC-使用说明.md",
@@ -90,40 +116,63 @@ def safe_update_target(base_dir: str, path: str) -> str:
     return target
 
 
-def github_json(url: str, use_etag_cache: bool = False) -> Dict[str, Any]:
-    headers = {
-        "Accept": "application/vnd.github+json",
-        "User-Agent": "Infinite-Canvas-Updater",
-    }
+def gitlab_headers() -> Dict[str, str]:
+    headers = {"User-Agent": "Infinite-Canvas-Updater"}
+    token = os.getenv("OCT_GITLAB_TOKEN", "").strip()
+    if token:
+        headers["PRIVATE-TOKEN"] = token
+    return headers
+
+
+def gitlab_json(url: str, use_etag_cache: bool = False) -> Any:
+    headers = gitlab_headers()
     cache_key = url
-    if use_etag_cache and cache_key == github_tree_url():
-        if GITHUB_TREE_CACHE["data"] and time.time() < GITHUB_TREE_CACHE["expires_at"]:
-            return GITHUB_TREE_CACHE["data"]
-        if GITHUB_TREE_CACHE["etag"]:
-            headers["If-None-Match"] = GITHUB_TREE_CACHE["etag"]
+    if use_etag_cache and cache_key == gitlab_tree_url():
+        if GITLAB_TREE_CACHE["data"] and time.time() < GITLAB_TREE_CACHE["expires_at"]:
+            return GITLAB_TREE_CACHE["data"]
+        if GITLAB_TREE_CACHE["etag"]:
+            headers["If-None-Match"] = GITLAB_TREE_CACHE["etag"]
     req = urllib.request.Request(url, headers=headers)
     try:
         with urllib.request.urlopen(req, timeout=30) as resp:
             etag = resp.headers.get("ETag", "")
             payload = json.loads(resp.read().decode("utf-8", errors="replace"))
-            if use_etag_cache and cache_key == github_tree_url():
-                GITHUB_TREE_CACHE.update({
+            if use_etag_cache and cache_key == gitlab_tree_url():
+                GITLAB_TREE_CACHE.update({
                     "etag": etag,
                     "data": payload,
                     "expires_at": time.time() + 600,
                 })
             return payload
     except urllib.error.HTTPError as exc:
-        if exc.code == 304 and use_etag_cache and GITHUB_TREE_CACHE["data"]:
-            GITHUB_TREE_CACHE["expires_at"] = time.time() + 600
-            return GITHUB_TREE_CACHE["data"]
+        if exc.code == 304 and use_etag_cache and GITLAB_TREE_CACHE["data"]:
+            GITLAB_TREE_CACHE["expires_at"] = time.time() + 600
+            return GITLAB_TREE_CACHE["data"]
         raise
 
 
-def github_bytes(url: str) -> bytes:
-    req = urllib.request.Request(url, headers={"User-Agent": "Infinite-Canvas-Updater"})
+def gitlab_bytes(url: str) -> bytes:
+    req = urllib.request.Request(url, headers=gitlab_headers())
     with urllib.request.urlopen(req, timeout=60) as resp:
         return resp.read()
+
+
+def gitlab_text(url: str) -> str:
+    return gitlab_bytes(url).decode("utf-8-sig", errors="replace").strip()
+
+
+def gitlab_tree_entries() -> List[Dict[str, Any]]:
+    entries: List[Dict[str, Any]] = []
+    page = 1
+    while True:
+        chunk = gitlab_json(gitlab_tree_url(page), use_etag_cache=(page == 1))
+        if not isinstance(chunk, list) or not chunk:
+            break
+        entries.extend(chunk)
+        if len(chunk) < 100:
+            break
+        page += 1
+    return entries
 
 
 def read_local_version(base_dir: str) -> str:
@@ -135,17 +184,13 @@ def read_local_version(base_dir: str) -> str:
         return ""
 
 
-def github_text(url: str) -> str:
-    return github_bytes(url).decode("utf-8-sig", errors="replace").strip()
-
-
 def update_status(base_dir: str) -> Dict[str, Any]:
     local_version = read_local_version(base_dir)
-    remote_version = github_text(github_version_url())
+    remote_version = gitlab_text(gitlab_version_url())
     return {
         "ok": True,
         "repo": normalized_update_repo(),
-        "repo_url": github_repo_url(),
+        "repo_url": gitlab_repo_url(),
         "branch": update_branch(),
         "local_version": local_version,
         "remote_version": remote_version,
@@ -160,7 +205,7 @@ def schedule_self_restart(base_dir: str, delay_seconds: int = 3) -> bool:
     pid = os.getpid()
     try:
         if os.name == "nt":
-            launcher = os.path.join(base_dir, "\u542f\u52a8\u670d\u52a1.bat")
+            launcher = os.path.join(base_dir, "启动服务.bat")
             if not os.path.exists(launcher):
                 launcher = os.path.join(base_dir, "start.bat")
             bat_path = os.path.join(base_dir, "_self_restart.bat")
@@ -181,7 +226,7 @@ def schedule_self_restart(base_dir: str, delay_seconds: int = 3) -> bool:
                 close_fds=True,
             )
         else:
-            launcher = os.path.join(base_dir, "mac-\u542f\u52a8\u670d\u52a1.command")
+            launcher = os.path.join(base_dir, "mac-启动服务.command")
             if not os.path.exists(launcher):
                 launcher = os.path.join(base_dir, "start.sh")
             sh_path = os.path.join(base_dir, "_self_restart.sh")
@@ -216,9 +261,8 @@ def run_update(base_dir: str, data_dir: str, auto_restart: bool = False, restart
         raise UpdateBusyError("An update or rollback is already running.")
     try:
         local_version = read_local_version(base_dir)
-        remote_version = github_text(github_version_url())
-        tree_data = github_json(github_tree_url(), use_etag_cache=True)
-        entries = tree_data.get("tree") or []
+        remote_version = gitlab_text(gitlab_version_url())
+        entries = gitlab_tree_entries()
         files = []
         for entry in entries:
             path = str(entry.get("path") or "").replace("\\", "/")
@@ -233,8 +277,7 @@ def run_update(base_dir: str, data_dir: str, auto_restart: bool = False, restart
         updated = []
         for rel in files:
             target = safe_update_target(base_dir, rel)
-            raw_url = f"{github_raw_root()}/{urllib.parse.quote(rel, safe='/')}"
-            data = github_bytes(raw_url)
+            data = gitlab_bytes(gitlab_raw_url(rel))
             if os.path.exists(target):
                 backup_path = os.path.join(backup_root, *rel.split("/"))
                 os.makedirs(os.path.dirname(backup_path), exist_ok=True)
@@ -257,7 +300,7 @@ def run_update(base_dir: str, data_dir: str, auto_restart: bool = False, restart
             "restart_scheduled": restart_scheduled,
             "local_version": local_version,
             "remote_version": remote_version,
-            "repo_url": github_repo_url(),
+            "repo_url": gitlab_repo_url(),
             "branch": update_branch(),
         }
     finally:

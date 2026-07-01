@@ -1,4 +1,4 @@
-import urllib.error
+﻿import urllib.error
 
 from fastapi import APIRouter, HTTPException
 
@@ -15,15 +15,15 @@ def update_status():
     try:
         return updater.update_status(BASE_DIR)
     except urllib.error.HTTPError as exc:
-        raise HTTPException(status_code=502, detail=f"GitHub version check failed: HTTP {exc.code}") from exc
+        raise HTTPException(status_code=502, detail=f"GitLab version check failed: HTTP {exc.code}") from exc
     except urllib.error.URLError as exc:
-        raise HTTPException(status_code=502, detail=f"Cannot connect to GitHub: {exc.reason}") from exc
+        raise HTTPException(status_code=502, detail=f"Cannot connect to GitLab: {exc.reason}") from exc
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Update check failed: {exc}") from exc
 
 
-@router.post("/api/update-from-github")
-def update_from_github(req: UpdateRequest = UpdateRequest()):
+@router.post("/api/update-from-gitlab")
+def update_from_gitlab(req: UpdateRequest = UpdateRequest()):
     try:
         return updater.run_update(
             BASE_DIR,
@@ -34,13 +34,18 @@ def update_from_github(req: UpdateRequest = UpdateRequest()):
     except updater.UpdateBusyError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
     except urllib.error.HTTPError as exc:
-        raise HTTPException(status_code=502, detail=f"GitHub download failed: HTTP {exc.code}") from exc
+        raise HTTPException(status_code=502, detail=f"GitLab download failed: HTTP {exc.code}") from exc
     except urllib.error.URLError as exc:
-        raise HTTPException(status_code=502, detail=f"Cannot connect to GitHub: {exc.reason}") from exc
+        raise HTTPException(status_code=502, detail=f"Cannot connect to GitLab: {exc.reason}") from exc
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Update failed: {exc}") from exc
+
+
+@router.post("/api/update-from-github")
+def update_from_github_compat(req: UpdateRequest = UpdateRequest()):
+    return update_from_gitlab(req)
 
 
 @router.get("/api/update-backups")

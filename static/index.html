@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 
 <head>
@@ -1475,17 +1475,17 @@
                 <div class="update-head">
                     <div>
                         <div class="update-title" id="update-title">软件更新</div>
-                        <div class="update-subtitle">从 GitHub 拉取最新版本，并在更新前自动备份当前文件。</div>
+                        <div class="update-subtitle">从 GitLab 拉取最新版本，并在更新前自动备份当前文件。</div>
                     </div>
                     <button class="update-close" type="button" onclick="closeUpdateModal()" aria-label="关闭">×</button>
                 </div>
                 <div class="update-status" id="update-status-box">
                     <div class="update-row"><span>当前版本</span><strong id="update-local-version">--</strong></div>
-                    <div class="update-row"><span>GitHub 版本</span><strong id="update-remote-version">--</strong></div>
+                    <div class="update-row"><span>GitLab 版本</span><strong id="update-remote-version">--</strong></div>
                     <div class="update-row"><span>更新源</span><strong id="update-repo">--</strong></div>
                     <div class="update-row"><span>状态</span><strong id="update-available">等待检查</strong></div>
                 </div>
-                <div class="update-message" id="update-message">点击“检查更新”查看 GitHub 上是否有新版本。</div>
+                <div class="update-message" id="update-message">点击“检查更新”查看 GitLab 上是否有新版本。</div>
                 <label class="update-options">
                     <input type="checkbox" id="update-auto-restart" checked>
                     更新完成后自动重启本地服务（推荐）
@@ -1744,22 +1744,22 @@
             const els = updateModalEls();
             els.local.textContent = data.local_version || '未知';
             els.remote.textContent = data.remote_version || '未知';
-            els.repo.textContent = data.repo_url ? data.repo_url.replace('https://github.com/', '') + '@' + (data.branch || 'main') : '--';
+            els.repo.textContent = data.repo_url ? data.repo_url.replace(/^https?:\/\//, '') + '@' + (data.branch || 'master') : '--';
             els.available.textContent = data.update_available ? '发现新版本' : '已是最新';
             els.message.textContent = data.update_available
-                ? 'GitHub 上有新版本。点击“立即更新”会先备份当前文件，再拉取最新代码。'
-                : '当前版本与 GitHub VERSION 一致。如需强制同步，也可以点击“立即更新”。';
+                ? 'GitLab 上有新版本。点击“立即更新”会先备份当前文件，再拉取最新代码。'
+                : '当前版本与 GitLab VERSION 一致。如需强制同步，也可以点击“立即更新”。';
         }
 
         async function checkGithubUpdate() {
-            setUpdateBusy(true, '正在连接 GitHub 检查版本...');
+            setUpdateBusy(true, '正在连接 GitLab 检查版本...');
             try {
                 const res = await fetch('/api/update-status');
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok) throw data;
                 renderUpdateStatus(data);
             } catch (error) {
-                updateModalEls().message.textContent = updateErrorMessage(error, '检查更新失败，请确认网络可访问 GitHub。');
+                updateModalEls().message.textContent = updateErrorMessage(error, '检查更新失败，请确认网络可访问 GitLab。');
             } finally {
                 setUpdateBusy(false);
             }
@@ -1767,11 +1767,11 @@
 
         async function runGithubUpdate() {
             const els = updateModalEls();
-            const ok = confirm('确定要从 GitHub 拉取最新版本吗？更新前会自动备份当前文件。');
+            const ok = confirm('确定要从 GitLab 拉取最新版本吗？更新前会自动备份当前文件。');
             if (!ok) return;
             setUpdateBusy(true, '正在下载并更新文件，请不要关闭软件...');
             try {
-                const res = await fetch('/api/update-from-github', {
+                const res = await fetch('/api/update-from-gitlab', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({auto_restart: Boolean(els.autoRestart.checked), restart_delay: 3})
@@ -2105,3 +2105,4 @@
     </script>
 </body>
 </html>
+
