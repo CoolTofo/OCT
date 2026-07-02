@@ -686,7 +686,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Start OCT Studio local server")
     parser.add_argument("--port", type=int, default=None, help="HTTP port to listen on")
     args = parser.parse_args()
-    app_port = int(args.port or os.getenv("APP_PORT", "3010"))
+    requested_port = int(args.port or os.getenv("APP_PORT", "3010"))
+    try:
+        app_port = bootstrap.find_available_port(requested_port)
+    except RuntimeError as exc:
+        raise SystemExit(str(exc)) from exc
+    if app_port != requested_port:
+        print(f"Port {requested_port} is unavailable; using {app_port} instead.")
     os.environ["APP_PORT"] = str(app_port)
     bootstrap.schedule_open_local_browser(app_port)
     uvicorn.run(app, host="0.0.0.0", port=app_port)

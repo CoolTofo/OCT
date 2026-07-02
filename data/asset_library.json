@@ -6,10 +6,34 @@
       "type": "image",
       "items": [
         {
-          "id": "asset_17abfeb4c864",
-          "name": "大圣特写",
-          "url": "/assets/library/lib_3bf65fd7511d_大圣特写.jpg",
-          "created_at": 1780644659659
+          "id": "asset_08074e6767df",
+          "name": "大圣",
+          "url": "/assets/library/lib_4e38e71bee5c_大圣.jpg",
+          "created_at": 1782901605061
+        },
+        {
+          "id": "asset_bd394003aa11",
+          "name": "江流儿",
+          "url": "/assets/library/lib_1dc8d22c6762_江流儿.jpg",
+          "created_at": 1782901605068
+        },
+        {
+          "id": "asset_af679804ec24",
+          "name": "江流儿_受伤",
+          "url": "/assets/library/lib_e96987c5a7b7_江流儿_受伤.jpg",
+          "created_at": 1782901605074
+        },
+        {
+          "id": "asset_feb59d57e0c8",
+          "name": "顺风耳2",
+          "url": "/assets/library/lib_9c7e67ae05d8_顺风耳2.png",
+          "created_at": 1782901605081
+        },
+        {
+          "id": "asset_06e05de6e552",
+          "name": "小空空",
+          "url": "/assets/library/lib_54c3afe7d35a_小空空.jpg",
+          "created_at": 1782901605096
         }
       ]
     },
@@ -17,7 +41,14 @@
       "id": "scenes",
       "name": "场景",
       "type": "image",
-      "items": []
+      "items": [
+        {
+          "id": "asset_8ebada270d3a",
+          "name": "建木底层1",
+          "url": "/assets/library/lib_2728a3d1f480_建木底层1.jpg",
+          "created_at": 1782901305964
+        }
+      ]
     },
     {
       "id": "workflows",
@@ -26,5 +57,5 @@
       "items": []
     }
   ],
-  "updated_at": 1780644659659
+  "updated_at": 1782901616623
 }

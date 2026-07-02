@@ -2,6 +2,7 @@
 
 import logging
 import os
+import socket
 import subprocess
 import sys
 import time
@@ -51,6 +52,23 @@ def setup_validation_error_handler(app: FastAPI, friendly_validation_error) -> N
             content={"detail": friendly_validation_error(exc.errors()), "errors": exc.errors()},
         )
 
+
+def can_bind_port(port: int, host: str = "0.0.0.0") -> bool:
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.bind((host, int(port)))
+        return True
+    except OSError:
+        return False
+
+
+def find_available_port(preferred_port: int, *, attempts: int = 50) -> int:
+    start = int(preferred_port)
+    for offset in range(max(1, attempts)):
+        port = start + offset
+        if can_bind_port(port):
+            return port
+    raise RuntimeError(f"No available HTTP port found from {start} to {start + attempts - 1}")
 
 def schedule_open_local_browser(port: int) -> None:
     if str(os.getenv("OCT_OPEN_BROWSER", "")).lower() not in ("1", "true", "yes", "on"):

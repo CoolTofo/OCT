@@ -1,0 +1,407 @@
+{
+  "377": {
+    "inputs": {
+      "pixels": [
+        "398",
+        0
+      ],
+      "vae": [
+        "385",
+        0
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAEEncode"
+    }
+  },
+  "378": {
+    "inputs": {
+      "sampler_name": "euler"
+    },
+    "class_type": "KSamplerSelect",
+    "_meta": {
+      "title": "KSamplerSelect"
+    }
+  },
+  "379": {
+    "inputs": {
+      "conditioning": [
+        "390",
+        0
+      ]
+    },
+    "class_type": "ConditioningZeroOut",
+    "_meta": {
+      "title": "ConditioningZeroOut"
+    }
+  },
+  "380": {
+    "inputs": {
+      "conditioning": [
+        "379",
+        0
+      ],
+      "latent": [
+        "386",
+        0
+      ]
+    },
+    "class_type": "ReferenceLatent",
+    "_meta": {
+      "title": "ReferenceLatent"
+    }
+  },
+  "381": {
+    "inputs": {
+      "noise": [
+        "392",
+        0
+      ],
+      "guider": [
+        "393",
+        0
+      ],
+      "sampler": [
+        "378",
+        0
+      ],
+      "sigmas": [
+        "397",
+        0
+      ],
+      "latent_image": [
+        "384",
+        0
+      ]
+    },
+    "class_type": "SamplerCustomAdvanced",
+    "_meta": {
+      "title": "SamplerCustomAdvanced"
+    }
+  },
+  "384": {
+    "inputs": {
+      "width": [
+        "391",
+        0
+      ],
+      "height": [
+        "391",
+        1
+      ],
+      "batch_size": 1
+    },
+    "class_type": "EmptyFlux2LatentImage",
+    "_meta": {
+      "title": "EmptyFlux2LatentImage"
+    }
+  },
+  "385": {
+    "inputs": {
+      "vae_name": "flux2-vae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "VAELoader"
+    }
+  },
+  "386": {
+    "inputs": {
+      "pixels": [
+        "406",
+        0
+      ],
+      "vae": [
+        "385",
+        0
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAEEncode"
+    }
+  },
+  "387": {
+    "inputs": {
+      "conditioning": [
+        "390",
+        0
+      ],
+      "latent": [
+        "386",
+        0
+      ]
+    },
+    "class_type": "ReferenceLatent",
+    "_meta": {
+      "title": "ReferenceLatent"
+    }
+  },
+  "388": {
+    "inputs": {
+      "conditioning": [
+        "380",
+        0
+      ],
+      "latent": [
+        "377",
+        0
+      ]
+    },
+    "class_type": "ReferenceLatent",
+    "_meta": {
+      "title": "ReferenceLatent"
+    }
+  },
+  "389": {
+    "inputs": {
+      "conditioning": [
+        "387",
+        0
+      ],
+      "latent": [
+        "377",
+        0
+      ]
+    },
+    "class_type": "ReferenceLatent",
+    "_meta": {
+      "title": "ReferenceLatent"
+    }
+  },
+  "390": {
+    "inputs": {
+      "clip": [
+        "395",
+        0
+      ],
+      "text": [
+        "410",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIPTextEncode"
+    }
+  },
+  "391": {
+    "inputs": {
+      "image": [
+        "406",
+        0
+      ]
+    },
+    "class_type": "GetImageSize",
+    "_meta": {
+      "title": "GetImageSize"
+    }
+  },
+  "392": {
+    "inputs": {
+      "noise_seed": 621274743353509
+    },
+    "class_type": "RandomNoise",
+    "_meta": {
+      "title": "RandomNoise"
+    }
+  },
+  "393": {
+    "inputs": {
+      "model": [
+        "408",
+        0
+      ],
+      "positive": [
+        "389",
+        0
+      ],
+      "negative": [
+        "388",
+        0
+      ],
+      "cfg": 1
+    },
+    "class_type": "CFGGuider",
+    "_meta": {
+      "title": "CFGGuider"
+    }
+  },
+  "394": {
+    "inputs": {
+      "unet_name": "flux-2-klein-9b-fp8.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "UNETLoader"
+    }
+  },
+  "395": {
+    "inputs": {
+      "clip_name": "qwen_3_8b_fp8mixed.safetensors",
+      "type": "qwen_image",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "CLIPLoader"
+    }
+  },
+  "397": {
+    "inputs": {
+      "steps": [
+        "414",
+        0
+      ],
+      "width": [
+        "391",
+        1
+      ],
+      "height": [
+        "391",
+        1
+      ]
+    },
+    "class_type": "Flux2Scheduler",
+    "_meta": {
+      "title": "Flux2Scheduler"
+    }
+  },
+  "398": {
+    "inputs": {
+      "image": [
+        "404",
+        0
+      ],
+      "upscale_method": "lanczos",
+      "megapixels": 1,
+      "resolution_steps": 16
+    },
+    "class_type": "ImageScaleToTotalPixels",
+    "_meta": {
+      "title": "ImageScaleToTotalPixels"
+    }
+  },
+  "400": {
+    "inputs": {
+      "samples": [
+        "381",
+        0
+      ],
+      "vae": [
+        "385",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAEDecode"
+    }
+  },
+  "402": {
+    "inputs": {
+      "images": [
+        "400",
+        0
+      ],
+      "filename_prefix": "ComfyUI"
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "SaveImage"
+    }
+  },
+  "403": {
+    "inputs": {
+      "image": "jiangliuer_a.mod.model 拷贝.jpg",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "OCTInput_图1"
+    }
+  },
+  "404": {
+    "inputs": {
+      "image": "大圣带盔甲1.jpg",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "OCTInput_图2"
+    }
+  },
+  "406": {
+    "inputs": {
+      "image": [
+        "403",
+        0
+      ],
+      "upscale_method": "lanczos",
+      "megapixels": [
+        "407",
+        0
+      ],
+      "resolution_steps": 16
+    },
+    "class_type": "ImageScaleToTotalPixels",
+    "_meta": {
+      "title": "ImageScaleToTotalPixels"
+    }
+  },
+  "407": {
+    "inputs": {
+      "value": 4
+    },
+    "class_type": "PrimitiveFloat",
+    "_meta": {
+      "title": "OCTInput_放大"
+    }
+  },
+  "408": {
+    "inputs": {
+      "model": [
+        "394",
+        0
+      ],
+      "lora_name": "Klein-万物迁移.safetensors",
+      "strength_model": [
+        "417",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "LoraLoaderModelOnly"
+    }
+  },
+  "410": {
+    "inputs": {
+      "text": "将图1的2维手绘角色的风格替换为图2的3D渲染角色风格"
+    },
+    "class_type": "CR Text",
+    "_meta": {
+      "title": "OCTInput_Prompt"
+    }
+  },
+  "414": {
+    "inputs": {
+      "value": 4
+    },
+    "class_type": "INTConstant",
+    "_meta": {
+      "title": "OCTInput_Step"
+    }
+  },
+  "417": {
+    "inputs": {
+      "value": 0.8
+    },
+    "class_type": "FloatConstant",
+    "_meta": {
+      "title": "OCTInput_模型强度"
+    }
+  }
+}

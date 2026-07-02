@@ -312,3 +312,17 @@ class AssetLibraryAddRequest(BaseModel):
 
 class AssetLibraryRenameRequest(BaseModel):
     name: str = ""
+
+
+class AssetLibraryBatchDeleteRequest(BaseModel):
+    ids: List[str] = []
+
+
+class AssetLibraryMoveRequest(BaseModel):
+    ids: List[str] = []
+    category_id: str = ""
+
+
+class AssetLibraryDownloadRequest(BaseModel):
+    ids: List[str] = []
+    filename: str = "asset-library-images.zip"

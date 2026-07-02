@@ -31,6 +31,14 @@
         return `/api/download-output?url=${encodeURIComponent(clean)}&name=${encodeURIComponent(name)}`;
     }
 
+    function mediaKindFromUrl(url){
+        const clean = cleanUrl(url).split('?', 1)[0].toLowerCase();
+        if(/\.(mp4|m4v|mov|webm|mkv|avi|wmv|flv|mpg|mpeg|ts|mts|m2ts|3gp|ogv)$/i.test(clean)) return 'video';
+        if(/\.(mp3|wav|ogg|m4a|flac|aac|wma|opus|aiff?|amr)$/i.test(clean)) return 'audio';
+        if(isImageMediaUrl(clean)) return 'image';
+        return 'file';
+    }
+
     function imageCategories(library){
         return (library?.categories || []).filter(cat => (cat.type || 'image') === 'image');
     }
@@ -106,11 +114,69 @@
         return res.json();
     }
 
+    async function responseErrorMessage(res, fallback){
+        try {
+            const data = await res.json();
+            return data?.detail || data?.message || fallback;
+        } catch(_) {
+            return fallback;
+        }
+    }
+
+    async function postJson(url, payload, fallback){
+        const res = await fetch(url, {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify(payload || {})
+        });
+        if(!res.ok) throw new Error(await responseErrorMessage(res, fallback));
+        return res.json();
+    }
+
+    async function deleteItems(ids){
+        return postJson('/api/asset-library/items/delete', {ids}, 'Asset delete failed.');
+    }
+
+    async function moveItems(ids, categoryId){
+        return postJson('/api/asset-library/items/move', {ids, category_id:categoryId}, 'Asset move failed.');
+    }
+
+    async function checkUrls(urls){
+        return postJson('/api/canvas-assets/check', {urls}, 'Asset check failed.');
+    }
+
+    async function uploadFiles(files){
+        const form = new FormData();
+        Array.from(files || []).forEach(file => form.append('files', file));
+        const res = await fetch('/api/ai/upload', {method:'POST', body:form});
+        if(!res.ok) throw new Error(await responseErrorMessage(res, 'Media upload failed.'));
+        return res.json();
+    }
+
+    async function downloadItems(ids, filename='asset-library-images.zip'){
+        const res = await fetch('/api/asset-library/items/download', {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({ids, filename})
+        });
+        if(!res.ok) throw new Error(await responseErrorMessage(res, 'Asset download failed.'));
+        const blob = await res.blob();
+        const href = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = href;
+        link.download = filename || 'asset-library-images.zip';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(href), 1000);
+    }
+
     window.CanvasAssetLibrary = {
         isLocalMediaUrl,
         isImageMediaUrl,
         fileNameFromUrl,
         downloadHref,
+        mediaKindFromUrl,
         imageCategories,
         activeImageCategory,
         fetchLibrary,
@@ -120,5 +186,10 @@
         addItem,
         renameItem,
         deleteItem,
+        deleteItems,
+        moveItems,
+        checkUrls,
+        uploadFiles,
+        downloadItems,
     };
 })();

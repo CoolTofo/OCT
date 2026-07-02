@@ -1173,6 +1173,7 @@
                 <div class="node-palette-tools" aria-label="画布设置">
                     <button class="node-palette-tool" type="button" onclick="openPromptTemplatePanel()" title="模板库" aria-label="模板库"><i data-lucide="library" class="w-4 h-4"></i></button>
                     <button id="assetLibrarySideBtn" class="node-palette-tool" type="button" onclick="toggleCanvasAssetLibrary()" title="资产库" aria-label="资产库"><i data-lucide="archive" class="w-4 h-4"></i></button>
+                    <button id="assetManagerPageBtn" class="node-palette-tool" type="button" title="资产管理页" aria-label="资产管理页"><i data-lucide="folder-open" class="w-4 h-4"></i></button>
                     <button class="node-palette-tool" type="button" onclick="autoArrangeCanvasNodes()" title="整理节点：有选中时只整理选中节点" aria-label="整理节点：有选中时只整理选中节点"><i data-lucide="layout-dashboard" class="w-4 h-4"></i></button>
                     <button class="node-palette-tool" type="button" onclick="createOrganizeFrameFromSelection()" title="整理框" aria-label="整理框"><i data-lucide="box-select" class="w-4 h-4"></i></button>
                     <button id="linkVisibilitySideBtn" class="node-palette-tool" type="button" onclick="toggleLinkVisibilityMode()" title="连线：全部显示" aria-label="连线：全部显示"><i data-lucide="git-branch" class="w-4 h-4"></i></button>
@@ -1413,6 +1414,7 @@
 
     <script src="/static/canvas-node-registry.js?v=20260610-node-palette-flow-frame"></script>
     <script src="/static/canvas-asset-library.js?v=20260617-asset-library"></script>
+    <script src="/static/canvas-asset-entry.js?v=20260701-canvas-return"></script>
     <script src="/static/canvas-organize-frames.js?v=20260609-organize-frame-members"></script>
     <script src="/static/canvas-group-order.js?v=20260609-group-visual-order"></script>
     <script src="/static/canvas-flow-frame.js?v=20260610-flow-frame-cinema"></script>
@@ -1472,6 +1474,28 @@
             });
         }
         refreshIcons();
+        const LAST_CANVAS_ID_KEY = 'oct_last_canvas_id';
+        function requestedCanvasId(){
+            try {
+                const params = new URLSearchParams(window.location.search || '');
+                return params.get('id') || params.get('canvas_id') || '';
+            } catch(_) {
+                return '';
+            }
+        }
+        function rememberCanvasId(id){
+            if(!id) return;
+            try { localStorage.setItem(LAST_CANVAS_ID_KEY, id); } catch(_) {}
+        }
+        function updateCanvasUrl(id){
+            if(!id || !window.history?.replaceState) return;
+            try {
+                const url = new URL(window.location.href);
+                url.pathname = '/static/canvas.html';
+                url.searchParams.set('id', id);
+                window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
+            } catch(_) {}
+        }
         function tr(key){ return window.StudioI18n ? StudioI18n.t(key) : key; }
         function trf(key, values={}){
             return Object.entries(values).reduce((text, [name, value]) => text.replaceAll(`{${name}}`, String(value)), tr(key));
@@ -3072,6 +3096,8 @@
                     return;
                 }
                 canvas = data.canvas;
+                rememberCanvasId(canvas.id);
+                updateCanvasUrl(canvas.id);
                 canvas.logs = canvas.logs || [];
                 canvas.settings = canvas.settings || {};
                 nodes = canvas.nodes || [];
@@ -3235,6 +3261,8 @@
                     openSmartCanvasPage(canvas.id);
                     return;
                 }
+                rememberCanvasId(canvas.id);
+                updateCanvasUrl(canvas.id);
                 canvas.logs = canvas.logs || [];
                 canvas.settings = canvas.settings || {};
                 nodes = canvas.nodes || [];
@@ -3270,6 +3298,8 @@
             applyingRemoteCanvas = true;
             try {
                 canvas = remote;
+                rememberCanvasId(canvas.id);
+                updateCanvasUrl(canvas.id);
                 canvas.logs = canvas.logs || [];
                 canvas.settings = canvas.settings || {};
                 nodes = canvas.nodes || [];
@@ -18509,7 +18539,9 @@ ${referenceNote}
             await loadConfig();
             pruneMissingComfyWorkflows();
             await loadCanvasList(false);
-            setCanvasMode(false);
+            const initialCanvasId = requestedCanvasId();
+            if(initialCanvasId) await openCanvas(initialCanvasId);
+            else setCanvasMode(false);
         };
     </script>
 </body>

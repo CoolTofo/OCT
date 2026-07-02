@@ -27,7 +27,7 @@ echo.
 
 "%PYEXE%" -m pip --version >nul 2>&1
 if errorlevel 1 (
-    echo [1/3] Installing pip via get-pip.py...
+    echo [1/4] Installing pip via get-pip.py...
     if not exist "%~dp0get-pip.py" (
         echo Downloading get-pip.py...
         powershell -Command "Invoke-WebRequest -Uri 'https://bootstrap.pypa.io/get-pip.py' -OutFile '%~dp0get-pip.py'" 2>nul
@@ -47,7 +47,7 @@ if errorlevel 1 (
 )
 
 echo.
-echo [2/3] Trying offline install from packages folder...
+echo [2/4] Trying offline install from packages folder...
 "%PYEXE%" -m pip install --no-index --find-links=packages -r requirements.txt
 if not errorlevel 1 (
     echo.
@@ -55,7 +55,7 @@ if not errorlevel 1 (
     goto :extra
 )
 
-echo [3/3] Offline failed, trying online install...
+echo [3/4] Offline failed, trying online install...
 "%PYEXE%" -m pip install -r requirements.txt
 if errorlevel 1 (
     echo.
@@ -72,9 +72,21 @@ if errorlevel 1 (
     echo [WARN] Failed to install uvicorn[standard]. WebSocket features may be unavailable.
 )
 
+echo.
+echo [4/4] Installing Dreamina CLI...
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\install_dreamina_cli.ps1"
+if errorlevel 1 (
+    echo.
+    echo [ERROR] Failed to install Dreamina CLI.
+    echo Please check network access, install Git for Windows, or place dreamina.exe at tools\dreamina\dreamina.exe and run this script again.
+    pause
+    exit /b 1
+)
+
 :done
 echo.
 echo ============================================
-echo   Done. Run start.bat to launch the server.
+echo   Done. Run 启动服务.bat to launch the server.
+echo   Dreamina login is account-specific: run dreamina login once on each new computer.
 echo ============================================
 pause

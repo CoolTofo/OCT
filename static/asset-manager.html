@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/static/october-cabin-logo.webp" type="image/webp">
+    <title>资产管理 · 十月文化</title>
+    <script>
+        (function(){
+            try {
+                var theme = localStorage.getItem('studio_theme') || localStorage.getItem('canvas_theme') || 'light';
+                if(theme === 'dark') document.documentElement.classList.add('theme-dark');
+            } catch(e) {}
+        })();
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/static/theme.js?v=20260516-theme-sync"></script>
+    <link rel="stylesheet" href="/static/asset-manager.css?v=20260701-asset-manager">
+</head>
+<body>
+    <div class="asset-page">
+        <header class="asset-topbar">
+            <div>
+                <div class="asset-kicker">OCT Asset Library</div>
+                <h1>资产管理</h1>
+                <p>集中管理本地图片资产，上传后可跨画布复用，也可以批量整理和下载。</p>
+            </div>
+            <div class="asset-top-actions">
+                <a id="backToCanvasLink" class="asset-btn ghost" href="/static/canvas.html"><i data-lucide="arrow-left"></i><span>回到画布</span></a>
+                <button id="refreshBtn" class="asset-btn" type="button"><i data-lucide="refresh-cw"></i><span>刷新</span></button>
+                <button id="uploadBtn" class="asset-btn primary" type="button"><i data-lucide="upload"></i><span>上传图片</span></button>
+                <input id="fileInput" type="file" accept="image/*" multiple hidden>
+            </div>
+        </header>
+
+        <main class="asset-shell">
+            <aside class="asset-sidebar" aria-label="资产分类">
+                <div class="asset-panel-head">
+                    <div>
+                        <strong>分类</strong>
+                        <span id="categoryCount">0 个分类</span>
+                    </div>
+                    <button id="newCategoryBtn" class="asset-icon-btn" type="button" title="新建分类"><i data-lucide="folder-plus"></i></button>
+                </div>
+                <div id="categoryList" class="category-list"></div>
+                <div class="category-actions">
+                    <button id="renameCategoryBtn" class="asset-btn small" type="button"><i data-lucide="pencil"></i><span>重命名</span></button>
+                    <button id="deleteCategoryBtn" class="asset-btn small danger" type="button"><i data-lucide="trash-2"></i><span>删除</span></button>
+                </div>
+            </aside>
+
+            <section class="asset-main" aria-label="资产列表">
+                <div class="asset-toolbar">
+                    <label class="asset-search">
+                        <i data-lucide="search"></i>
+                        <input id="searchInput" type="search" placeholder="搜索名称或文件路径">
+                    </label>
+                    <div class="asset-counts">
+                        <span id="assetCount">0 个资产</span>
+                        <span id="selectionCount">未选择</span>
+                    </div>
+                </div>
+
+                <div id="dropzone" class="asset-dropzone">
+                    <i data-lucide="image-plus"></i>
+                    <div>
+                        <strong>拖入图片保存到当前分类</strong>
+                        <span>支持 PNG、JPG、WEBP、GIF、BMP</span>
+                    </div>
+                </div>
+
+                <div class="asset-bulkbar">
+                    <button id="selectAllBtn" class="asset-btn small" type="button"><i data-lucide="check-square"></i><span>全选</span></button>
+                    <button id="clearSelectionBtn" class="asset-btn small" type="button"><i data-lucide="square"></i><span>清空</span></button>
+                    <select id="bulkMoveSelect" aria-label="移动到分类"></select>
+                    <button id="bulkMoveBtn" class="asset-btn small" type="button"><i data-lucide="folder-input"></i><span>移动</span></button>
+                    <button id="bulkDownloadBtn" class="asset-btn small" type="button"><i data-lucide="download"></i><span>下载</span></button>
+                    <button id="bulkDeleteBtn" class="asset-btn small danger" type="button"><i data-lucide="trash-2"></i><span>删除</span></button>
+                </div>
+
+                <div id="notice" class="asset-notice" role="status"></div>
+                <div id="assetGrid" class="asset-grid"></div>
+                <div id="emptyState" class="asset-empty">
+                    <i data-lucide="archive"></i>
+                    <strong>当前分类还没有图片资产</strong>
+                    <span>上传图片，或在画布里的图片节点菜单中保存到资产库。</span>
+                </div>
+            </section>
+
+            <aside class="asset-preview" aria-label="资产预览">
+                <div class="asset-panel-head">
+                    <div>
+                        <strong>预览</strong>
+                        <span>当前资产</span>
+                    </div>
+                </div>
+                <div id="previewPane" class="preview-pane"></div>
+            </aside>
+        </main>
+    </div>
+
+    <script src="/static/canvas-asset-library.js?v=20260701-asset-library"></script>
+    <script src="/static/asset-manager.js?v=20260701-canvas-return"></script>
+</body>
+</html>

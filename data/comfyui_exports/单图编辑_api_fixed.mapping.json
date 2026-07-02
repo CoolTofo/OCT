@@ -1,0 +1,180 @@
+{
+  "profile": "generic",
+  "main_output_node_id": "402",
+  "output_mode": "main",
+  "workflow_output": "D:\\Program Files\\OCT\\data\\comfyui_exports\\单图编辑_api_fixed.workflow.json",
+  "api_output": "D:\\Program Files\\OCT\\workflows\\custom\\单图编辑_api_fixed.json",
+  "api_input": "D:\\Program Files\\OCT\\data\\comfyui_exports\\_api_input_e90d292dab22438a9fb2838c334e9313.json",
+  "normalize_legacy_widgets": {
+    "changes": []
+  },
+  "compatible_custom_nodes": {
+    "converted": []
+  },
+  "strip_reroute_nodes": {
+    "removed": 0,
+    "rewired": [],
+    "unresolved": []
+  },
+  "anything_everywhere": {
+    "removed": 0,
+    "added_links": [],
+    "sources": []
+  },
+  "bypassed_nodes": {
+    "rewired": [],
+    "removed_links": 0
+  },
+  "flatten_set_get": {
+    "converted": [],
+    "skipped": []
+  },
+  "frontend_switches": {
+    "converted": [],
+    "skipped": [],
+    "main_output_node_id": null
+  },
+  "body_ratio_mapper_widget_values": {
+    "changes": []
+  },
+  "api_value_overlay": {
+    "updated": [],
+    "skipped": [
+      {
+        "node_id": "359",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "360",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "361",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "362",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "363",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "364",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "365",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "366",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "367",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "368",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "369",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "370",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "371",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "372",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "373",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "374",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "375",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "376",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "382",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "383",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "396",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "399",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "401",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "405",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "409",
+        "reason": "node not present in repaired prompt"
+      },
+      {
+        "node_id": "411",
+        "reason": "node not present in repaired prompt"
+      }
+    ]
+  },
+  "body_ratio_mapper_api_repair": {
+    "changes": []
+  },
+  "api_prompt_input_validation": {
+    "issues": []
+  },
+  "body_ratio_mapper_api_validation": {
+    "issues": []
+  },
+  "validation": {
+    "nodes": 29,
+    "links": 37,
+    "bad_links": 0,
+    "residual_ui_nodes": []
+  },
+  "post_convert_api_repair": {
+    "flux_latent_resolution_steps": [
+      {
+        "node_id": "398",
+        "input": "resolution_steps",
+        "from": 1,
+        "to": 16
+      },
+      {
+        "node_id": "406",
+        "input": "resolution_steps",
+        "from": 1,
+        "to": 16
+      }
+    ]
+  }
+}

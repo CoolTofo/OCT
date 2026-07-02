@@ -13,7 +13,10 @@ from app import canvas_store, media_store
 from app.paths import ASSET_LIBRARY_DIR
 from app.schemas import (
     AssetLibraryAddRequest,
+    AssetLibraryBatchDeleteRequest,
     AssetLibraryCategoryRequest,
+    AssetLibraryDownloadRequest,
+    AssetLibraryMoveRequest,
     AssetLibraryRenameRequest,
     CanvasAssetCheckRequest,
     CanvasAssetDownloadRequest,
@@ -25,6 +28,21 @@ from app.schemas import (
 
 def create_router(manager) -> APIRouter:
     router = APIRouter()
+
+    def normalized_asset_ids(raw_ids):
+        ids = []
+        seen = set()
+        for raw in raw_ids or []:
+            asset_id = str(raw or "").strip()
+            if asset_id and asset_id not in seen:
+                seen.add(asset_id)
+                ids.append(asset_id)
+        return ids[:1000]
+
+    def iter_asset_library_items(lib):
+        for cat in lib.get("categories", []):
+            for item in cat.get("items", []):
+                yield cat, item
 
     @router.get("/api/canvases")
     async def canvases():
@@ -196,6 +214,100 @@ def create_router(manager) -> APIRouter:
             raise HTTPException(status_code=404, detail="Asset not found.")
         media_store.save_asset_library(lib)
         return {"library": lib}
+
+    @router.post("/api/asset-library/items/delete")
+    async def delete_asset_library_items(payload: AssetLibraryBatchDeleteRequest):
+        ids = set(normalized_asset_ids(payload.ids))
+        if not ids:
+            raise HTTPException(status_code=400, detail="No asset ids were provided.")
+        lib = media_store.load_asset_library()
+        removed = 0
+        for cat in lib.get("categories", []):
+            current = cat.get("items", []) if isinstance(cat.get("items"), list) else []
+            keep = [item for item in current if item.get("id") not in ids]
+            removed += len(current) - len(keep)
+            cat["items"] = keep
+        if removed <= 0:
+            raise HTTPException(status_code=404, detail="No matching assets were found.")
+        media_store.save_asset_library(lib)
+        return {"library": lib, "removed": removed}
+
+    @router.post("/api/asset-library/items/move")
+    async def move_asset_library_items(payload: AssetLibraryMoveRequest):
+        ids = set(normalized_asset_ids(payload.ids))
+        if not ids:
+            raise HTTPException(status_code=400, detail="No asset ids were provided.")
+        lib = media_store.load_asset_library()
+        target = media_store.find_asset_category(lib, payload.category_id)
+        if not target:
+            raise HTTPException(status_code=404, detail="Target category not found.")
+        if target.get("type") != "image":
+            raise HTTPException(status_code=400, detail="Assets can only be moved into image categories.")
+        moved = []
+        matched = 0
+        for cat in lib.get("categories", []):
+            current = cat.get("items", []) if isinstance(cat.get("items"), list) else []
+            keep = []
+            for item in current:
+                if item.get("id") in ids:
+                    matched += 1
+                    if cat is target:
+                        keep.append(item)
+                    else:
+                        moved.append(item)
+                else:
+                    keep.append(item)
+            cat["items"] = keep
+        if matched <= 0:
+            raise HTTPException(status_code=404, detail="No matching assets were found.")
+        existing = {item.get("id") for item in target.get("items", [])}
+        for item in moved:
+            if item.get("id") not in existing:
+                target.setdefault("items", []).append(item)
+                existing.add(item.get("id"))
+        media_store.save_asset_library(lib)
+        return {"library": lib, "moved": len(moved)}
+
+    @router.post("/api/asset-library/items/download")
+    async def download_asset_library_items(payload: AssetLibraryDownloadRequest):
+        ids = normalized_asset_ids(payload.ids)
+        if not ids:
+            raise HTTPException(status_code=400, detail="No asset ids were provided.")
+        lib = media_store.load_asset_library()
+        items_by_id = {item.get("id"): item for _, item in iter_asset_library_items(lib)}
+        buffer = BytesIO()
+        used_names = set()
+        count = 0
+        with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zf:
+            for asset_id in ids:
+                item = items_by_id.get(asset_id)
+                if not item:
+                    continue
+                path = media_store.output_file_from_url(item.get("url"))
+                if not path or not os.path.isfile(path):
+                    continue
+                base_name = media_store.sanitize_asset_name(item.get("name") or os.path.basename(path), f"asset-{count + 1}")
+                ext = os.path.splitext(path)[1] or ".png"
+                if not os.path.splitext(base_name)[1]:
+                    base_name += ext
+                archive_name = base_name
+                stem, suffix_ext = os.path.splitext(base_name)
+                suffix = 2
+                while archive_name in used_names:
+                    archive_name = f"{stem}-{suffix}{suffix_ext}"
+                    suffix += 1
+                used_names.add(archive_name)
+                zf.write(path, archive_name)
+                count += 1
+        if count <= 0:
+            raise HTTPException(status_code=404, detail="No downloadable local assets were found.")
+        buffer.seek(0)
+        filename = re.sub(r'[\\/:*?"<>|]+', "_", payload.filename or "asset-library-images.zip")
+        if not filename.lower().endswith(".zip"):
+            filename += ".zip"
+        encoded = urllib.parse.quote(filename)
+        headers = {"Content-Disposition": f"attachment; filename*=UTF-8''{encoded}"}
+        return Response(buffer.getvalue(), media_type="application/zip", headers=headers)
 
     @router.put("/api/canvases/{canvas_id}")
     async def update_canvas(canvas_id: str, payload: CanvasSaveRequest):
